@@ -1,0 +1,30 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build results
+bin/
+obj/
+
+# ASP.NET
+wwwroot/lib/
+
+# Logs
+*.log
+
+# OS Files
+Thumbs.db
+Desktop.ini
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# NuGet
+packages/
+
+# Entity Framework
+Migrations/*.Designer.cs
