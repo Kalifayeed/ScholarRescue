@@ -1,0 +1,372 @@
+@{
+    ViewData["Title"] = "Become a Tutor";
+    Layout = "~/Views/Shared/_Layout.Public.cshtml";
+}
+
+<!-- Page Header -->
+<section class="py-5" style="background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);">
+    <div class="container">
+        <h1 class="display-5 fw-bold text-white">Become a Tutor</h1>
+        <p class="text-white-50 lead mb-0">Share your expertise and earn while helping students succeed</p>
+    </div>
+</section>
+
+<!-- Overview -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-3">Join Our Academic Community</h2>
+                <p class="text-muted">
+                    ScholarRescue is always looking for qualified academic professionals to join our team of tutors. Whether you specialize in tutoring, research guidance, editing, proofreading, or academic coaching, we provide the platform for you to connect with students who need your expertise.
+                </p>
+                <p class="text-muted">
+                    Our tutors enjoy flexible schedules, competitive earnings, and the satisfaction of making a real difference in students' academic journeys.
+                </p>
+                <div class="d-flex gap-3 mt-4">
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary">Apply as Tutor</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary">Register Now</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="rounded-4 p-5" style="background:var(--bg-main);">
+                    <i class="bi bi-person-workspace" style="font-size:6rem;color:var(--primary);opacity:0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Application Process -->
+<section class="py-5" style="background:var(--bg-main);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Application Process</h2>
+            <p class="text-muted">Get started in four simple steps</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100 text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center fw-bold fs-4 mb-3" style="width:56px;height:56px;">1</div>
+                        <h6 class="fw-bold">Register Account</h6>
+                        <p class="text-muted small mb-0">Create your account and complete your profile with your academic credentials.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100 text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center fw-bold fs-4 mb-3" style="width:56px;height:56px;">2</div>
+                        <h6 class="fw-bold">Submit Application</h6>
+                        <p class="text-muted small mb-0">Complete the tutor application form with your qualifications and experience.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100 text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle text-white d-inline-flex align-items-center justify-content-center fw-bold fs-4 mb-3" style="width:56px;height:56px;background:var(--accent);">3</div>
+                        <h6 class="fw-bold">Verification</h6>
+                        <p class="text-muted small mb-0">Our team reviews your application and verifies your credentials.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100 text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center fw-bold fs-4 mb-3" style="width:56px;height:56px;">4</div>
+                        <h6 class="fw-bold">Start Earning</h6>
+                        <p class="text-muted small mb-0">Once approved, start accepting orders and earning on your own schedule.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Requirements -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-6">
+                <h3 class="fw-bold mb-4">Requirements</h3>
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <i class="bi bi-check-circle-fill text-success fs-5 mt-1"></i>
+                    <div>
+                        <strong>Academic Qualifications</strong>
+                        <p class="text-muted small mb-0">Minimum of a Bachelor's degree in your area of specialization.</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <i class="bi bi-check-circle-fill text-success fs-5 mt-1"></i>
+                    <div>
+                        <strong>Professional Experience</strong>
+                        <p class="text-muted small mb-0">Demonstrated experience in academic tutoring, research, or related fields.</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <i class="bi bi-check-circle-fill text-success fs-5 mt-1"></i>
+                    <div>
+                        <strong>Communication Skills</strong>
+                        <p class="text-muted small mb-0">Excellent written and verbal communication abilities.</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <i class="bi bi-check-circle-fill text-success fs-5 mt-1"></i>
+                    <div>
+                        <strong>Reliability</strong>
+                        <p class="text-muted small mb-0">Commitment to delivering quality work within deadlines.</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <i class="bi bi-check-circle-fill text-success fs-5 mt-1"></i>
+                    <div>
+                        <strong>Internet Access</strong>
+                        <p class="text-muted small mb-0">Reliable internet connection for communication and order management.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h3 class="fw-bold mb-4">Approval Workflow</h3>
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body d-flex align-items-center gap-3 p-3">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                            <i class="bi bi-file-earmark-text text-primary"></i>
+                        </div>
+                        <div>
+                            <strong class="small">Step 1: Application Submitted</strong>
+                            <p class="text-muted small mb-0">Your application enters our review queue.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body d-flex align-items-center gap-3 p-3">
+                        <div class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                            <i class="bi bi-search text-warning"></i>
+                        </div>
+                        <div>
+                            <strong class="small">Step 2: Credential Verification</strong>
+                            <p class="text-muted small mb-0">We verify your academic credentials and experience.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body d-flex align-items-center gap-3 p-3">
+                        <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                            <i class="bi bi-clipboard-check text-info"></i>
+                        </div>
+                        <div>
+                            <strong class="small">Step 3: Assessment</strong>
+                            <p class="text-muted small mb-0">Complete a brief assessment of your expertise area.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body d-flex align-items-center gap-3 p-3">
+                        <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                            <i class="bi bi-check-circle text-success"></i>
+                        </div>
+                        <div>
+                            <strong class="small">Step 4: Approval & Activation</strong>
+                            <p class="text-muted small mb-0">Your account is activated and you can start accepting orders.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Expected Earnings -->
+<section class="py-5" style="background:var(--bg-main);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Expected Earnings</h2>
+            <p class="text-muted">Competitive rates based on your expertise and experience</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm text-center h-100 p-4">
+                    <div class="card-body">
+                        <i class="bi bi-cash-stack fs-1 text-success mb-3"></i>
+                        <h5 class="fw-bold">Flexible Earnings</h5>
+                        <p class="text-muted small">Earn based on the orders you complete. More experience means higher rates.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm text-center h-100 p-4">
+                    <div class="card-body">
+                        <i class="bi bi-wallet2 fs-1 text-primary mb-3"></i>
+                        <h5 class="fw-bold">Regular Payouts</h5>
+                        <p class="text-muted small">Request payouts through our secure withdrawal system.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card border-0 shadow-sm text-center h-100 p-4">
+                    <div class="card-body">
+                        <i class="bi bi-graph-up-arrow fs-1 text-warning mb-3"></i>
+                        <h5 class="fw-bold">Growth Potential</h5>
+                        <p class="text-muted small">Build your reputation and unlock higher-paying opportunities.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tutor Benefits -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Tutor Benefits</h2>
+            <p class="text-muted">Why tutors love working with ScholarRescue</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-clock-history text-primary fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Flexible Schedule</h6>
+                        <p class="text-muted small mb-0">Work from anywhere, anytime that suits your schedule.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-shield-check text-success fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Secure Payments</h6>
+                        <p class="text-muted small mb-0">Your earnings are protected and paid reliably.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-people text-info fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Diverse Students</h6>
+                        <p class="text-muted small mb-0">Work with students from various backgrounds and academic levels.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-chat-dots text-warning fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Built-in Communication</h6>
+                        <p class="text-muted small mb-0">Use our secure messaging system to stay in touch with students.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-star text-danger fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Build Reputation</h6>
+                        <p class="text-muted small mb-0">Earn ratings and build your professional profile.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-tools text-primary fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Platform Tools</h6>
+                        <p class="text-muted small mb-0">Access dashboard, wallet, and order management tools.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="py-5" style="background:var(--bg-main);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Frequently Asked Questions</h2>
+            <p class="text-muted">Common questions from prospective tutors</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="tutorFaq">
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#tfaq1">
+                                What qualifications do I need?
+                            </button>
+                        </h2>
+                        <div id="tfaq1" class="accordion-collapse collapse show" data-bs-parent="#tutorFaq">
+                            <div class="accordion-body text-muted">
+                                We require a minimum of a Bachelor's degree. Advanced degrees (Master's, PhD) are preferred but not mandatory. We also value relevant professional experience in your field.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#tfaq2">
+                                How long does the approval process take?
+                            </button>
+                        </h2>
+                        <div id="tfaq2" class="accordion-collapse collapse" data-bs-parent="#tutorFaq">
+                            <div class="accordion-body text-muted">
+                                The review process typically takes 3-5 business days. You'll receive email notifications at each stage of the process.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#tfaq3">
+                                How do I get paid?
+                            </button>
+                        </h2>
+                        <div id="tfaq3" class="accordion-collapse collapse" data-bs-parent="#tutorFaq">
+                            <div class="accordion-body text-muted">
+                                You can request payouts through your wallet dashboard. We support various payment methods including bank transfers and mobile money.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#tfaq4">
+                                Can I choose which orders to accept?
+                            </button>
+                        </h2>
+                        <div id="tfaq4" class="accordion-collapse collapse" data-bs-parent="#tutorFaq">
+                            <div class="accordion-body text-muted">
+                                Yes, you have full control over which orders you accept. Browse available orders and choose the ones that match your expertise and schedule.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-5" style="background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);">
+    <div class="container text-center">
+        <h2 class="fw-bold text-white mb-3">Ready to Start Tutoring?</h2>
+        <p class="text-white-50 mb-4">Join our team of qualified academic professionals today.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-accent btn-lg">Apply as Tutor</a>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg">Register Now</a>
+        </div>
+    </div>
+</section>

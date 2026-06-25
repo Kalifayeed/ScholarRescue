@@ -1,0 +1,60 @@
+@model ScholarRescue.Models.WriterResource
+@{
+    ViewData["Title"] = Model.Title;
+    string categoryName = ViewBag.CategoryName;
+}
+
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Knowledge Center</a></li>
+            <li class="breadcrumb-item"><a asp-action="Category" asp-route-id="@Model.Category" class="text-decoration-none">@categoryName</a></li>
+            <li class="breadcrumb-item active">@Model.Title</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                @if (!string.IsNullOrEmpty(Model.SubCategory))
+                {
+                    <span class="badge bg-primary bg-opacity-10 text-primary mb-3">@Model.SubCategory</span>
+                }
+                <h4 class="fw-bold mb-3">@Model.Title</h4>
+                <div class="text-muted small mb-3">
+                    <i class="bi bi-calendar me-1"></i>Updated @Model.UpdatedAt.ToString("MMM dd, yyyy")
+                </div>
+                <hr />
+                <div class="article-content">
+                    @Html.Raw(Model.Content)
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a asp-action="Category" asp-route-id="@Model.Category" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back to @categoryName
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-grid me-1"></i>Knowledge Center
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .article-content { line-height: 1.8; color: #333; }
+        .article-content h1, .article-content h2, .article-content h3 { margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .article-content p { margin-bottom: 1rem; }
+        .article-content ul, .article-content ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+        .article-content code { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; font-size: 0.875em; }
+        .article-content pre { background: #f8f9fa; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+        .article-content blockquote { border-left: 4px solid #dee2e6; padding-left: 1rem; margin-left: 0; color: #666; }
+        .article-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .article-content table th, .article-content table td { border: 1px solid #dee2e6; padding: 0.5rem 0.75rem; }
+        .article-content table th { background: #f8f9fa; }
+    </style>
+}

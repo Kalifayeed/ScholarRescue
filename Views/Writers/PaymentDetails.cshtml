@@ -1,0 +1,140 @@
+@model WriterPaymentDetail
+@{
+    ViewData["Title"] = "Payment Details";
+}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-action="Wallet">My Wallet</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Payment Details</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-credit-card"></i> Payment Details</h1>
+        <a asp-action="Wallet" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Back to Wallet
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Configure Your Payout Method</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="PaymentDetails" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Payment Method <span class="text-danger">*</span></label>
+                        <select name="paymentMethod" class="form-select" required onchange="togglePaymentFields(this.value)">
+                            <option value="">Select payment method...</option>
+                            <option value="BankTransfer" selected="@(Model.PaymentMethod == "BankTransfer")">Bank Transfer</option>
+                            <option value="PayPal" selected="@(Model.PaymentMethod == "PayPal")">PayPal</option>
+                            <option value="MobileMoney" selected="@(Model.PaymentMethod == "MobileMoney")">Mobile Money (M-Pesa)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Bank Transfer Fields -->
+                <div id="bankTransferFields" class="payment-fields" style="display: @(Model.PaymentMethod == "BankTransfer" ? "block" : "none");">
+                    <h6 class="mb-3"><i class="bi bi-bank"></i> Bank Transfer Details</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Account Name <span class="text-danger">*</span></label>
+                            <input type="text" name="accountName" class="form-control" value="@Model.AccountName" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Account Number <span class="text-danger">*</span></label>
+                            <input type="text" name="accountNumber" class="form-control" value="@Model.AccountNumber" required />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Bank Name <span class="text-danger">*</span></label>
+                            <input type="text" name="bankName" class="form-control" value="@Model.BankName" required />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PayPal Fields -->
+                <div id="payPalFields" class="payment-fields" style="display: @(Model.PaymentMethod == "PayPal" ? "block" : "none");">
+                    <h6 class="mb-3"><i class="bi bi-paypal"></i> PayPal Details</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">PayPal Email <span class="text-danger">*</span></label>
+                            <input type="email" name="payPalEmail" class="form-control" value="@Model.PayPalEmail" required />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Money Fields -->
+                <div id="mobileMoneyFields" class="payment-fields" style="display: @(Model.PaymentMethod == "MobileMoney" ? "block" : "none");">
+                    <h6 class="mb-3"><i class="bi bi-phone"></i> Mobile Money Details</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" name="phoneNumber" class="form-control" value="@Model.PhoneNumber" required placeholder="+254 7XX XXX XXX" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Account Name <span class="text-danger">*</span></label>
+                            <input type="text" name="accountName" class="form-control" value="@Model.AccountName" required />
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Payment Details
+                    </button>
+                    <a asp-action="Wallet" class="btn btn-outline-secondary">
+                        <i class="bi bi-x"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Security Notice -->
+    <div class="card mt-4 border-info">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Security Notice</h5>
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li>Your payment details are encrypted and stored securely.</li>
+                <li>Only authorized administrators can view your payment information for payout processing.</li>
+                <li>Never share your login credentials or payment details via email.</li>
+                <li>Payouts are only processed during the 1st and 15th of each month (24-hour window).</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePaymentFields(method) {
+        document.getElementById('bankTransferFields').style.display = method === 'BankTransfer' ? 'block' : 'none';
+        document.getElementById('payPalFields').style.display = method === 'PayPal' ? 'block' : 'none';
+        document.getElementById('mobileMoneyFields').style.display = method === 'MobileMoney' ? 'block' : 'none';
+    }
+</script>

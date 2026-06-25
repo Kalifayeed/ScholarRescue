@@ -1,0 +1,820 @@
+@model ConversationDetailsViewModel
+@{
+    ViewData["Title"] = !string.IsNullOrEmpty(Model.OrderNumber)
+        ? $"Chat - {Model.OrderNumber}"
+        : "Conversation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid messaging-page">
+    <div class="row g-0 messaging-shell">
+        <!-- Left panel: Conversation list (also shown for quick navigation) -->
+        <div class="col-12 col-lg-4 col-xl-3 conversation-list-panel" id="conversationListPanel">
+            <div class="card border-0 shadow-sm h-100 rounded-0">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-chat-dots"></i> Conversations
+                        </h5>
+                        <a asp-action="Index" class="btn btn-sm btn-light" title="Back to list">
+                            <i class="bi bi-arrow-left"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0 conversation-list-body">
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-arrow-left-circle display-6 d-block mb-2"></i>
+                        <p class="small">Use the back button or
+                            <a asp-action="Index">browse all conversations</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right panel: Active chat -->
+        <div class="col-12 col-lg-8 col-xl-9 conversation-detail-panel" id="conversationDetailPanel">
+            <div class="card border-0 shadow-sm h-100 rounded-0 d-flex flex-column chat-card">
+
+                <!-- Chat header -->
+                <div class="card-header chat-header bg-white border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center min-w-0">
+                            <button type="button" class="btn btn-sm btn-link d-lg-none me-2" id="openListBtn">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <div class="avatar-placeholder bg-primary text-white me-2 flex-shrink-0">
+                                @if (Model.Participants.Any(p => p.UserId != Model.CurrentUserId))
+                                {
+                                    @Model.Participants.First(p => p.UserId != Model.CurrentUserId).FullName.Substring(0, 1)
+                                }
+                                else
+                                {
+                                    @Model.OrderNumber.Substring(0, 1)
+                                }
+                            </div>
+                            <div class="min-w-0">
+                                <h6 class="mb-0 text-truncate">
+                                    @if (Model.Participants.Any(p => p.UserId != Model.CurrentUserId))
+                                    {
+                                        @Model.Participants.First(p => p.UserId != Model.CurrentUserId).FullName
+                                    }
+                                    else
+                                    {
+                                        <text>Order @Model.OrderNumber</text>
+                                    }
+                                </h6>
+                                <div class="chat-header-meta">
+                                    <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId"
+                                       class="text-muted small text-decoration-none me-2">
+                                        <i class="bi bi-file-text"></i> @Model.OrderNumber
+                                    </a>
+                                    <span class="participant-presence">
+                                        @{
+                                            var otherParticipant = Model.Participants.FirstOrDefault(p => p.UserId != Model.CurrentUserId);
+                                            if (otherParticipant != null)
+                                            {
+                                                if (otherParticipant.IsOnline)
+                                                {
+                                                    <span class="text-success small">
+                                                        <i class="bi bi-circle-fill presence-dot"></i>
+                                                        <span class="presence-status-text">Online</span>
+                                                    </span>
+                                                }
+                                                else if (otherParticipant.LastSeen.HasValue)
+                                                {
+                                                    <span class="text-muted small">
+                                                        <i class="bi bi-circle"></i>
+                                                        Last seen @otherParticipant.LastSeen.Value.ToLocalTime().ToString("MMM dd, h:mm tt")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">
+                                                        <i class="bi bi-circle"></i> Offline
+                                                    </span>
+                                                }
+                                            }
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="dropdown">
+                                <button class="btn btn-link text-dark" type="button" data-bs-toggle="dropdown" title="Conversation options">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Orders" asp-action="Details" asp-route-id="@Model.OrderId">
+                                            <i class="bi bi-file-text"></i> View Order Details
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#participantsModal">
+                                            <i class="bi bi-people"></i> View Participants
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages area -->
+                <div class="card-body chat-messages-area" id="messagesArea">
+                    @if (!Model.Messages.Any())
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-chat-square display-4 d-block mb-2"></i>
+                            <h6>No messages yet</h6>
+                            <p class="small">Start the conversation by sending a message below.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        var lastDate = (DateTime?)null;
+                        foreach (var msg in Model.Messages)
+                        {
+                            // Date separator
+                            if (lastDate == null || msg.CreatedDate.Date != lastDate.Value.Date)
+                            {
+                                <div class="day-separator">
+                                    <span class="badge bg-light text-dark">
+                                        @GetDayLabel(msg.CreatedDate)
+                                    </span>
+                                </div>
+                            }
+                            lastDate = msg.CreatedDate;
+
+                            <div class="message-wrapper @(msg.IsMine ? "mine" : "theirs")" data-message-id="@msg.Id">
+                                @if (!msg.IsMine)
+                                {
+                                    <div class="avatar-placeholder bg-secondary text-white me-2 flex-shrink-0 message-avatar">
+                                        @msg.SenderAvatarInitials
+                                    </div>
+                                }
+                                <div class="message-bubble @(msg.IsMine ? "mine" : "theirs")">
+                                    @if (!msg.IsMine && Model.Participants.Count > 2)
+                                    {
+                                        <div class="sender-name">@msg.SenderName</div>
+                                    }
+                                    @if (msg.HasAttachment && !string.IsNullOrEmpty(msg.AttachmentUrl))
+                                    {
+                                        <div class="attachment-preview mb-2">
+                                            <a href="@msg.AttachmentUrl" target="_blank" class="text-decoration-none">
+                                                <i class="bi bi-paperclip"></i> @msg.AttachmentFileName
+                                            </a>
+                                        </div>
+                                    }
+                                    <div class="message-text">@msg.MessageText</div>
+                                    <div class="message-meta">
+                                        <span class="message-time" data-utc="@msg.CreatedDate.ToString("o")">
+                                            @msg.CreatedDate.ToLocalTime().ToString("h:mm tt")
+                                        </span>
+                                        @if (msg.IsEdited)
+                                        {
+                                            <span class="message-edited text-muted ms-1">(edited)</span>
+                                        }
+                                        @if (msg.IsMine)
+                                        {
+                                            <span class="message-status ms-1 @(msg.IsRead ? "read" : "delivered")" title="@(msg.IsRead ? "Read" : "Delivered")">
+                                                @if (msg.IsRead)
+                                                {
+                                                    <i class="bi bi-check2-all"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-check2"></i>
+                                                }
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    <!-- Typing indicator -->
+                    <div class="typing-indicator" id="typingIndicator" style="display:none;">
+                        <div class="avatar-placeholder bg-secondary text-white me-2 flex-shrink-0" style="width:32px;height:32px;font-size:0.8rem;">?</div>
+                        <div class="message-bubble theirs typing-bubble">
+                            <div class="typing-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <span class="typing-text ms-2" id="typingText">typing...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Composer -->
+                <div class="card-footer chat-composer bg-white border-top">
+                    <form id="messageForm" autocomplete="off">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="conversationId" value="@Model.Id" />
+                        <div class="input-group">
+                            <button type="button" class="btn btn-outline-secondary" id="attachBtn" title="Attach file (coming soon)">
+                                <i class="bi bi-paperclip"></i>
+                            </button>
+                            <textarea id="messageInput" class="form-control" rows="1"
+                                      placeholder="Type a message..."
+                                      maxlength="5000" required></textarea>
+                            <button type="submit" class="btn btn-primary" id="sendBtn" title="Send (Enter)">
+                                <i class="bi bi-send"></i>
+                                <span class="d-none d-sm-inline ms-1">Send</span>
+                            </button>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <small class="text-muted">
+                                <i class="bi bi-keyboard"></i>
+                                <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line
+                            </small>
+                            <small class="text-muted char-counter" id="charCounter">0 / 5000</small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Participants modal -->
+<div class="modal fade" id="participantsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-people"></i> Participants</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group list-group-flush">
+                    @foreach (var p in Model.Participants)
+                    {
+                        <li class="list-group-item d-flex align-items-center">
+                            <div class="avatar-placeholder bg-secondary text-white me-3 flex-shrink-0">
+                                @p.FullName.Substring(0, 1)
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">@p.FullName</div>
+                                <small class="text-muted">@p.UserType</small>
+                            </div>
+                            <div>
+                                @if (p.IsOnline)
+                                {
+                                    <span class="badge bg-success">Online</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Offline</span>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .messaging-page,
+    .messaging-shell {
+        height: calc(100vh - 140px);
+        min-height: 600px;
+    }
+
+    .conversation-list-panel,
+    .conversation-detail-panel {
+        height: 100%;
+    }
+
+    .conversation-list-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 140px);
+    }
+
+    .chat-card {
+        height: 100%;
+    }
+
+    .chat-header {
+        flex-shrink: 0;
+    }
+
+    .chat-header-meta {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .chat-messages-area {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        background: #f5f7fb;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-composer {
+        flex-shrink: 0;
+        background: #fff;
+    }
+
+    .avatar-placeholder {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .message-avatar {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .presence-dot {
+        font-size: 0.5rem;
+    }
+
+    .min-w-0 {
+        min-width: 0;
+    }
+
+    .message-wrapper {
+        display: flex;
+        margin-bottom: 0.75rem;
+        align-items: flex-end;
+    }
+
+    .message-wrapper.mine {
+        justify-content: flex-end;
+    }
+
+    .message-bubble {
+        max-width: 70%;
+        padding: 0.6rem 0.85rem;
+        border-radius: 16px;
+        position: relative;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .message-bubble.mine {
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .message-bubble.theirs {
+        background: white;
+        color: #212529;
+        border-bottom-left-radius: 4px;
+    }
+
+    .sender-name {
+        font-weight: 600;
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+        color: #6c757d;
+    }
+
+    .message-text {
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    .message-meta {
+        font-size: 0.7rem;
+        margin-top: 0.3rem;
+        opacity: 0.8;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .message-bubble.mine .message-meta {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .message-status.read {
+        color: #4fc3f7;
+    }
+
+    .message-bubble.mine .message-status {
+        color: rgba(255, 255, 255, 0.95);
+    }
+
+    .day-separator {
+        text-align: center;
+        margin: 1rem 0;
+    }
+
+    .attachment-preview a {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+    }
+
+    .message-bubble.mine .attachment-preview a {
+        color: white;
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .typing-indicator {
+        display: flex;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+
+    .typing-bubble {
+        display: flex;
+        align-items: center;
+    }
+
+    .typing-dots {
+        display: inline-flex;
+        gap: 4px;
+    }
+
+    .typing-dots span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #6c757d;
+        display: inline-block;
+        animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @@keyframes typing {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    #messageInput {
+        resize: none;
+        max-height: 120px;
+    }
+
+    @@media (max-width: 991.98px) {
+        .conversation-list-panel {
+            display: block;
+        }
+        .conversation-detail-panel {
+            display: none;
+        }
+        .conversation-list-panel.hide-list {
+            display: none;
+        }
+        .conversation-detail-panel.show-detail {
+            display: block;
+        }
+    }
+</style>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    <script>
+        (function () {
+            const conversationId = parseInt(document.getElementById('conversationId').value, 10);
+            const currentUserId = '@Model.CurrentUserId';
+            const currentUserName = '@Model.CurrentUserName';
+            const messageForm = document.getElementById('messageForm');
+            const messageInput = document.getElementById('messageInput');
+            const messagesArea = document.getElementById('messagesArea');
+            const sendBtn = document.getElementById('sendBtn');
+            const charCounter = document.getElementById('charCounter');
+            const typingIndicator = document.getElementById('typingIndicator');
+            const typingText = document.getElementById('typingText');
+            const attachBtn = document.getElementById('attachBtn');
+
+            // Mobile navigation
+            var openBtn = document.getElementById('openListBtn');
+            if (openBtn) {
+                openBtn.addEventListener('click', function () {
+                    document.getElementById('conversationListPanel').classList.remove('hide-list');
+                    document.getElementById('conversationDetailPanel').classList.remove('show-detail');
+                });
+            }
+
+            // ----- Auto-scroll to bottom on load.
+            scrollToBottom();
+
+            // ----- Character counter.
+            messageInput.addEventListener('input', function () {
+                const len = this.value.length;
+                charCounter.textContent = len + ' / 5000';
+                if (len > 4800) charCounter.classList.add('text-danger');
+                else charCounter.classList.remove('text-danger');
+
+                // Auto-grow the textarea up to a max height.
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+
+                // Typing notification.
+                if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke('Typing', conversationId).catch(function () { });
+                }
+            });
+
+            // ----- Enter to send, Shift+Enter for new line.
+            messageInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // ----- Submit via send button or Enter.
+            messageForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                sendMessage();
+            });
+
+            // ----- Attach button (placeholder).
+            attachBtn.addEventListener('click', function () {
+                showToast('File attachments are coming soon. The button is wired up but drag-and-drop is not yet implemented.', 'info');
+            });
+
+            // ----- Build the SignalR connection.
+            let connection = null;
+            try {
+                connection = new signalR.HubConnectionBuilder()
+                    .withUrl('/chatHub')
+                    .build();
+
+                connection.on('ReceiveMessage', function (msg) {
+                    if (msg.conversationId === conversationId) {
+                        appendMessage(msg, msg.senderId === currentUserId);
+                        scrollToBottom();
+                    }
+                    // Update unread counts in navbar.
+                    refreshUnreadCount();
+                });
+
+                connection.on('MessagesRead', function (userId) {
+                    if (userId !== currentUserId) {
+                        // Mark all my messages in this conversation as read visually.
+                        document.querySelectorAll('.message-wrapper.mine .message-status').forEach(function (s) {
+                            s.classList.add('read');
+                            s.classList.remove('delivered');
+                            s.innerHTML = '<i class="bi bi-check2-all"></i>';
+                            s.title = 'Read';
+                        });
+                    }
+                });
+
+                connection.on('UserTyping', function (data) {
+                    if (data.conversationId === conversationId && data.userId !== currentUserId) {
+                        typingText.textContent = (data.userName || 'Someone') + ' is typing...';
+                        typingIndicator.style.display = 'flex';
+                        scrollToBottom();
+
+                        clearTimeout(window.__typingTimeout);
+                        window.__typingTimeout = setTimeout(function () {
+                            typingIndicator.style.display = 'none';
+                        }, 3000);
+                    }
+                });
+
+                connection.on('UserJoined', function (userId) {
+                    if (userId !== currentUserId) {
+                        console.log('User joined conversation:', userId);
+                    }
+                });
+
+                connection.on('UserLeft', function (userId) {
+                    if (userId !== currentUserId) {
+                        console.log('User left conversation:', userId);
+                    }
+                });
+
+                connection.on('Error', function (message) {
+                    showToast(message, 'danger');
+                });
+
+                connection.start()
+                    .then(function () {
+                        return connection.invoke('JoinConversation', conversationId);
+                    })
+                    .catch(function (err) {
+                        console.error('SignalR error:', err);
+                    });
+
+                // Mark messages as read on the server when the user opens the chat.
+                fetch('/Messages/MarkRead/' + conversationId, {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': getAntiForgeryToken() }
+                }).catch(function () { });
+
+                // Refresh unread counts after a short delay.
+                setTimeout(refreshUnreadCount, 1000);
+            } catch (e) {
+                console.warn('SignalR initialization failed:', e);
+            }
+
+            // ----- Send a message via SignalR.
+            function sendMessage() {
+                const text = (messageInput.value || '').trim();
+                if (!text) return;
+
+                if (text.length > 5000) {
+                    showToast('Message exceeds 5000 characters.', 'warning');
+                    return;
+                }
+
+                if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+                    // Fallback to HTTP if SignalR is disconnected.
+                    sendViaHttp(text);
+                    return;
+                }
+
+                sendBtn.disabled = true;
+                connection.invoke('SendMessage', conversationId, text)
+                    .then(function () {
+                        messageInput.value = '';
+                        charCounter.textContent = '0 / 5000';
+                        messageInput.style.height = 'auto';
+                        sendBtn.disabled = false;
+                        messageInput.focus();
+                    })
+                    .catch(function (err) {
+                        console.error('Send error:', err);
+                        // Try HTTP fallback.
+                        sendViaHttp(text);
+                        sendBtn.disabled = false;
+                    });
+            }
+
+            function sendViaHttp(text) {
+                fetch('/Messages/Send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': getAntiForgeryToken()
+                    },
+                    body: JSON.stringify({ conversationId: conversationId, messageText: text })
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data && data.success) {
+                            messageInput.value = '';
+                            charCounter.textContent = '0 / 5000';
+                            messageInput.style.height = 'auto';
+                            appendMessage(data.message, true);
+                            scrollToBottom();
+                        } else {
+                            showToast((data && (data.error || data.errors && data.errors[0])) || 'Failed to send message.', 'danger');
+                        }
+                    })
+                    .catch(function () {
+                        showToast('Network error sending message.', 'danger');
+                    });
+            }
+
+            // ----- Append a single message to the chat window.
+            function appendMessage(msg, isMine) {
+                // If messages area is empty (empty-state placeholder), clear it.
+                const empty = messagesArea.querySelector('.text-center.py-5');
+                if (empty) empty.remove();
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'message-wrapper ' + (isMine ? 'mine' : 'theirs');
+                wrapper.setAttribute('data-message-id', msg.id || '');
+
+                const date = new Date(msg.createdDate);
+                const time = formatTime(date);
+
+                if (isMine) {
+                    wrapper.innerHTML =
+                        '<div class="message-bubble mine">' +
+                        (msg.attachmentFileName ? '<div class="attachment-preview mb-2"><a href="' + (msg.attachmentUrl || '#') + '" target="_blank" class="text-decoration-none"><i class="bi bi-paperclip"></i> ' + escapeHtml(msg.attachmentFileName) + '</a></div>' : '') +
+                        '<div class="message-text">' + escapeHtml(msg.messageText) + '</div>' +
+                        '<div class="message-meta">' +
+                        '<span class="message-time">' + time + '</span>' +
+                        '<span class="message-status delivered ms-1" title="Delivered"><i class="bi bi-check2"></i></span>' +
+                        '</div>' +
+                        '</div>';
+                } else {
+                    var initials = msg.senderAvatarInitials || '?';
+                    wrapper.innerHTML =
+                        '<div class="avatar-placeholder bg-secondary text-white me-2 flex-shrink-0 message-avatar">' + escapeHtml(initials) + '</div>' +
+                        '<div class="message-bubble theirs">' +
+                        '<div class="message-text">' + escapeHtml(msg.messageText) + '</div>' +
+                        '<div class="message-meta">' +
+                        '<span class="message-time">' + time + '</span>' +
+                        '</div>' +
+                        '</div>';
+                }
+
+                // Insert before the typing indicator.
+                messagesArea.insertBefore(wrapper, typingIndicator);
+            }
+
+            // ----- Helpers.
+            function scrollToBottom() {
+                if (!messagesArea) return;
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }
+
+            function formatTime(date) {
+                var hours = date.getHours();
+                var minutes = date.getMinutes();
+                var ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                if (hours === 0) hours = 12;
+                var minStr = minutes < 10 ? '0' + minutes : minutes;
+                return hours + ':' + minStr + ' ' + ampm;
+            }
+
+            function escapeHtml(s) {
+                if (s == null) return '';
+                return String(s)
+                    .replace(/&/g, '&')
+                    .replace(/</g, '<')
+                    .replace(/>/g, '>')
+                    .replace(/"/g, '"')
+                    .replace(/'/g, '&#039;');
+            }
+
+            function getAntiForgeryToken() {
+                const input = document.querySelector('#messageForm input[name="__RequestVerificationToken"]');
+                return input ? input.value : '';
+            }
+
+            function showToast(message, type) {
+                type = type || 'info';
+                // Bootstrap 5 toast - create on-the-fly.
+                var container = document.getElementById('toastContainer');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'toastContainer';
+                    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+                    container.style.zIndex = '1090';
+                    document.body.appendChild(container);
+                }
+                var id = 'toast' + Date.now();
+                var html = '<div id="' + id + '" class="toast align-items-center text-white bg-' + type + ' border-0" role="alert" data-bs-delay="4000">' +
+                    '<div class="d-flex">' +
+                    '<div class="toast-body">' + escapeHtml(message) + '</div>' +
+                    '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>' +
+                    '</div>' +
+                    '</div>';
+                container.insertAdjacentHTML('beforeend', html);
+                var toastEl = document.getElementById(id);
+                var t = new bootstrap.Toast(toastEl);
+                t.show();
+                toastEl.addEventListener('hidden.bs.toast', function () { toastEl.remove(); });
+            }
+
+            function refreshUnreadCount() {
+                fetch('/Messages/UnreadCount')
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (!data) return;
+                        var navBadge = document.getElementById('navbarUnreadCount');
+                        if (navBadge) {
+                            if (data.count > 0) {
+                                navBadge.textContent = data.count;
+                                navBadge.style.display = '';
+                            } else {
+                                navBadge.style.display = 'none';
+                            }
+                        }
+                    })
+                    .catch(function () { });
+            }
+        })();
+    </script>
+}
+
+@functions {
+    private static string GetDayLabel(DateTime utc)
+    {
+        var local = utc.ToLocalTime().Date;
+        var today = DateTime.Today;
+        if (local == today) return "Today";
+        if (local == today.AddDays(-1)) return "Yesterday";
+        if ((today - local).TotalDays < 7) return local.ToString("dddd");
+        return local.ToString("MMM dd, yyyy");
+    }
+}

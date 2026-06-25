@@ -1,0 +1,243 @@
+@model ScholarRescue.Models.WriterApplication
+
+@{
+    ViewData["Title"] = "Writer Application Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Writer Application Details</h2>
+        <a asp-action="WriterApplications" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Applications
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Application Details -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Application Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Status</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge @GetStatusBadgeClass(Model.Status) fs-6">
+                                @Model.Status
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-3">Highest Qualification</dt>
+                        <dd class="col-sm-9">@Model.HighestQualification</dd>
+
+                        <dt class="col-sm-3">Specialization</dt>
+                        <dd class="col-sm-9">@Model.Specialization</dd>
+
+                        <dt class="col-sm-3">Phone Number</dt>
+                        <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+                        <dt class="col-sm-3">Submitted</dt>
+                        <dd class="col-sm-9">@Model.SubmittedAt.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+
+                        @if (Model.ReviewedAt.HasValue)
+                        {
+                            <dt class="col-sm-3">Reviewed</dt>
+                            <dd class="col-sm-9">@Model.ReviewedAt.Value.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+
+                            <dt class="col-sm-3">Reviewed By</dt>
+                            <dd class="col-sm-9">@(Model.ReviewedBy?.Email ?? "N/A")</dd>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.AdminComments))
+                        {
+                            <dt class="col-sm-3">Admin Comments</dt>
+                            <dd class="col-sm-9">@Model.AdminComments</dd>
+                        }
+                    </dl>
+
+                    @* Biography *@
+                    <h6 class="fw-bold">Professional Biography</h6>
+                    <div class="bg-light p-3 rounded mb-3">
+                        @Html.Raw(Model.Biography.Replace("\n", "<br />"))
+                    </div>
+
+                    @* Documents *@
+                    <div class="mt-3">
+                        @if (!string.IsNullOrEmpty(Model.CvFilePath))
+                        {
+                            <a href="@Model.CvFilePath" target="_blank" class="btn btn-outline-primary me-2 mb-2">
+                                <i class="bi bi-file-earmark-text"></i> Download CV
+                            </a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.DegreeFilePath))
+                        {
+                            <a href="@Model.DegreeFilePath" target="_blank" class="btn btn-outline-primary me-2 mb-2">
+                                <i class="bi bi-award"></i> Download Degree Certificate
+                            </a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.WritingSampleFilePath))
+                        {
+                            <a href="@Model.WritingSampleFilePath" target="_blank" class="btn btn-outline-primary me-2 mb-2">
+                                <i class="bi bi-file-earmark-text"></i> Download Writing Sample
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applicant Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Applicant Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Name</dt>
+                        <dd class="col-sm-9">@Model.User.FirstName @Model.User.LastName</dd>
+
+                        <dt class="col-sm-3">Email</dt>
+                        <dd class="col-sm-9">@Model.User.Email</dd>
+
+                        <dt class="col-sm-3">Phone</dt>
+                        <dd class="col-sm-9">@(Model.User.PhoneNumber ?? "N/A")</dd>
+
+                        <dt class="col-sm-3">Account Type</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-primary">@Model.User.UserType</span>
+                        </dd>
+
+                        <dt class="col-sm-3">Active</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.User.IsActive)
+                            {
+                                <i class="bi bi-check-circle text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-x-circle text-danger"></i>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Registered</dt>
+                        <dd class="col-sm-9">@Model.User.CreatedDate.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            @if (Model.Status == WriterApplicationStatus.Pending)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Review Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="ApproveWriterApplication" asp-route-id="@Model.Id" method="post" class="mb-3">
+                            <div class="mb-3">
+                                <label for="approveNotes" class="form-label">Admin Notes (Optional)</label>
+                                <textarea class="form-control" id="approveNotes" name="adminComments" rows="3" placeholder="Enter any notes for the applicant..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success" onclick="return confirm('Approve this writer application and assign Writer role?');">
+                                <i class="bi bi-check-circle"></i> Approve Application
+                            </button>
+                        </form>
+
+                        <form asp-action="RejectWriterApplication" asp-route-id="@Model.Id" method="post" class="mb-3">
+                            <div class="mb-3">
+                                <label for="rejectNotes" class="form-label">Rejection Reason</label>
+                                <textarea class="form-control" id="rejectNotes" name="adminComments" rows="3" placeholder="Enter reason for rejection..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this writer application?');">
+                                <i class="bi bi-x-circle"></i> Reject Application
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else if (Model.Status == WriterApplicationStatus.Approved)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Management Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="SuspendWriterApplication" asp-route-id="@Model.Id" method="post">
+                            <div class="mb-3">
+                                <label for="suspendNotes" class="form-label">Suspension Reason</label>
+                                <textarea class="form-control" id="suspendNotes" name="adminComments" rows="3" placeholder="Enter reason for suspension..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-dark" onclick="return confirm('Suspend this writer? They will lose access to the platform.');">
+                                <i class="bi bi-pause-circle"></i> Suspend Writer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Quick Stats Sidebar -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Application ID</span>
+                            <span class="fw-bold">#@Model.Id</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Current Status</span>
+                            <span class="badge @GetStatusBadgeClass(Model.Status)">@Model.Status</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>CV Uploaded</span>
+                            <span>@(!string.IsNullOrEmpty(Model.CvFilePath) ? "Yes" : "No")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Degree Uploaded</span>
+                            <span>@(!string.IsNullOrEmpty(Model.DegreeFilePath) ? "Yes" : "No")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Writing Sample Uploaded</span>
+                            <span>@(!string.IsNullOrEmpty(Model.WritingSampleFilePath) ? "Yes" : "No")</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusBadgeClass(WriterApplicationStatus status)
+    {
+        return status switch
+        {
+            WriterApplicationStatus.Pending => "bg-warning text-dark",
+            WriterApplicationStatus.Approved => "bg-success",
+            WriterApplicationStatus.Rejected => "bg-danger",
+            WriterApplicationStatus.MoreInformationRequired => "bg-info text-dark",
+            WriterApplicationStatus.Suspended => "bg-dark",
+            _ => "bg-secondary"
+        };
+    }
+}

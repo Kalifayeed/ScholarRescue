@@ -1,0 +1,145 @@
+@{
+    ViewData["Title"] = "Writer Knowledge Center";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1"><i class="bi bi-book me-2"></i>Writer Knowledge Center</h4>
+        <p class="text-muted mb-0 small">Everything you need to deliver exceptional academic work.</p>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- FAQ -->
+    <div class="col-md-6 col-lg-4">
+        <a asp-action="Faq" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 resource-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                            <i class="bi bi-question-circle text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="fw-semibold">FAQ</h6>
+                    <p class="text-muted small mb-2">Frequently asked questions about orders, payments, revisions, and account management.</p>
+                    <span class="badge bg-primary bg-opacity-10 text-primary">@ViewBag.FaqCount articles</span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Writer Rules -->
+    <div class="col-md-6 col-lg-4">
+        <a asp-action="Category" asp-route-id="WriterRules" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 resource-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                            <i class="bi bi-shield-check text-danger fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="fw-semibold">Writer Rules</h6>
+                    <p class="text-muted small mb-2">Platform policies, assignment rules, revision guidelines, and payout policies.</p>
+                    <span class="badge bg-danger bg-opacity-10 text-danger">@ViewBag.WriterRulesCount articles</span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Writing Guide -->
+    <div class="col-md-6 col-lg-4">
+        <a asp-action="Category" asp-route-id="WritingGuide" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 resource-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                            <i class="bi bi-pencil-square text-success fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="fw-semibold">Writing Guide</h6>
+                    <p class="text-muted small mb-2">Essay writing, research papers, case studies, dissertations, and literature reviews.</p>
+                    <span class="badge bg-success bg-opacity-10 text-success">@ViewBag.WritingGuideCount articles</span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Citation Guides -->
+    <div class="col-md-6 col-lg-4">
+        <a asp-action="Category" asp-route-id="CitationGuides" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 resource-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                            <i class="bi bi-quote text-warning fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="fw-semibold">Citation Guides</h6>
+                    <p class="text-muted small mb-2">APA 7, MLA 9, Chicago, and Harvard citation formatting references.</p>
+                    <span class="badge bg-warning bg-opacity-10 text-warning">@ViewBag.CitationGuidesCount articles</span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Formatting Guide -->
+    <div class="col-md-6 col-lg-4">
+        <a asp-action="Category" asp-route-id="FormattingGuide" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 resource-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                            <i class="bi bi-text-paragraph text-info fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="fw-semibold">Formatting Guide</h6>
+                    <p class="text-muted small mb-2">Document formatting standards: fonts, margins, spacing, headings, and structure.</p>
+                    <span class="badge bg-info bg-opacity-10 text-info">@ViewBag.FormattingGuideCount articles</span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Writer Checklist -->
+    <div class="col-md-6 col-lg-4">
+        <a asp-action="Category" asp-route-id="WriterChecklist" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 resource-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                            <i class="bi bi-clipboard-check text-secondary fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="fw-semibold">Writer Checklist</h6>
+                    <p class="text-muted small mb-2">Plagiarism checks, formatting checks, source verification, and grammar review.</p>
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary">@ViewBag.WriterChecklistCount articles</span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Academic Resources -->
+    <div class="col-md-6 col-lg-4">
+        <a asp-action="Category" asp-route-id="AcademicResources" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 resource-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-dark bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                            <i class="bi bi-journal-richtext text-dark fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="fw-semibold">Academic Resources</h6>
+                    <p class="text-muted small mb-2">Useful academic databases, reference tools, and research methodology guides.</p>
+                    <span class="badge bg-dark bg-opacity-10 text-dark">@ViewBag.AcademicResourcesCount articles</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .resource-card { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .resource-card:hover { transform: translateY(-2px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1) !important; }
+    </style>
+}

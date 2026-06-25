@@ -1,0 +1,227 @@
+@using ScholarRescue.Models.Enums
+@model ScholarRescue.Models.Order
+
+@{
+    ViewData["Title"] = "Payment Checkout";
+    var publicKey = ViewBag.PaystackPublicKey as string ?? "";
+    var currentProvider = ViewBag.CurrentProvider as PaymentProvider? ?? PaymentProvider.Paystack;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Order Summary -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-receipt text-primary me-2"></i>Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <table class="table table-sm table-borderless mb-0">
+                                <tr><td class="text-muted">Order:</td><td class="fw-medium">@Model.OrderNumber</td></tr>
+                                <tr>
+                                    <td class="text-muted">Title:</td>
+                                    <td class="fw-medium">@Model.Title</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Academic Level:</td>
+                                    <td>@Model.AcademicLevel</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Subject:</td>
+                                    <td>@Model.Subject</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-sm table-borderless mb-0">
+                                <tr><td class="text-muted">Pages:</td><td>@Model.Pages</td></tr>
+                                <tr>
+                                    <td class="text-muted">Sources:</td>
+                                    <td>@Model.NumberOfSources</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Deadline:</td>
+                                    <td>@Model.Deadline.ToString("MMM dd, yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Total Price:</td>
+                                    <td class="fw-bold text-primary fs-5">$@Model.Budget.ToString("F2")</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Choose Payment Method -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-credit-card-2-front text-primary me-2"></i>Choose Payment Method</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Payment Provider Selection (future-proof: PayPal can be added here) -->
+                    <div class="payment-providers mb-4">
+                        <div class="row g-3">
+                            <!-- Paystack (default) -->
+                            <div class="col-md-6">
+                                <div class="payment-option card @(currentProvider == PaymentProvider.Paystack ? "border-primary" : "")">
+                                    <div class="card-body text-center py-4">
+                                        <div class="mb-2">
+                                            <i class="bi bi-credit-card-2-front" style="font-size: 2.5rem; color: #0d6efd;"></i>
+                                        </div>
+                                        <h5 class="fw-bold mb-1">Paystack</h5>
+                                        <p class="text-muted small mb-0">Visa, Mastercard, Amex & more</p>
+                                        <span class="badge bg-primary mt-2">Selected</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PayPal placeholder (future integration) -->
+                            <div class="col-md-6">
+                                <div class="payment-option card border-muted opacity-50">
+                                    <div class="card-body text-center py-4">
+                                        <div class="mb-2">
+                                            <i class="bi bi-paypal" style="font-size: 2.5rem; color: #003087;"></i>
+                                        </div>
+                                        <h5 class="fw-bold mb-1">PayPal</h5>
+                                        <p class="text-muted small mb-0">Coming soon</p>
+                                        <span class="badge bg-secondary mt-2">Unavailable</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Brand Icons -->
+                    <div class="text-center mb-4">
+                        <p class="text-muted mb-2">We accept:</p>
+                        <div class="card-brands d-flex justify-content-center gap-3 flex-wrap">
+                            <div class="card-brand-icon text-center">
+                                <i class="bi bi-credit-card" style="font-size: 2rem; color: #1a1f71;"></i>
+                                <div class="small mt-1 fw-medium">Visa</div>
+                            </div>
+                            <div class="card-brand-icon text-center">
+                                <i class="bi bi-credit-card-2-front" style="font-size: 2rem; color: #eb001b;"></i>
+                                <div class="small mt-1 fw-medium">Mastercard</div>
+                            </div>
+                            <div class="card-brand-icon text-center">
+                                <i class="bi bi-credit-card-2-back" style="font-size: 2rem; color: #2e77bc;"></i>
+                                <div class="small mt-1 fw-medium">American Express</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paystack Trust Notice -->
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-shield-check fs-4 me-3 mt-1"></i>
+                            <div>
+                                <strong>Processed securely by Paystack.</strong><br />
+                                Your payment is securely processed through Paystack and held in escrow until the assigned tutor successfully completes the order.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Badges -->
+                    <div class="d-flex justify-content-center gap-3 mb-4 flex-wrap">
+                        <div class="security-badge d-flex align-items-center gap-2 px-3 py-2 bg-light rounded-pill">
+                            <i class="bi bi-lock-fill text-success"></i>
+                            <span class="small fw-medium">SSL Secured</span>
+                        </div>
+                        <div class="security-badge d-flex align-items-center gap-2 px-3 py-2 bg-light rounded-pill">
+                            <i class="bi bi-shield-check text-primary"></i>
+                            <span class="small fw-medium">Escrow Protected</span>
+                        </div>
+                        <div class="security-badge d-flex align-items-center gap-2 px-3 py-2 bg-light rounded-pill">
+                            <i class="bi bi-patch-check-fill text-info"></i>
+                            <span class="small fw-medium">Secure Checkout</span>
+                        </div>
+                    </div>
+
+                    <!-- Accepted Cards Section -->
+                    <div class="accepted-cards border rounded-3 p-3 mb-4">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-check-circle text-success me-2"></i>Accepted Cards</h6>
+                        <div class="row">
+                            <div class="col-sm-4 mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-check-circle-fill text-success small"></i>
+                                    <span>Visa</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-check-circle-fill text-success small"></i>
+                                    <span>Mastercard</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-check-circle-fill text-success small"></i>
+                                    <span>American Express</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paystack Payment Form -->
+                    <form asp-action="InitiatePaystack" asp-controller="Payments" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.Id" />
+                        <input type="hidden" name="provider" value="@PaymentProvider.Paystack" />
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg py-3">
+                                <i class="bi bi-lock-fill me-2"></i>
+                                Pay $@Model.Budget.ToString("F2") Securely
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="text-muted text-center small mt-3 mb-0">
+                        <i class="bi bi-shield-lock me-1"></i>
+                        Your payment information is encrypted and processed securely by Paystack.
+                    </p>
+                </div>
+                <div class="card-footer bg-white text-center py-3">
+                    <a asp-action="Index" asp-controller="Orders" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .payment-option {
+            transition: all 0.2s ease;
+            border-width: 2px;
+            cursor: default;
+        }
+        .payment-option:hover:not(.opacity-50) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .card-brand-icon {
+            transition: transform 0.2s ease;
+            min-width: 80px;
+        }
+        .card-brand-icon:hover {
+            transform: translateY(-3px);
+        }
+        .security-badge {
+            transition: all 0.2s ease;
+        }
+        .security-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,206 @@
+@model ScholarRescue.ViewModels.WriterResources.WriterAnalyticsViewModel
+@{
+    ViewData["Title"] = "Performance Analytics";
+}
+
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h4 class="mb-1"><i class="bi bi-graph-up me-2"></i>@Model.WriterName</h4>
+            <p class="text-muted small mb-0">Performance analytics & rank progress</p>
+        </div>
+        <a asp-action="Dashboard" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Completed Orders</div>
+                <div class="fw-bold fs-3">@Model.CompletedOrders</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Current Orders</div>
+                <div class="fw-bold fs-3">@Model.CurrentOrders</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Average Rating</div>
+                <div class="fw-bold fs-3">@Model.AverageRating.ToString("F2")</div>
+                <div class="text-muted small">(@Model.TotalRatings reviews)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">On-Time Delivery</div>
+                <div class="fw-bold fs-3 text-success">@Model.OnTimeDeliveryPercentage.ToString("F0")%</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Revision Rate</div>
+                <div class="fw-bold fs-3 text-warning">@Model.RevisionPercentage.ToString("F0")%</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Dispute Rate</div>
+                <div class="fw-bold fs-3 text-danger">@Model.DisputePercentage.ToString("F0")%</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Total Earnings</div>
+                <div class="fw-bold fs-3 text-success">$@Model.TotalEarnings.ToString("F0")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Commission Paid</div>
+                <div class="fw-bold fs-3">$@Model.CommissionPaid.ToString("F0")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rank Progress -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-trophy me-1"></i>Rank Progress</h6>
+    </div>
+    <div class="card-body">
+        <div class="row align-items-center g-3">
+            <div class="col-md-4 text-center">
+                <div class="fw-bold fs-4">@Model.CurrentRank</div>
+                <div class="text-muted small">Current Rank</div>
+            </div>
+            <div class="col-md-4">
+                <div class="progress" style="height:24px;">
+                    @{ 
+                        int pct = Model.CompletedOrdersToNextRank > 0 
+                            ? Math.Min(100, Model.CompletedOrders * 100 / (Model.CompletedOrders + Model.CompletedOrdersToNextRank)) 
+                            : 100;
+                    }
+                    <div class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width:@pct%">
+                        @Model.CompletedOrders orders
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.NextRankName))
+                {
+                    <div class="text-center mt-1">
+                        <small class="text-muted">@Model.CompletedOrdersToNextRank more orders to reach @Model.NextRankName</small>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center mt-1">
+                        <small class="text-success">Highest rank achieved!</small>
+                    </div>
+                }
+            </div>
+            <div class="col-md-4 text-center">
+                @if (Model.RatingToNextRank > 0)
+                {
+                    <div class="text-muted small">Need @Model.RatingToNextRank.ToString("F2") more avg rating for next rank</div>
+                }
+                else
+                {
+                    <div class="text-muted small">Rating requirement met</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-bar-chart me-1"></i>Monthly Orders Completed</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="ordersChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-cash-coin me-1"></i>Monthly Earnings</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="earningsChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var monthlyLabels = [@Html.Raw(string.Join(",", Model.MonthlyStats.Select(m => $"'{m.Month} {m.Year}'")))];
+    var ordersData = [@string.Join(",", Model.MonthlyStats.Select(m => m.OrdersCompleted))];
+    var earningsData = [@string.Join(",", Model.MonthlyStats.Select(m => m.Earnings.ToString("F2")))];
+
+    new Chart(document.getElementById('ordersChart'), {
+        type: 'bar',
+        data: {
+            labels: monthlyLabels,
+            datasets: [{
+                label: 'Orders',
+                data: ordersData,
+                backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, stepSize: 1 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    new Chart(document.getElementById('earningsChart'), {
+        type: 'line',
+        data: {
+            labels: monthlyLabels,
+            datasets: [
+                {
+                    label: 'Earnings',
+                    data: earningsData,
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    borderColor: 'rgba(25, 135, 84, 1)',
+                    fill: true,
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '$' + v; } } } },
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>

@@ -1,0 +1,105 @@
+@model IEnumerable<ScholarRescue.ViewModels.Order.OrderIndexViewModel>
+@using ScholarRescue.Models.Enums
+
+@{
+    ViewData["Title"] = "Application Under Review";
+    var application = ViewBag.WriterApplication as ScholarRescue.Models.WriterApplication;
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0"><i class="bi bi-hourglass-split"></i> Application Under Review</h1>
+            <small class="text-muted">Your writer application is being reviewed by our admin team.</small>
+        </div>
+        <span class="badge bg-warning text-dark fs-6 py-2 px-3 rounded-pill">
+            <i class="bi bi-clock-history"></i> Pending
+        </span>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-hourglass-split display-1 text-warning mb-3"></i>
+                    <h2 class="h4 mb-3">Thank you, @User.Identity?.Name!</h2>
+                    <p class="lead text-muted mb-4">
+                        Your writer application has been received and is currently under review.
+                        Our admin team will verify your documents and qualifications.
+                    </p>
+                    <p class="text-muted">You'll receive a notification once a decision has been made.</p>
+
+                    @if (application != null)
+                    {
+                        <div class="mt-4">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar-event"></i>
+                                Submitted on @application.SubmittedAt.ToString("MMMM dd, yyyy 'at' HH:mm") UTC
+                            </small>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> What happens next?</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <strong>Application Review:</strong> Our admin team will verify your submitted documents and qualifications.
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <strong>Document Verification:</strong> We'll check your CV, degree certificate, and writing sample.
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <strong>Decision Notification:</strong> You'll receive an email and in-app notification with our decision.
+                        </li>
+                        <li class="mb-0">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <strong>Get Started:</strong> Once approved, you can browse available orders and start earning.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Application Summary</h6>
+                </div>
+                <div class="card-body">
+                    @if (application != null)
+                    {
+                        <dl class="row mb-0 small">
+                            <dt class="col-5">Status:</dt>
+                            <dd class="col-7"><span class="badge bg-warning text-dark">@application.Status</span></dd>
+
+                            <dt class="col-5">Qualification:</dt>
+                            <dd class="col-7">@application.HighestQualification</dd>
+
+                            <dt class="col-5">Specialization:</dt>
+                            <dd class="col-7">@application.Specialization</dd>
+
+                            <dt class="col-5">Submitted:</dt>
+                            <dd class="col-7">@application.SubmittedAt.ToString("MMM dd, yyyy")</dd>
+                        </dl>
+                    }
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="bi bi-headset"></i>
+                <strong>Need help?</strong>
+                <p class="small mb-0 mt-1">
+                    If you have any questions, please contact our support team.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

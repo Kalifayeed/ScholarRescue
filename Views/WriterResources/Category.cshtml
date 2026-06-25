@@ -1,0 +1,104 @@
+@model List<ScholarRescue.Models.WriterResource>
+@using ScholarRescue.Models.Enums
+@{
+    var category = (WriterResourceCategory)ViewBag.Category;
+    string categoryName = ViewBag.CategoryName;
+    var subCategories = ViewBag.SubCategories as List<string> ?? new List<string>();
+    string? selectedSub = ViewBag.SelectedSubCategory as string;
+
+    ViewData["Title"] = categoryName;
+
+    string iconClass = category switch
+    {
+        WriterResourceCategory.WriterRules => "bi-shield-check",
+        WriterResourceCategory.WritingGuide => "bi-pencil-square",
+        WriterResourceCategory.CitationGuides => "bi-quote",
+        WriterResourceCategory.FormattingGuide => "bi-text-paragraph",
+        WriterResourceCategory.WriterChecklist => "bi-clipboard-check",
+        WriterResourceCategory.AcademicResources => "bi-journal-richtext",
+        _ => "bi-book"
+    };
+
+    string colorClass = category switch
+    {
+        WriterResourceCategory.WriterRules => "danger",
+        WriterResourceCategory.WritingGuide => "success",
+        WriterResourceCategory.CitationGuides => "warning",
+        WriterResourceCategory.FormattingGuide => "info",
+        WriterResourceCategory.WriterChecklist => "secondary",
+        WriterResourceCategory.AcademicResources => "dark",
+        _ => "primary"
+    };
+}
+
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Knowledge Center</a></li>
+            <li class="breadcrumb-item active">@categoryName</li>
+        </ol>
+    </nav>
+    <h4 class="mb-1"><i class="bi @iconClass me-2"></i>@categoryName</h4>
+</div>
+
+<!-- Sub-Category Filters -->
+@if (subCategories.Any())
+{
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a asp-action="Category" asp-route-id="@category"
+           class="btn btn-sm @(string.IsNullOrEmpty(selectedSub) ? $"btn-{colorClass}" : $"btn-outline-{colorClass}") rounded-pill">
+            All
+        </a>
+        @foreach (var sub in subCategories)
+        {
+            <a asp-action="Category" asp-route-id="@category" asp-route-subCategory="@sub"
+               class="btn btn-sm @(selectedSub == sub ? $"btn-{colorClass}" : $"btn-outline-{colorClass}") rounded-pill">
+                @sub
+            </a>
+        }
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi @iconClass fs-1 text-muted"></i>
+        <p class="text-muted mt-2">No content available in this section yet.</p>
+        <a asp-action="Index" class="btn btn-outline-primary btn-sm">Back to Knowledge Center</a>
+    </div>
+}
+else
+{
+    <!-- Resource Cards -->
+    <div class="row g-3">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6">
+                <a asp-action="Article" asp-route-id="@item.Id" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 resource-card">
+                        <div class="card-body">
+                            @if (!string.IsNullOrEmpty(item.SubCategory))
+                            {
+                                <span class="badge bg-@colorClass bg-opacity-10 text-@colorClass mb-2">@item.SubCategory</span>
+                            }
+                            <h6 class="fw-semibold text-dark mb-2">@item.Title</h6>
+                            <p class="text-muted small mb-0" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+                                @System.Text.RegularExpressions.Regex.Replace(item.Content, "<.*?>", "").Substring(0, Math.Min(150, System.Text.RegularExpressions.Regex.Replace(item.Content, "<.*?>", "").Length))...
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pt-0">
+                            <small class="text-muted"><i class="bi bi-arrow-right me-1"></i>Read more</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <style>
+        .resource-card { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .resource-card:hover { transform: translateY(-2px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1) !important; }
+    </style>
+}

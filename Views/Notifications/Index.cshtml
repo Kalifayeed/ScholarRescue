@@ -1,0 +1,343 @@
+@model ScholarRescue.ViewModels.Notification.NotificationIndexViewModel
+@{
+    ViewData["Title"] = "Notifications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-bell"></i> Notifications
+            </h1>
+            <small class="text-muted">Stay up to date with your orders and activity</small>
+        </div>
+        <div class="d-flex gap-2">
+            @if (Model.UnreadCount > 0)
+            {
+                <form asp-action="MarkAllRead" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-check2-all"></i> Mark All Read
+                    </button>
+                </form>
+            }
+            <a asp-action="Settings" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-gear"></i> Settings
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small"><i class="bi bi-search"></i> Search</label>
+                    <input type="text" name="search" class="form-control form-control-sm"
+                           placeholder="Search notifications..." value="@Model.SearchTerm" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small"><i class="bi bi-filter"></i> Status</label>
+                    <select name="filter" class="form-select form-select-sm">
+                        <option value="">All</option>
+                        <option value="unread" selected="@(Model.Filter == "unread")">Unread</option>
+                        <option value="read" selected="@(Model.Filter == "read")">Read</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small"><i class="bi bi-tag"></i> Category</label>
+                    <select name="category" class="form-select form-select-sm">
+                        <option value="">All Categories</option>
+                        <option value="Messages" selected="@(Model.CategoryFilter?.ToString() == "Messages")">Messages</option>
+                        <option value="Orders" selected="@(Model.CategoryFilter?.ToString() == "Orders")">Orders</option>
+                        <option value="Assignments" selected="@(Model.CategoryFilter?.ToString() == "Assignments")">Assignments</option>
+                        <option value="Revisions" selected="@(Model.CategoryFilter?.ToString() == "Revisions")">Revisions</option>
+                        <option value="Applications" selected="@(Model.CategoryFilter?.ToString() == "Applications")">Applications</option>
+                        <option value="System" selected="@(Model.CategoryFilter?.ToString() == "System")">System</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification List -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-bell"></i> Notifications
+                @if (Model.UnreadCount > 0)
+                {
+                    <span class="badge bg-danger ms-2">@Model.UnreadCount unread</span>
+                }
+            </h5>
+            <span class="badge bg-light text-dark">@Model.TotalCount total</span>
+        </div>
+        <div id="notificationList" class="card-body p-0">
+            @if (!Model.Notifications.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-bell-slash display-4 d-block mb-2"></i>
+                    <h6>No notifications</h6>
+                    <p class="small mb-0">
+                        @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.Filter != null || Model.CategoryFilter.HasValue)
+                        {
+                            <text>No notifications match your filters.</text>
+                        }
+                        else
+                        {
+                            <text>You have no notifications yet. They will appear here as activity happens.</text>
+                        }
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var notif in Model.Notifications)
+                    {
+                        <div class="list-group-item list-group-item-action notification-item @(notif.IsRead ? "" : "unread")"
+                             data-notification-id="@notif.Id">
+                            <div class="d-flex align-items-start">
+                                <div class="notification-icon me-3 flex-shrink-0">
+                                    @switch (notif.Category)
+                                    {
+                                        case ScholarRescue.Models.Enums.NotificationCategory.Messages:
+                                            <span class="badge bg-primary rounded-circle p-2"><i class="bi bi-chat-dots text-white"></i></span>
+                                            break;
+                                        case ScholarRescue.Models.Enums.NotificationCategory.Orders:
+                                            <span class="badge bg-success rounded-circle p-2"><i class="bi bi-file-text text-white"></i></span>
+                                            break;
+                                        case ScholarRescue.Models.Enums.NotificationCategory.Assignments:
+                                            <span class="badge bg-warning rounded-circle p-2"><i class="bi bi-person-plus text-white"></i></span>
+                                            break;
+                                        case ScholarRescue.Models.Enums.NotificationCategory.Revisions:
+                                            <span class="badge bg-info rounded-circle p-2"><i class="bi bi-arrow-repeat text-white"></i></span>
+                                            break;
+                                        case ScholarRescue.Models.Enums.NotificationCategory.Applications:
+                                            <span class="badge bg-success rounded-circle p-2"><i class="bi bi-person-check text-white"></i></span>
+                                            break;
+                                        case ScholarRescue.Models.Enums.NotificationCategory.System:
+                                        default:
+                                            <span class="badge bg-secondary rounded-circle p-2"><i class="bi bi-megaphone text-white"></i></span>
+                                            break;
+                                    }
+                                </div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong class="@(notif.IsRead ? "" : "fw-bold")">@notif.Title</strong>
+                                        <small class="text-muted ms-2 flex-shrink-0">@notif.TimeAgo</small>
+                                    </div>
+                                    <div class="small text-muted text-truncate">@notif.Message</div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <span class="badge @GetCategoryBadgeClass(notif.Category)">@notif.Category</span>
+                                        <div class="btn-group btn-group-sm">
+                                            @if (!notif.IsRead)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-primary mark-read-btn"
+                                                        data-id="@notif.Id" title="Mark as read">
+                                                    <i class="bi bi-check2"></i>
+                                                </button>
+                                            }
+                                            @if (!string.IsNullOrEmpty(notif.RelatedUrl))
+                                            {
+                                                <a href="@notif.RelatedUrl" class="btn btn-sm btn-outline-info" title="View related">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            }
+                                            <form asp-action="Delete" asp-route-id="@notif.Id" method="post"
+                                                  style="display:inline;" class="delete-notif-form">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-search="@Model.SearchTerm"
+                           asp-route-filter="@Model.Filter"
+                           asp-route-category="@Model.CategoryFilter"
+                           asp-route-page="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mark single notification as read via AJAX
+            document.querySelectorAll('.mark-read-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.dataset.id;
+                    var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                    fetch('/Notifications/MarkRead/' + id, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token }
+                    })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data && data.success) {
+                            var item = btn.closest('.notification-item');
+                            if (item) {
+                                item.classList.remove('unread');
+                                var strong = item.querySelector('strong');
+                                if (strong) strong.classList.remove('fw-bold');
+                                btn.remove();
+                            }
+                            refreshUnreadCount();
+                        }
+                    })
+                    .catch(function () {});
+                });
+            });
+
+            // SignalR for real-time updates
+            try {
+                var connection = new signalR.HubConnectionBuilder()
+                    .withUrl('/notificationHub')
+                    .build();
+
+                connection.on('ReceiveNotification', function (notif) {
+                    refreshUnreadCount();
+                    // Show toast
+                    showToast(notif.title, notif.message, notif.type || 'info');
+                });
+
+                connection.on('ReceiveToast', function (data) {
+                    showToast(data.title, data.message, data.type || 'info');
+                });
+
+                connection.on('UnreadCountUpdated', function (count) {
+                    updateBadge(count);
+                });
+
+                connection.start().catch(function () {});
+            } catch (e) {}
+
+            function refreshUnreadCount() {
+                fetch('/Notifications/UnreadCount')
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data && data.success) updateBadge(data.count);
+                    })
+                    .catch(function () {});
+            }
+
+            function updateBadge(count) {
+                var badge = document.getElementById('notifNavbarBadge');
+                var navBadge = document.getElementById('navbarNotifCount');
+                if (badge) {
+                    if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+                    else { badge.style.display = 'none'; }
+                }
+                if (navBadge) {
+                    if (count > 0) { navBadge.textContent = count; navBadge.style.display = ''; }
+                    else { navBadge.style.display = 'none'; }
+                }
+            }
+
+            function showToast(title, message, type) {
+                type = type || 'info';
+                var container = document.getElementById('toastContainer');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'toastContainer';
+                    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+                    container.style.zIndex = '1090';
+                    document.body.appendChild(container);
+                }
+                var id = 'toast' + Date.now();
+                var bg = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : type === 'danger' ? 'bg-danger' : 'bg-primary';
+                var html = '<div id="' + id + '" class="toast align-items-center text-white ' + bg + ' border-0" role="alert" data-bs-delay="5000">' +
+                    '<div class="d-flex">' +
+                    '<div class="toast-body"><strong>' + escapeHtml(title) + '</strong><br><small>' + escapeHtml(message) + '</small></div>' +
+                    '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>' +
+                    '</div>' +
+                    '</div>';
+                container.insertAdjacentHTML('beforeend', html);
+                var toastEl = document.getElementById(id);
+                var t = new bootstrap.Toast(toastEl);
+                t.show();
+                toastEl.addEventListener('hidden.bs.toast', function () { toastEl.remove(); });
+            }
+
+            function escapeHtml(s) {
+                if (s == null) return '';
+                return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
+            }
+        });
+    </script>
+}
+
+@functions {
+    private static string GetCategoryBadgeClass(ScholarRescue.Models.Enums.NotificationCategory cat)
+    {
+        return cat switch
+        {
+            ScholarRescue.Models.Enums.NotificationCategory.Messages => "bg-primary",
+            ScholarRescue.Models.Enums.NotificationCategory.Orders => "bg-success",
+            ScholarRescue.Models.Enums.NotificationCategory.Assignments => "bg-warning text-dark",
+            ScholarRescue.Models.Enums.NotificationCategory.Revisions => "bg-info text-dark",
+            ScholarRescue.Models.Enums.NotificationCategory.Applications => "bg-success",
+            ScholarRescue.Models.Enums.NotificationCategory.System => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<style>
+    .notification-item.unread {
+        background: #f0f7ff;
+        border-left: 3px solid #0d6efd;
+    }
+    .notification-item .notification-icon .badge {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    .min-w-0 { min-width: 0; }
+</style>

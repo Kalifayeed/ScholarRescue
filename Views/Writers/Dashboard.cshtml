@@ -1,0 +1,330 @@
+@model IEnumerable<ScholarRescue.ViewModels.Order.OrderIndexViewModel>
+@using ScholarRescue.Models.Enums
+
+@{
+    ViewData["Title"] = "Writer Dashboard";
+    var rank = ViewBag.WriterRank as WriterRank? ?? WriterRank.Beginner;
+    var ranking = ViewBag.WriterRanking as ScholarRescue.Models.WriterRanking;
+    var availability = ViewBag.WriterAvailability as WriterAvailabilityStatus? ?? WriterAvailabilityStatus.Available;
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="h3 mb-0"><i class="bi bi-pencil-square"></i> Writer Dashboard</h1>
+            <small class="text-muted">Your assigned orders and workload</small>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <partial name="_RankBadge" model="rank" />
+            <partial name="_AvailabilityBadge" model="availability" />
+            <span class="badge bg-dark fs-6 py-2 px-3 rounded-pill">
+                <i class="bi bi-person-badge"></i> Writer
+            </span>
+        </div>
+    </div>
+
+    @* Availability form *@
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body py-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <small class="text-muted fw-medium"><i class="bi bi-toggle-on me-1"></i>Availability for new orders:</small>
+                <partial name="_AvailabilityBadge" model="availability" />
+            </div>
+            <form asp-action="UpdateAvailability" method="post" class="d-flex gap-1 align-items-center">
+                @Html.AntiForgeryToken()
+                <select name="status" class="form-select form-select-sm" style="width:auto;">
+                    @foreach (WriterAvailabilityStatus s in Enum.GetValues<WriterAvailabilityStatus>())
+                    {
+                        <option value="@s" selected="@(s == availability)">@s</option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+            </form>
+        </div>
+    </div>
+
+    @if (ranking != null && ranking.CompletedOrders > 0)
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body py-3">
+                <div class="row text-center g-2">
+                    <div class="col-6 col-md-3">
+                        <div class="text-muted small">Completed Orders</div>
+                        <div class="fw-semibold fs-5">@ranking.CompletedOrders</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="text-muted small">Average Rating</div>
+                        <div class="fw-semibold fs-5">
+                            @if (ranking.TotalRatings > 0) { @ranking.AverageRating.ToString("F2") <span class="text-muted small">(@ranking.TotalRatings)</span> } else { <span class="text-muted">—</span> }
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="text-muted small">On-Time Delivery</div>
+                        <div class="fw-semibold fs-5">@((ranking.OnTimeDeliveryRate * 100).ToString("F0"))%</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="text-muted small">Revision Rate</div>
+                        <div class="fw-semibold fs-5">@((ranking.RevisionRate * 100).ToString("F0"))%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @* Stats Cards *@
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h2 class="fw-bold text-primary mb-0">@ViewBag.TotalAssigned</h2>
+                    <small class="text-muted">Assigned Orders</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h2 class="fw-bold text-warning mb-0">@ViewBag.InProgress</h2>
+                    <small class="text-muted">In Progress</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h2 class="fw-bold text-success mb-0">@ViewBag.Completed</h2>
+                    <small class="text-muted">Completed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h2 class="fw-bold text-info mb-0">@ViewBag.PendingAssignment</h2>
+                    <small class="text-muted">Available Orders</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Recent Messages *@
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Recent Conversations</h5>
+                    <a asp-controller="Messages" asp-action="Index" class="btn btn-light btn-sm">
+                        <i class="bi bi-chat-square-text"></i> All Messages
+                    </a>
+                </div>
+                <div class="card-body" id="recentConversationsWidget">
+                    <div class="text-center py-3">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted small mt-2 mb-0">Loading conversations...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Assigned Orders List *@
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-list-check"></i> My Assigned Orders</h5>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox display-4 text-muted"></i>
+                    <h6 class="mt-2 text-muted">No orders assigned yet</h6>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order #</th>
+                                <th>Title</th>
+                                <th>Client</th>
+                                <th>Status</th>
+                                <th>Pages</th>
+                                <th>Budget</th>
+                                <th>Deadline</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td><strong>@order.OrderNumber</strong></td>
+                                    <td>@(order.Title.Length > 30 ? order.Title[..30] + "..." : order.Title)</td>
+                                    <td>@order.ClientName</td>
+                                    <td>
+                                        @{
+                                            var badgeClass = order.Status switch
+                                            {
+                                                ScholarRescue.Models.Enums.OrderStatus.Assigned => "bg-primary",
+                                                ScholarRescue.Models.Enums.OrderStatus.InProgress => "bg-warning text-dark",
+                                                ScholarRescue.Models.Enums.OrderStatus.DraftSubmitted => "bg-info",
+                                                ScholarRescue.Models.Enums.OrderStatus.Completed => "bg-success",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @badgeClass">@order.Status</span>
+                                    </td>
+                                    <td>@order.Pages</td>
+                                    <td>@order.Budget.ToString("C")</td>
+                                    <td>
+                                        <span class="@(order.Deadline < DateTime.UtcNow ? "text-danger" : "")">
+                                            @order.Deadline.ToString("MMM dd")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id"
+                                               class="btn btn-outline-info"><i class="bi bi-eye"></i></a>
+                                            @if (order.Status == ScholarRescue.Models.Enums.OrderStatus.Assigned)
+                                            {
+                                                <form asp-action="UpdateStatus" method="post" style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@order.Id" />
+                                                    <input type="hidden" name="newStatus" value="InProgress" />
+                                                    <button type="submit" class="btn btn-outline-warning"
+                                                            title="Start Working"><i class="bi bi-play-fill"></i></button>
+                                                </form>
+                                            }
+                                            @if (order.Status == ScholarRescue.Models.Enums.OrderStatus.InProgress)
+                                            {
+                                                <form asp-action="UpdateStatus" method="post" style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@order.Id" />
+                                                    <input type="hidden" name="newStatus" value="Submitted" />
+                                                    <button type="submit" class="btn btn-outline-success"
+                                                            title="Submit"><i class="bi bi-send"></i></button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            loadRecentConversations();
+            setupSignalR();
+        });
+
+        function loadRecentConversations() {
+            var widget = document.getElementById('recentConversationsWidget');
+            if (!widget) return;
+
+            fetch('/Messages/Recent?take=5')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data || !data.success) {
+                        widget.innerHTML = '<div class="text-center py-3 text-muted"><p class="small mb-0">Could not load conversations.</p></div>';
+                        return;
+                    }
+                    if (!data.conversations || data.conversations.length === 0) {
+                        widget.innerHTML = '<div class="text-center py-3 text-muted"><i class="bi bi-inbox d-block mb-1" style="font-size:2rem;"></i><p class="small mb-0">No recent conversations.</p></div>';
+                        return;
+                    }
+                    var html = '<div class="list-group list-group-flush">';
+                    data.conversations.forEach(function (c) {
+                        var time = formatRelativeLocal(c.lastMessageDate);
+                        var unreadBadge = c.unreadCount > 0 ? '<span class="badge bg-danger rounded-pill ms-auto">' + c.unreadCount + '</span>' : '';
+                        var online = c.isOtherPartyOnline
+                            ? '<span class="text-success"><i class="bi bi-circle-fill" style="font-size:0.5rem;"></i></span>'
+                            : '<span class="text-muted"><i class="bi bi-circle" style="font-size:0.5rem;"></i></span>';
+                        html += '<a href="/Messages/Conversation/' + c.conversationId + '" class="list-group-item list-group-item-action d-flex align-items-start py-2 px-3">' +
+                            '<div class="flex-grow-1 min-w-0">' +
+                            '<div class="d-flex justify-content-between align-items-center">' +
+                            '<strong class="text-truncate small">' + escapeHtml(c.otherPartyName || c.orderNumber) + '</strong>' +
+                            '<small class="text-muted ms-2 flex-shrink-0">' + time + '</small>' +
+                            '</div>' +
+                            '<div class="small text-muted text-truncate">' +
+                            '<span class="fw-medium">' + escapeHtml(c.orderNumber) + ':</span> ' +
+                            escapeHtml(c.lastMessagePreview || '') +
+                            '</div>' +
+                            '<div class="d-flex align-items-center gap-1 mt-1">' +
+                            online +
+                            '<small class="text-muted" style="font-size:0.7rem;">' + escapeHtml(c.otherPartyName || '') + '</small>' +
+                            '</div>' +
+                            '</div>' +
+                            unreadBadge +
+                            '</a>';
+                    });
+                    html += '</div>';
+                    widget.innerHTML = html;
+                })
+                .catch(function () {
+                    widget.innerHTML = '<div class="text-center py-3 text-muted"><p class="small mb-0">Error loading conversations.</p></div>';
+                });
+        }
+
+        function setupSignalR() {
+            try {
+                var connection = new signalR.HubConnectionBuilder()
+                    .withUrl('/chatHub')
+                    .build();
+                connection.on('ReceiveMessage', function () {
+                    setTimeout(loadRecentConversations, 500);
+                });
+                connection.on('ReceiveNotification', function () {
+                    setTimeout(loadRecentConversations, 500);
+                });
+                connection.start().catch(function () {});
+            } catch (e) {}
+        }
+
+        function formatRelativeLocal(utcStr) {
+            try {
+                var d = new Date(utcStr);
+                var now = new Date();
+                var diffMs = now - d;
+                var diffMin = Math.floor(diffMs / 60000);
+                if (diffMin < 1) return 'Just now';
+                if (diffMin < 60) return diffMin + 'm ago';
+                var diffHr = Math.floor(diffMin / 60);
+                if (diffHr < 24) return diffHr + 'h ago';
+                var diffDay = Math.floor(diffHr / 24);
+                if (diffDay < 7) return diffDay + 'd ago';
+                return d.toLocaleDateString();
+            } catch (e) { return ''; }
+        }
+
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"').replace(/'/g,'&#039;');
+        }
+    </script>
+}

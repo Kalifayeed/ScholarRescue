@@ -1,0 +1,103 @@
+@model List<ScholarRescue.Models.WriterResource>
+@{
+    ViewData["Title"] = "FAQ";
+    var subCategories = ViewBag.SubCategories as List<string> ?? new List<string>();
+    string? selectedSub = ViewBag.SelectedSubCategory as string;
+    string? searchQuery = ViewBag.SearchQuery as string;
+}
+
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Knowledge Center</a></li>
+            <li class="breadcrumb-item active">FAQ</li>
+        </ol>
+    </nav>
+    <h4 class="mb-1"><i class="bi bi-question-circle me-2"></i>Frequently Asked Questions</h4>
+    <p class="text-muted small">Search or browse by category to find answers to common questions.</p>
+</div>
+
+<!-- Search Bar -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Faq" method="get" class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="text" name="q" value="@searchQuery" class="form-control" placeholder="Search questions, keywords, or topics..." />
+            @if (!string.IsNullOrWhiteSpace(selectedSub))
+            {
+                <input type="hidden" name="subCategory" value="@selectedSub" />
+            }
+            <button type="submit" class="btn btn-primary">Search</button>
+            @if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                <a asp-action="Faq" class="btn btn-outline-secondary">Clear</a>
+            }
+        </form>
+    </div>
+</div>
+
+<!-- Category Filters -->
+@if (subCategories.Any())
+{
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a asp-action="Faq"
+           class="btn btn-sm @(string.IsNullOrEmpty(selectedSub) ? "btn-primary" : "btn-outline-primary") rounded-pill">
+            All
+        </a>
+        @foreach (var cat in subCategories)
+        {
+            <a asp-action="Faq" asp-route-subCategory="@cat"
+               class="btn btn-sm @(selectedSub == cat ? "btn-primary" : "btn-outline-primary") rounded-pill">
+                @cat
+            </a>
+        }
+    </div>
+}
+
+<!-- Results -->
+@if (!string.IsNullOrWhiteSpace(searchQuery))
+{
+    <div class="mb-3">
+        <small class="text-muted">Found <strong>@Model.Count</strong> result(s) for "<strong>@searchQuery</strong>"</small>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-search fs-1 text-muted"></i>
+        <p class="text-muted mt-2">No FAQ entries found. Try a different search term or category.</p>
+        <a asp-action="Faq" class="btn btn-outline-primary btn-sm">View All FAQ</a>
+    </div>
+}
+else
+{
+    <!-- Group by SubCategory -->
+    var grouped = Model.GroupBy(m => m.SubCategory ?? "General").OrderBy(g => g.Key);
+    int index = 0;
+
+    foreach (var group in grouped)
+    {
+        <h6 class="fw-semibold text-muted mb-2 mt-3"><i class="bi bi-tag me-1"></i>@group.Key</h6>
+        <div class="accordion mb-3" id="faq-@(group.Key?.Replace(" ", ""))">
+            @foreach (var item in group)
+            {
+                index++;
+                var collapseId = $"faq-collapse-{index}";
+                <div class="accordion-item border-0 shadow-sm mb-2 rounded">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-medium" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                            @item.Question ?? item.Title
+                        </button>
+                    </h2>
+                    <div id="@collapseId" class="accordion-collapse collapse" data-bs-parent="#faq-@(group.Key?.Replace(" ", ""))">
+                        <div class="accordion-body text-muted small">
+                            @Html.Raw(item.Content)
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}

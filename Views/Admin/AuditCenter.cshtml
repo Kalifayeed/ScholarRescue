@@ -1,0 +1,383 @@
+@model ScholarRescue.ViewModels.Admin.AdminAuditCenterViewModel
+
+@{
+    ViewData["Title"] = "Audit Center";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0"><i class="bi bi-shield-exclamation text-danger me-2"></i>Audit Center</h1>
+            <p class="text-muted mb-0 mt-1">Single-screen command center for all critical system alerts.</p>
+        </div>
+        <a asp-action="Dashboard" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
+    </div>
+
+    <!-- Count Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100 @(Model.FailedPaymentsCount > 0 ? "border-start border-4 border-danger" : "")">
+                <div class="card-body text-center">
+                    <div class="fs-1 text-danger mb-2"><i class="bi bi-credit-card-2-front"></i></div>
+                    <h2 class="mb-0">@Model.FailedPaymentsCount</h2>
+                    <small class="text-muted">Failed Payments</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100 @(Model.PendingPayoutsCount > 0 ? "border-start border-4 border-warning" : "")">
+                <div class="card-body text-center">
+                    <div class="fs-1 text-warning mb-2"><i class="bi bi-cash-stack"></i></div>
+                    <h2 class="mb-0">@Model.PendingPayoutsCount</h2>
+                    <small class="text-muted">Pending Payouts</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100 @(Model.ActiveDisputesCount > 0 ? "border-start border-4 border-danger" : "")">
+                <div class="card-body text-center">
+                    <div class="fs-1 text-danger mb-2"><i class="bi bi-exclamation-triangle"></i></div>
+                    <h2 class="mb-0">@Model.ActiveDisputesCount</h2>
+                    <small class="text-muted">Active Disputes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100 @(Model.FraudAlertsCount > 0 ? "border-start border-4 border-danger" : "")">
+                <div class="card-body text-center">
+                    <div class="fs-1 text-danger mb-2"><i class="bi bi-shield-fill-x"></i></div>
+                    <h2 class="mb-0">@Model.FraudAlertsCount</h2>
+                    <small class="text-muted">Fraud Alerts</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100 @(Model.FlaggedMessagesCount > 0 ? "border-start border-4 border-warning" : "")">
+                <div class="card-body text-center">
+                    <div class="fs-1 text-warning mb-2"><i class="bi bi-chat-dots"></i></div>
+                    <h2 class="mb-0">@Model.FlaggedMessagesCount</h2>
+                    <small class="text-muted">Flagged Messages</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100 @(Model.WriterPenaltiesCount > 0 ? "border-start border-4 border-warning" : "")">
+                <div class="card-body text-center">
+                    <div class="fs-1 text-warning mb-2"><i class="bi bi-person-x"></i></div>
+                    <h2 class="mb-0">@Model.WriterPenaltiesCount</h2>
+                    <small class="text-muted">Writer Penalties</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100 @(Model.ClientComplaintsCount > 0 ? "border-start border-4 border-info" : "")">
+                <div class="card-body text-center">
+                    <div class="fs-1 text-info mb-2"><i class="bi bi-ticket"></i></div>
+                    <h2 class="mb-0">@Model.ClientComplaintsCount</h2>
+                    <small class="text-muted">Support Tickets</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm h-100 @(Model.SystemErrorsCount > 0 ? "border-start border-4 border-danger" : "")">
+                <div class="card-body text-center">
+                    <div class="fs-1 text-danger mb-2"><i class="bi bi-bug"></i></div>
+                    <h2 class="mb-0">@Model.SystemErrorsCount</h2>
+                    <small class="text-muted">System Errors</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Sections -->
+    <div class="accordion" id="auditAccordion">
+
+        <!-- 1. Failed Payments -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed @(Model.FailedPaymentsCount > 0 ? "text-danger fw-bold" : "")" type="button" data-bs-toggle="collapse" data-bs-target="#failedPayments">
+                    <i class="bi bi-credit-card-2-front me-2"></i> Failed Payments
+                    <span class="badge @(Model.FailedPaymentsCount > 0 ? "bg-danger" : "bg-secondary") ms-2">@Model.FailedPaymentsCount</span>
+                </button>
+            </h2>
+            <div id="failedPayments" class="accordion-collapse collapse" data-bs-parent="#auditAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light"><tr><th>Order</th><th>Amount</th><th>Payment Method</th><th>Reference</th><th>Client</th><th>Date</th></tr></thead>
+                            <tbody>
+                                @if (Model.FailedPayments.Count == 0)
+                                {
+                                    <tr><td colspan="6" class="text-center text-muted py-3">No failed payments.</td></tr>
+                                }
+                                @foreach (var p in Model.FailedPayments)
+                                {
+                                    <tr>
+                                        <td><a asp-action="OrderManagement" asp-route-statusFilter="Funded">@p.OrderNumber</a></td>
+                                        <td>$@p.Amount.ToString("F2")</td>
+                                        <td>@p.PaymentMethod</td>
+                                        <td><code>@p.TransactionReference</code></td>
+                                        <td>@p.ClientName</td>
+                                        <td>@p.CreatedAt.ToString("MMM dd, HH:mm")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Pending Payouts -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed @(Model.PendingPayoutsCount > 0 ? "text-warning fw-bold" : "")" type="button" data-bs-toggle="collapse" data-bs-target="#pendingPayouts">
+                    <i class="bi bi-cash-stack me-2"></i> Pending Payouts
+                    <span class="badge @(Model.PendingPayoutsCount > 0 ? "bg-warning text-dark" : "bg-secondary") ms-2">@Model.PendingPayoutsCount</span>
+                </button>
+            </h2>
+            <div id="pendingPayouts" class="accordion-collapse collapse" data-bs-parent="#auditAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light"><tr><th>Writer</th><th>Amount</th><th>Method</th><th>Requested</th><th>Notes</th></tr></thead>
+                            <tbody>
+                                @if (Model.PendingPayouts.Count == 0)
+                                {
+                                    <tr><td colspan="5" class="text-center text-muted py-3">No pending payouts.</td></tr>
+                                }
+                                @foreach (var p in Model.PendingPayouts)
+                                {
+                                    <tr>
+                                        <td>@p.WriterName<br /><small class="text-muted">@p.WriterEmail</small></td>
+                                        <td class="fw-bold">$@p.Amount.ToString("F2")</td>
+                                        <td>@p.PaymentMethod</td>
+                                        <td>@p.RequestedAt.ToString("MMM dd")</td>
+                                        <td><small>@p.Notes</small></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Active Disputes -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed @(Model.ActiveDisputesCount > 0 ? "text-danger fw-bold" : "")" type="button" data-bs-toggle="collapse" data-bs-target="#activeDisputes">
+                    <i class="bi bi-exclamation-triangle me-2"></i> Active Disputes
+                    <span class="badge @(Model.ActiveDisputesCount > 0 ? "bg-danger" : "bg-secondary") ms-2">@Model.ActiveDisputesCount</span>
+                </button>
+            </h2>
+            <div id="activeDisputes" class="accordion-collapse collapse" data-bs-parent="#auditAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light"><tr><th>Order</th><th>Raised By</th><th>Reason</th><th>Status</th><th>Date</th></tr></thead>
+                            <tbody>
+                                @if (Model.ActiveDisputes.Count == 0)
+                                {
+                                    <tr><td colspan="5" class="text-center text-muted py-3">No active disputes.</td></tr>
+                                }
+                                @foreach (var d in Model.ActiveDisputes)
+                                {
+                                    <tr>
+                                        <td><a asp-action="OrderManagement" asp-route-statusFilter="Disputed">@d.OrderNumber</a></td>
+                                        <td>@d.RaisedBy</td>
+                                        <td><small>@d.Reason</small></td>
+                                        <td><span class="badge bg-danger">@d.Status</span></td>
+                                        <td>@d.CreatedAt.ToString("MMM dd")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Fraud Alerts -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed @(Model.FraudAlertsCount > 0 ? "text-danger fw-bold" : "")" type="button" data-bs-toggle="collapse" data-bs-target="#fraudAlerts">
+                    <i class="bi bi-shield-fill-x me-2"></i> Fraud Alerts
+                    <span class="badge @(Model.FraudAlertsCount > 0 ? "bg-danger" : "bg-secondary") ms-2">@Model.FraudAlertsCount</span>
+                </button>
+            </h2>
+            <div id="fraudAlerts" class="accordion-collapse collapse" data-bs-parent="#auditAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light"><tr><th>User</th><th>Type</th><th>Risk</th><th>Description</th><th>Status</th><th>Date</th></tr></thead>
+                            <tbody>
+                                @if (Model.FraudAlerts.Count == 0)
+                                {
+                                    <tr><td colspan="6" class="text-center text-muted py-3">No fraud alerts.</td></tr>
+                                }
+                                @foreach (var f in Model.FraudAlerts)
+                                {
+                                    <tr>
+                                        <td>@f.UserName</td>
+                                        <td>@f.FraudType</td>
+                                        <td>
+                                            <span class="badge @(f.RiskScore >= 80 ? "bg-danger" : f.RiskScore >= 40 ? "bg-warning text-dark" : "bg-info")">
+                                                @f.RiskScore
+                                            </span>
+                                        </td>
+                                        <td><small>@f.Description</small></td>
+                                        <td>@(f.IsResolved ? "Resolved" : "Active")</td>
+                                        <td>@f.CreatedAt.ToString("MMM dd")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Flagged Messages -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed @(Model.FlaggedMessagesCount > 0 ? "text-warning fw-bold" : "")" type="button" data-bs-toggle="collapse" data-bs-target="#flaggedMessages">
+                    <i class="bi bi-chat-dots me-2"></i> Flagged Messages
+                    <span class="badge @(Model.FlaggedMessagesCount > 0 ? "bg-warning text-dark" : "bg-secondary") ms-2">@Model.FlaggedMessagesCount</span>
+                </button>
+            </h2>
+            <div id="flaggedMessages" class="accordion-collapse collapse" data-bs-parent="#auditAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light"><tr><th>Sender</th><th>Type</th><th>Content</th><th>Date</th></tr></thead>
+                            <tbody>
+                                @if (Model.FlaggedMessages.Count == 0)
+                                {
+                                    <tr><td colspan="4" class="text-center text-muted py-3">No flagged messages.</td></tr>
+                                }
+                                @foreach (var m in Model.FlaggedMessages)
+                                {
+                                    <tr>
+                                        <td>@m.SenderName<br /><small class="text-muted">@m.SenderEmail</small></td>
+                                        <td>@m.ConversationTitle</td>
+                                        <td><small>@m.ContentPreview</small></td>
+                                        <td>@m.SentAt.ToString("MMM dd, HH:mm")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Writer Penalties -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed @(Model.WriterPenaltiesCount > 0 ? "text-warning fw-bold" : "")" type="button" data-bs-toggle="collapse" data-bs-target="#writerPenalties">
+                    <i class="bi bi-person-x me-2"></i> Writer Penalties
+                    <span class="badge @(Model.WriterPenaltiesCount > 0 ? "bg-warning text-dark" : "bg-secondary") ms-2">@Model.WriterPenaltiesCount</span>
+                </button>
+            </h2>
+            <div id="writerPenalties" class="accordion-collapse collapse" data-bs-parent="#auditAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light"><tr><th>Writer</th><th>Penalty</th><th>Reason</th><th>Date</th></tr></thead>
+                            <tbody>
+                                @if (Model.WriterPenalties.Count == 0)
+                                {
+                                    <tr><td colspan="4" class="text-center text-muted py-3">No writer penalties.</td></tr>
+                                }
+                                @foreach (var w in Model.WriterPenalties)
+                                {
+                                    <tr>
+                                        <td>@w.WriterName<br /><small class="text-muted">@w.WriterEmail</small></td>
+                                        <td class="text-danger fw-bold">-$@w.PenaltyAmount.ToString("F2")</td>
+                                        <td><small>@w.Reason</small></td>
+                                        <td>@w.CreatedAt.ToString("MMM dd")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Support Tickets -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed @(Model.ClientComplaintsCount > 0 ? "text-info fw-bold" : "")" type="button" data-bs-toggle="collapse" data-bs-target="#supportTickets">
+                    <i class="bi bi-ticket me-2"></i> Support Tickets
+                    <span class="badge @(Model.ClientComplaintsCount > 0 ? "bg-info" : "bg-secondary") ms-2">@Model.ClientComplaintsCount</span>
+                </button>
+            </h2>
+            <div id="supportTickets" class="accordion-collapse collapse" data-bs-parent="#auditAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light"><tr><th>User</th><th>Subject</th><th>Department</th><th>Status</th><th>Date</th></tr></thead>
+                            <tbody>
+                                @if (Model.ClientComplaints.Count == 0)
+                                {
+                                    <tr><td colspan="5" class="text-center text-muted py-3">No open support tickets.</td></tr>
+                                }
+                                @foreach (var t in Model.ClientComplaints)
+                                {
+                                    <tr>
+                                        <td>@t.UserName<br /><small class="text-muted">@t.UserEmail</small></td>
+                                        <td>@t.Subject</td>
+                                        <td>@t.Department</td>
+                                        <td><span class="badge @(t.Status == "Open" ? "bg-danger" : t.Status == "Pending" ? "bg-warning text-dark" : "bg-success")">@t.Status</span></td>
+                                        <td>@t.CreatedAt.ToString("MMM dd")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. System Errors -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed @(Model.SystemErrorsCount > 0 ? "text-danger fw-bold" : "")" type="button" data-bs-toggle="collapse" data-bs-target="#systemErrors">
+                    <i class="bi bi-bug me-2"></i> System Errors
+                    <span class="badge @(Model.SystemErrorsCount > 0 ? "bg-danger" : "bg-secondary") ms-2">@Model.SystemErrorsCount</span>
+                </button>
+            </h2>
+            <div id="systemErrors" class="accordion-collapse collapse" data-bs-parent="#auditAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light"><tr><th>Category</th><th>Message</th><th>User</th><th>URL</th><th>Status</th><th>Date</th></tr></thead>
+                            <tbody>
+                                @if (Model.SystemErrors.Count == 0)
+                                {
+                                    <tr><td colspan="6" class="text-center text-muted py-3">No system errors.</td></tr>
+                                }
+                                @foreach (var e in Model.SystemErrors)
+                                {
+                                    <tr>
+                                        <td><span class="badge bg-secondary">@e.Category</span></td>
+                                        <td><small>@e.Message</small></td>
+                                        <td>@e.UserName</td>
+                                        <td><small><code>@e.Url</code></small></td>
+                                        <td>@(e.IsResolved ? "Resolved" : "Unresolved")</td>
+                                        <td>@e.CreatedAt.ToString("MMM dd, HH:mm")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

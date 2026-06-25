@@ -1,0 +1,481 @@
+@model ScholarRescue.ViewModels.Order.CreateOrderViewModel
+@using ScholarRescue.ViewModels.Order
+
+@{
+    ViewData["Title"] = "Create Order";
+    var subjects = AcademicSubjects.Subjects;
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Order</h1>
+        <small class="text-muted">Submit a new academic support request</small>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back to Orders
+    </a>
+</div>
+
+<form asp-action="Create" method="post" id="createOrderForm" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Assignment Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-semibold"></label>
+                        <input asp-for="Title" class="form-control" placeholder="e.g., Research paper on climate change" />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-semibold"></label>
+                        <textarea asp-for="Description" class="form-control" rows="6" placeholder="Provide detailed instructions, requirements, and any specific notes for your order"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">Order Attachments</label>
+                        <div class="upload-area border rounded-3 p-3 text-center" id="uploadArea" style="border:2px dashed #ccc;cursor:pointer;">
+                            <i class="bi bi-cloud-upload fs-1 text-muted"></i>
+                            <p class="mb-1 mt-2 fw-medium">Drag & drop files here or click to browse</p>
+                            <small class="text-muted">PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, RAR, JPG, JPEG, PNG (Max 25MB each, up to 10 files)</small>
+                            <input type="file" id="fileInput" class="d-none" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.jpg,.jpeg,.png" />
+                        </div>
+                        <div id="fileList" class="mt-2"></div>
+                        <input type="hidden" asp-for="UploadedFiles" id="uploadedFilesInput" />
+                        <small class="text-muted">Files will be uploaded after order creation</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-mortarboard text-primary me-2"></i>Academic Requirements</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Subject" class="form-label fw-semibold"></label>
+                            <select asp-for="Subject" class="form-select" id="subjectSelect">
+                                <option value="">-- Select Subject --</option>
+                                @foreach (var s in subjects)
+                                {
+                                    <option value="@s">@s</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Subject" class="text-danger small"></span>
+                            <div id="otherSubjectGroup" class="mt-2" style="display:none;">
+                                <label asp-for="OtherSubject" class="form-label small">Specify Subject</label>
+                                <input asp-for="OtherSubject" class="form-control" placeholder="Enter your subject" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="AcademicLevel" class="form-label fw-semibold"></label>
+                            @* Custom dropdown with string values matching JavaScript keys *@
+                            <select asp-for="AcademicLevel" class="form-select" id="academicLevel">
+                                <option value="">-- Select Academic Level --</option>
+                                <option value="HighSchool">High School</option>
+                                <option value="College">College</option>
+                                <option value="Undergraduate">Undergraduate</option>
+                                <option value="Masters">Master's</option>
+                                <option value="PhD">PhD</option>
+                            </select>
+                            <span asp-validation-for="AcademicLevel" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CitationFormat" class="form-label fw-semibold"></label>
+                            <select asp-for="CitationFormat" class="form-select" id="citationFormat"
+                                    asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.CitationFormat>()">
+                            </select>
+                            <span asp-validation-for="CitationFormat" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Deadline" class="form-label fw-semibold"></label>
+                            <input asp-for="Deadline" class="form-control" id="deadlinePicker"
+                                   placeholder="DD/MM/YYYY HH:mm" />
+                            <span asp-validation-for="Deadline" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Pages" class="form-label fw-semibold"></label>
+                            <input asp-for="Pages" class="form-control" id="pages" type="number" min="1" value="1" />
+                            <span asp-validation-for="Pages" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="NumberOfSources" class="form-label fw-semibold"></label>
+                            <input asp-for="NumberOfSources" class="form-control" id="sources" type="number" min="0" value="0" />
+                            <span asp-validation-for="NumberOfSources" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top:80px;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Pricing Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Academic Level</span>
+                        <strong id="academicLevelDisplay" class="small text-end">--</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Pages</span>
+                        <strong id="pagesDisplay" class="small">0</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Word Count</span>
+                        <strong id="wordCountDisplay" class="small">0</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Sources</span>
+                        <strong id="sourcesDisplay" class="small">0</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Citation Format</span>
+                        <strong id="citationDisplay" class="small text-end">APA 7th</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Deadline</span>
+                        <strong id="deadlineDisplay" class="small text-end">--</strong>
+                    </div>
+                    <hr class="my-2" />
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-muted small">Base Price</span>
+                        <strong id="basePriceDisplay" class="small">$0.00</strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1">
+                        <span class="text-muted small">Urgency Surcharge</span>
+                        <strong id="surchargeDisplay" class="small">$0.00</strong>
+                    </div>
+                    <hr class="my-2" />
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="fw-bold">Total Price</span>
+                        <strong id="totalPriceDisplay" class="text-primary fs-4">$0.00</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Cancel
+        </a>
+        <button type="button" class="btn btn-primary btn-lg" id="reviewOrderBtn">
+            <i class="bi bi-eye me-1"></i>Review Order
+        </button>
+    </div>
+</form>
+
+<!-- Order Review Modal -->
+<div class="modal fade" id="orderReviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-file-text me-2"></i>Order Review Summary</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold border-bottom pb-2">Order Details</h6>
+                        <table class="table table-sm table-borderless">
+                            <tr><td class="text-muted">Title:</td><td id="reviewTitle" class="fw-medium"></td></tr>
+                            <tr><td class="text-muted">Subject:</td><td id="reviewSubject"></td></tr>
+                            <tr><td class="text-muted">Academic Level:</td><td id="reviewAcademic"></td></tr>
+                            <tr><td class="text-muted">Citation:</td><td id="reviewCitation"></td></tr>
+                            <tr><td class="text-muted">Pages:</td><td id="reviewPages"></td></tr>
+                            <tr><td class="text-muted">Word Count:</td><td id="reviewWordCount"></td></tr>
+                            <tr><td class="text-muted">Sources:</td><td id="reviewSources"></td></tr>
+                            <tr><td class="text-muted">Deadline:</td><td id="reviewDeadline"></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold border-bottom pb-2">Price Breakdown</h6>
+                        <table class="table table-sm table-borderless">
+                            <tr><td class="text-muted">Base Rate:</td><td id="reviewBaseRate"></td></tr>
+                            <tr><td class="text-muted">Pages:</td><td id="reviewPages2"></td></tr>
+                            <tr><td class="text-muted">Base Price:</td><td id="reviewBasePrice"></td></tr>
+                            <tr><td class="text-muted">Urgency Surcharge:</td><td id="reviewSurcharge"></td></tr>
+                            <tr class="border-top"><td class="fw-bold">Total Price:</td><td id="reviewTotal" class="fw-bold text-primary fs-5"></td></tr>
+                        </table>
+                        <h6 class="fw-bold border-bottom pb-2 mt-3">Uploaded Files</h6>
+                        <ul id="reviewFiles" class="list-unstyled mb-0 small">
+                            <li class="text-muted">No files uploaded</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-pencil me-1"></i>Back & Edit
+                </button>
+                <button type="submit" class="btn btn-success btn-lg" id="proceedPaymentBtn" form="createOrderForm">
+                    <i class="bi bi-credit-card me-1"></i>Proceed to Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // ============================================================
+        // SCHOLARRESCUE ORDER CREATION – CENTRAL PRICING ENGINE
+        // Keys match dropdown option values (string names, not enum ints)
+        // ============================================================
+
+        var ACADEMIC_RATES = {
+            HighSchool: 5,
+            College: 6,
+            Undergraduate: 7,
+            Masters: 8,
+            PhD: 9
+        };
+
+        var ACADEMIC_NAMES = {
+            HighSchool: 'High School',
+            College: 'College',
+            Undergraduate: 'Undergraduate',
+            Masters: "Master's",
+            PhD: 'PhD'
+        };
+
+        var WORDS_PER_PAGE = 300;
+        var uploadedFiles = [];
+
+        // ---- CENTRAL PRICE CALCULATION ----
+        function calculateOrderPrice() {
+            // Read values from the DOM
+            var level = document.getElementById('academicLevel').value;
+            var pages = parseInt(document.getElementById('pages').value) || 0;
+            var deadlineStr = document.getElementById('deadlinePicker').value;
+
+            // Lookup rate using string key
+            var rate = ACADEMIC_RATES[level] || 0;
+            var basePrice = pages * rate;
+
+            // Calculate urgency surcharge
+            var surchargePerPage = 0;
+            if (deadlineStr && deadlineStr.length > 0) {
+                var parts = deadlineStr.split(/[\s\/:]/);
+                if (parts.length >= 4) {
+                    var dt = new Date(
+                        parseInt(parts[2], 10),
+                        parseInt(parts[1], 10) - 1,
+                        parseInt(parts[0], 10),
+                        parseInt(parts[3], 10),
+                        parseInt(parts[4] || 0, 10)
+                    );
+                    if (!isNaN(dt.getTime())) {
+                        var hrs = (dt - new Date()) / (1000 * 60 * 60);
+                        if (hrs <= 12) surchargePerPage = 2;
+                        else if (hrs <= 24) surchargePerPage = 1;
+                    }
+                }
+            }
+
+            var surchargeTotal = pages * surchargePerPage;
+            var totalPrice = basePrice + surchargeTotal;
+
+            return {
+                level: level,
+                levelName: ACADEMIC_NAMES[level] || '--',
+                pages: pages,
+                wordCount: pages * WORDS_PER_PAGE,
+                rate: rate,
+                basePrice: basePrice,
+                surchargePerPage: surchargePerPage,
+                surchargeTotal: surchargeTotal,
+                totalPrice: totalPrice
+            };
+        }
+
+        // ---- UPDATE PRICING SUMMARY ----
+        function updatePricingSummary() {
+            var p = calculateOrderPrice();
+
+            document.getElementById('academicLevelDisplay').textContent = p.levelName;
+            document.getElementById('pagesDisplay').textContent = p.pages;
+            document.getElementById('wordCountDisplay').textContent = p.wordCount;
+            document.getElementById('basePriceDisplay').textContent = '$' + p.basePrice.toFixed(2);
+
+            if (p.surchargeTotal > 0) {
+                document.getElementById('surchargeDisplay').textContent = '$' + p.surchargeTotal.toFixed(2);
+            } else {
+                document.getElementById('surchargeDisplay').textContent = '$0.00';
+            }
+            document.getElementById('totalPriceDisplay').textContent = '$' + p.totalPrice.toFixed(2);
+        }
+
+        // ---- UPDATE REVIEW MODAL ----
+        function updateReviewModal() {
+            var p = calculateOrderPrice();
+
+            document.getElementById('reviewTitle').textContent = document.getElementById('Title').value || '-';
+            var se = document.getElementById('subjectSelect');
+            var sv = se.value === 'Other'
+                ? (document.getElementById('OtherSubject').value || 'Other')
+                : (se.options[se.selectedIndex]?.text || '-');
+            document.getElementById('reviewSubject').textContent = sv;
+            document.getElementById('reviewAcademic').textContent = p.levelName;
+            document.getElementById('reviewCitation').textContent = document.getElementById('citationDisplay').textContent;
+            document.getElementById('reviewPages').textContent = p.pages;
+            document.getElementById('reviewWordCount').textContent = p.wordCount;
+            document.getElementById('reviewSources').textContent = document.getElementById('sources').value || 0;
+            document.getElementById('reviewBaseRate').textContent = '$' + p.rate.toFixed(2) + '/page';
+            document.getElementById('reviewPages2').textContent = p.pages;
+            document.getElementById('reviewBasePrice').textContent = '$' + p.basePrice.toFixed(2);
+            document.getElementById('reviewSurcharge').textContent = '$' + p.surchargeTotal.toFixed(2);
+            document.getElementById('reviewTotal').textContent = '$' + p.totalPrice.toFixed(2);
+
+            // Deadline display
+            var deadline = document.getElementById('deadlinePicker').value;
+            if (deadline && deadline.length > 0) {
+                var parts = deadline.split(/[\s\/:]/);
+                if (parts.length >= 4) {
+                    var dt = new Date(parseInt(parts[2],10), parseInt(parts[1],10)-1, parseInt(parts[0],10), parseInt(parts[3],10), parseInt(parts[4]||0,10));
+                    if (!isNaN(dt.getTime())) {
+                        document.getElementById('reviewDeadline').textContent = dt.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+                    }
+                }
+            } else {
+                document.getElementById('reviewDeadline').textContent = '--';
+            }
+
+            // Files
+            var fh = uploadedFiles.length === 0 ? '<li class="text-muted">No files uploaded</li>' : '';
+            for (var i = 0; i < uploadedFiles.length; i++) {
+                fh += '<li><i class="bi bi-file-earmark me-1"></i>' + uploadedFiles[i].name + '</li>';
+            }
+            document.getElementById('reviewFiles').innerHTML = fh;
+        }
+
+        // ---- FULL UI UPDATE (both summary + info fields) ----
+        function refreshAllDisplays() {
+            // Update sources display
+            document.getElementById('sourcesDisplay').textContent = document.getElementById('sources').value || 0;
+
+            // Update citation display
+            var citationEl = document.getElementById('citationFormat');
+            if (citationEl && citationEl.selectedIndex >= 0) {
+                document.getElementById('citationDisplay').textContent = citationEl.options[citationEl.selectedIndex].text;
+            }
+
+            // Update deadline display
+            var deadline = document.getElementById('deadlinePicker').value;
+            if (deadline && deadline.length > 0) {
+                var parts = deadline.split(/[\s\/:]/);
+                if (parts.length >= 4) {
+                    var dt = new Date(parseInt(parts[2],10), parseInt(parts[1],10)-1, parseInt(parts[0],10), parseInt(parts[3],10), parseInt(parts[4]||0,10));
+                    if (!isNaN(dt.getTime())) {
+                        document.getElementById('deadlineDisplay').textContent = dt.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+                    }
+                }
+            } else {
+                document.getElementById('deadlineDisplay').textContent = '--';
+            }
+
+            updatePricingSummary();
+        }
+
+        // ---- FILE UPLOAD ----
+        function handleFiles(files) {
+            var maxSize = 25 * 1024 * 1024;
+            var allowed = ['.pdf','.doc','.docx','.ppt','.pptx','.xls','.xlsx','.txt','.zip','.rar','.jpg','.jpeg','.png'];
+            for (var i = 0; i < files.length; i++) {
+                var f = files[i];
+                var ext = '.' + f.name.split('.').pop().toLowerCase();
+                if (allowed.indexOf(ext) === -1) { alert('File type ' + ext + ' not supported.'); continue; }
+                if (f.size > maxSize) { alert('File "' + f.name + '" exceeds 25MB.'); continue; }
+                if (uploadedFiles.length >= 10) { alert('Max 10 files.'); break; }
+                uploadedFiles.push({ name: f.name, size: f.size });
+            }
+            renderFileList();
+        }
+        function removeFile(i) { uploadedFiles.splice(i,1); renderFileList(); }
+        function renderFileList() {
+            var c = document.getElementById('fileList');
+            if (!uploadedFiles.length) { c.innerHTML = ''; document.getElementById('uploadedFilesInput').value = ''; return; }
+            var html = '<div class="list-group">';
+            for (var i = 0; i < uploadedFiles.length; i++) {
+                var f = uploadedFiles[i];
+                var s = f.size > 1048576 ? (f.size/1048576).toFixed(1)+' MB' : (f.size/1024).toFixed(0)+' KB';
+                html += '<div class="list-group-item d-flex justify-content-between align-items-center py-2"><span><i class="bi bi-file-earmark me-2"></i>' + f.name + ' <small class="text-muted">(' + s + ')</small></span><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile(' + i + ')"><i class="bi bi-trash"></i></button></div>';
+            }
+            html += '</div>';
+            c.innerHTML = html;
+            document.getElementById('uploadedFilesInput').value = uploadedFiles.map(function(f){return f.name;}).join(',');
+        }
+
+        // ---- SHOW REVIEW MODAL ----
+        function showReview() {
+            updateReviewModal();
+            new bootstrap.Modal(document.getElementById('orderReviewModal')).show();
+        }
+
+        // ---- INIT ----
+        document.addEventListener('DOMContentLoaded', function () {
+            // Flatpickr
+            try {
+                flatpickr('#deadlinePicker', {
+                    enableTime: true,
+                    dateFormat: 'd/m/Y H:i',
+                    time_24hr: true,
+                    minDate: new Date().fp_incr(1),
+                    minuteIncrement: 5,
+                    onChange: function () { refreshAllDisplays(); }
+                });
+            } catch (e) {}
+
+            // Subject "Other"
+            var ss = document.getElementById('subjectSelect');
+            if (ss) {
+                ss.addEventListener('change', function () {
+                    document.getElementById('otherSubjectGroup').style.display = this.value === 'Other' ? 'block' : 'none';
+                });
+            }
+
+            // Event binding
+            var acad = document.getElementById('academicLevel');
+            if (acad) acad.addEventListener('change', refreshAllDisplays);
+
+            var p = document.getElementById('pages');
+            if (p) { p.addEventListener('input', refreshAllDisplays); p.addEventListener('change', refreshAllDisplays); }
+
+            var cit = document.getElementById('citationFormat');
+            if (cit) cit.addEventListener('change', refreshAllDisplays);
+
+            var src = document.getElementById('sources');
+            if (src) src.addEventListener('input', function () { document.getElementById('sourcesDisplay').textContent = this.value || 0; });
+
+            // File upload
+            var ua = document.getElementById('uploadArea');
+            var fi = document.getElementById('fileInput');
+            if (ua && fi) {
+                ua.addEventListener('click', function () { fi.click(); });
+                ua.addEventListener('dragover', function (e) { e.preventDefault(); ua.style.borderColor = '#0d6efd'; });
+                ua.addEventListener('dragleave', function () { ua.style.borderColor = '#ccc'; });
+                ua.addEventListener('drop', function (e) { e.preventDefault(); ua.style.borderColor = '#ccc'; handleFiles(e.dataTransfer.files); });
+                fi.addEventListener('change', function () { handleFiles(this.files); this.value = ''; });
+            }
+
+            // Review button
+            var rb = document.getElementById('reviewOrderBtn');
+            if (rb) rb.addEventListener('click', showReview);
+
+            // Initial calculation on page load
+            refreshAllDisplays();
+        });
+    </script>
+}

@@ -1,0 +1,122 @@
+@model ScholarRescue.Models.WriterResource
+@using ScholarRescue.Models.Enums
+@{
+    ViewData["Title"] = "Edit Writer Resource";
+    var categories = ViewBag.Categories as List<WriterResourceCategory> ?? new List<WriterResourceCategory>();
+}
+
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-action="WriterResources" class="text-decoration-none">Writer Resources</a></li>
+            <li class="breadcrumb-item active">@Model.Title</li>
+        </ol>
+    </nav>
+    <h4 class="mb-1"><i class="bi bi-pencil-square me-2"></i>Edit Resource</h4>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <form asp-action="WriterResourceEdit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="CreatedAt" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label asp-for="Title" class="form-label fw-medium">Title <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Category" class="form-label fw-medium">Category <span class="text-danger">*</span></label>
+                            <select asp-for="Category" class="form-select" id="categorySelect">
+                                @foreach (var cat in categories)
+                                {
+                                    <option value="@cat">@cat</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SubCategory" class="form-label fw-medium">Sub-Category</label>
+                            <input asp-for="SubCategory" class="form-control" />
+                            <span class="text-muted small">Groups items under a category section.</span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="SortOrder" class="form-label fw-medium">Sort Order</label>
+                            <input asp-for="SortOrder" class="form-control" type="number" min="0" />
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsActive" class="form-check-input" />
+                                <label asp-for="IsActive" class="form-check-label fw-medium">Published</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ-only fields -->
+            <div class="card border-0 shadow-sm mb-3" id="faqFields">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-question-circle me-1"></i>FAQ Fields</h6>
+                </div>
+                <div class="card-body">
+                    <label asp-for="Question" class="form-label fw-medium">Question</label>
+                    <input asp-for="Question" class="form-control" />
+                    <span class="text-muted small">Shown as the FAQ question. If blank, the Title is used.</span>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-file-earmark-text me-1"></i>Content <span class="text-danger">*</span></h6>
+                </div>
+                <div class="card-body">
+                    <textarea asp-for="Content" class="form-control" rows="15"></textarea>
+                    <span asp-validation-for="Content" class="text-danger small"></span>
+                    <span class="text-muted small">You can use HTML tags for formatting (e.g., <h3>, <ul>, <strong>, <code>).</span>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <label asp-for="Tags" class="form-label fw-medium">Tags</label>
+                    <input asp-for="Tags" class="form-control" />
+                    <span class="text-muted small">Comma-separated keywords to help with search.</span>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body text-muted small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Created: @Model.CreatedAt.ToString("MMM dd, yyyy HH:mm") UTC &nbsp;|&nbsp;
+                    Last Updated: @Model.UpdatedAt.ToString("MMM dd, yyyy HH:mm") UTC
+                    @if (!string.IsNullOrEmpty(Model.AuthorId))
+                    {
+                        <span>&nbsp;|&nbsp; Author ID: @Model.AuthorId</span>
+                    }
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save Changes</button>
+                <a asp-action="WriterResources" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('categorySelect').addEventListener('change', function () {
+            document.getElementById('faqFields').style.display = this.value === 'FAQ' ? 'block' : 'none';
+        });
+        // Initial state
+        document.getElementById('faqFields').style.display = document.getElementById('categorySelect').value === 'FAQ' ? 'block' : 'none';
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,26 @@
+@model ScholarRescue.Models.Enums.WriterRank
+@using ScholarRescue.Models.Enums
+@{
+    string bgColor = Model switch
+    {
+        WriterRank.Beginner => "secondary",
+        WriterRank.Intermediate => "primary",
+        WriterRank.Advanced => "info",
+        WriterRank.Expert => "warning",
+        WriterRank.Elite => "danger",
+        _ => "secondary"
+    };
+    string icon = Model switch
+    {
+        WriterRank.Beginner => "bi-circle",
+        WriterRank.Intermediate => "bi-star",
+        WriterRank.Advanced => "bi-star-fill",
+        WriterRank.Expert => "bi-trophy",
+        WriterRank.Elite => "bi-trophy-fill",
+        _ => "bi-circle"
+    };
+}
+
+<span class="badge bg-@bgColor bg-opacity-10 text-@bgColor" title="@Model writer rank">
+    <i class="bi @icon me-1"></i>@Model
+</span>

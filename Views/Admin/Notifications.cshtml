@@ -1,0 +1,200 @@
+@model ScholarRescue.ViewModels.Notification.AdminNotificationIndexViewModel
+@{
+    ViewData["Title"] = "Notification Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-bell"></i> Notification Management
+        </h1>
+        <span class="badge bg-dark fs-6 py-2 px-3 rounded-pill">
+            <i class="bi bi-shield-check"></i> Admin View
+        </span>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="Notifications" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small">Search</label>
+                    <input type="text" name="search" class="form-control form-control-sm"
+                           placeholder="Search title or message..." value="@Model.SearchTerm" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold small">Status</label>
+                    <select name="filter" class="form-select form-select-sm">
+                        <option value="">All</option>
+                        <option value="unread" selected="@(Model.Filter == "unread")">Unread</option>
+                        <option value="read" selected="@(Model.Filter == "read")">Read</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold small">Category</label>
+                    <select name="category" class="form-select form-select-sm">
+                        <option value="">All</option>
+                        <option value="Messages" selected="@(Model.CategoryFilter?.ToString() == "Messages")">Messages</option>
+                        <option value="Orders" selected="@(Model.CategoryFilter?.ToString() == "Orders")">Orders</option>
+                        <option value="Assignments" selected="@(Model.CategoryFilter?.ToString() == "Assignments")">Assignments</option>
+                        <option value="Revisions" selected="@(Model.CategoryFilter?.ToString() == "Revisions")">Revisions</option>
+                        <option value="Applications" selected="@(Model.CategoryFilter?.ToString() == "Applications")">Applications</option>
+                        <option value="System" selected="@(Model.CategoryFilter?.ToString() == "System")">System</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small">User</label>
+                    <input type="text" name="userName" class="form-control form-control-sm"
+                           placeholder="Filter by user name..." value="@Model.UserNameFilter" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notifications Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-bell"></i> All Notifications</h5>
+            <span class="badge bg-light text-dark">@Model.TotalCount total</span>
+        </div>
+        <div class="card-body p-0">
+            @if (!Model.Notifications.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-bell-slash display-4 d-block mb-2"></i>
+                    <h6>No notifications found</h6>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>User</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var notif in Model.Notifications)
+                            {
+                                <tr class="@(notif.IsRead ? "" : "table-primary")">
+                                    <td>
+                                        <small>@notif.UserId</small>
+                                    </td>
+                                    <td>
+                                        <strong>@notif.Title</strong>
+                                        <br />
+                                        <small class="text-muted">@(notif.Message.Length > 60 ? notif.Message[..60] + "..." : notif.Message)</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetBadgeClass(notif.Category)">@notif.Category</span>
+                                    </td>
+                                    <td>
+                                        @if (notif.IsRead)
+                                        {
+                                            <span class="badge bg-secondary">Read</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-primary">Unread</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small data-utc="@notif.CreatedDate.ToString("o")">
+                                            @notif.CreatedDate.ToLocalTime().ToString("MMM dd, h:mm tt")
+                                        </small>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-controller="Notifications" asp-action="Details" asp-route-id="@notif.Id"
+                                               class="btn btn-outline-info" title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Notifications"
+                           asp-route-search="@Model.SearchTerm"
+                           asp-route-filter="@Model.Filter"
+                           asp-route-category="@Model.CategoryFilter"
+                           asp-route-userName="@Model.UserNameFilter"
+                           asp-route-page="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[data-utc]').forEach(function (el) {
+                try {
+                    var d = new Date(el.dataset.utc);
+                    var now = new Date();
+                    var diffMs = now - d;
+                    var diffMin = Math.floor(diffMs / 60000);
+                    var display;
+                    if (diffMin < 1) display = 'Just now';
+                    else if (diffMin < 60) display = diffMin + 'm ago';
+                    else if (diffMin < 1440) display = Math.floor(diffMin / 60) + 'h ago';
+                    else if (diffMin < 10080) display = Math.floor(diffMin / 1440) + 'd ago';
+                    else display = d.toLocaleDateString();
+                    el.textContent = display;
+                } catch (e) { }
+            });
+        });
+    </script>
+}
+
+@functions {
+    private static string GetBadgeClass(ScholarRescue.Models.Enums.NotificationCategory cat)
+    {
+        return cat switch
+        {
+            ScholarRescue.Models.Enums.NotificationCategory.Messages => "bg-primary",
+            ScholarRescue.Models.Enums.NotificationCategory.Orders => "bg-success",
+            ScholarRescue.Models.Enums.NotificationCategory.Assignments => "bg-warning text-dark",
+            ScholarRescue.Models.Enums.NotificationCategory.Revisions => "bg-info text-dark",
+            ScholarRescue.Models.Enums.NotificationCategory.Applications => "bg-success",
+            ScholarRescue.Models.Enums.NotificationCategory.System => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}

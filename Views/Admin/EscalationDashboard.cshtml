@@ -1,0 +1,247 @@
+@model ScholarRescue.ViewModels.Admin.EscalationDashboardViewModel
+@using ScholarRescue.Models.Enums
+@{
+    ViewData["Title"] = "Escalation Dashboard";
+    Layout = "~/Views/Shared/_Layout.App.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0"><i class="bi bi-exclamation-triangle"></i> Escalation Dashboard</h1>
+            <small class="text-muted">System monitoring alerts requiring administrative attention.</small>
+        </div>
+        <span class="badge @(Model.TotalActiveAlerts > 0 ? "bg-danger" : "bg-success") fs-6 py-2 px-3 rounded-pill">
+            @Model.TotalActiveAlerts active alert(s)
+        </span>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2 col-6">
+            <div class="card border-0 shadow-sm text-center p-3 h-100 @(Model.NoApplicantAlerts > 0 ? "bg-warning bg-opacity-10" : "")">
+                <i class="bi bi-people fs-3 text-warning"></i>
+                <h5 class="mt-2 mb-0">@Model.NoApplicantAlerts</h5>
+                <small class="text-muted">No Applicants</small>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="card border-0 shadow-sm text-center p-3 h-100 @(Model.UrgentNoApplicantAlerts > 0 ? "bg-danger bg-opacity-10" : "")">
+                <i class="bi bi-alarm fs-3 text-danger"></i>
+                <h5 class="mt-2 mb-0">@Model.UrgentNoApplicantAlerts</h5>
+                <small class="text-muted">Urgent No Apps</small>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="card border-0 shadow-sm text-center p-3 h-100 @(Model.WriterInactiveAlerts > 0 ? "bg-info bg-opacity-10" : "")">
+                <i class="bi bi-person-slash fs-3 text-info"></i>
+                <h5 class="mt-2 mb-0">@Model.WriterInactiveAlerts</h5>
+                <small class="text-muted">Writer Inactive</small>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="card border-0 shadow-sm text-center p-3 h-100 @(Model.MilestoneOverdueAlerts > 0 ? "bg-primary bg-opacity-10" : "")">
+                <i class="bi bi-flag fs-3 text-primary"></i>
+                <h5 class="mt-2 mb-0">@Model.MilestoneOverdueAlerts</h5>
+                <small class="text-muted">Milestones Overdue</small>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="card border-0 shadow-sm text-center p-3 h-100 @(Model.RevisionOverdueAlerts > 0 ? "bg-secondary bg-opacity-10" : "")">
+                <i class="bi bi-arrow-counterclockwise fs-3 text-secondary"></i>
+                <h5 class="mt-2 mb-0">@Model.RevisionOverdueAlerts</h5>
+                <small class="text-muted">Revisions Overdue</small>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <a asp-action="EscalationDashboard" class="text-decoration-none">
+                <div class="card border-0 shadow-sm text-center p-3 h-100">
+                    <i class="bi bi-arrow-counterclockwise fs-3 text-muted"></i>
+                    <h5 class="mt-2 mb-0 text-muted">Reset</h5>
+                    <small class="text-muted">All Alerts</small>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Type Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-2">
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-action="EscalationDashboard" asp-route-typeFilter="@MonitoringAlertType.NoApplicantsAfter2Hours"
+                   class="btn btn-sm @(Model.CurrentTypeFilter == MonitoringAlertType.NoApplicantsAfter2Hours ? "btn-warning" : "btn-outline-warning")">
+                    <i class="bi bi-people"></i> No Applicants
+                    @if (Model.NoApplicantAlerts > 0) { <span class="badge bg-dark ms-1">@Model.NoApplicantAlerts</span> }
+                </a>
+                <a asp-action="EscalationDashboard" asp-route-typeFilter="@MonitoringAlertType.UrgentNoApplicantsAfter30Min"
+                   class="btn btn-sm @(Model.CurrentTypeFilter == MonitoringAlertType.UrgentNoApplicantsAfter30Min ? "btn-danger" : "btn-outline-danger")">
+                    <i class="bi bi-alarm"></i> Urgent No Apps
+                    @if (Model.UrgentNoApplicantAlerts > 0) { <span class="badge bg-dark ms-1">@Model.UrgentNoApplicantAlerts</span> }
+                </a>
+                <a asp-action="EscalationDashboard" asp-route-typeFilter="@MonitoringAlertType.WriterInactive24Hours"
+                   class="btn btn-sm @(Model.CurrentTypeFilter == MonitoringAlertType.WriterInactive24Hours ? "btn-info" : "btn-outline-info")">
+                    <i class="bi bi-person-slash"></i> Writer Inactive
+                    @if (Model.WriterInactiveAlerts > 0) { <span class="badge bg-dark ms-1">@Model.WriterInactiveAlerts</span> }
+                </a>
+                <a asp-action="EscalationDashboard" asp-route-typeFilter="@MonitoringAlertType.MilestoneOverdue"
+                   class="btn btn-sm @(Model.CurrentTypeFilter == MonitoringAlertType.MilestoneOverdue ? "btn-primary" : "btn-outline-primary")">
+                    <i class="bi bi-flag"></i> Milestones Overdue
+                    @if (Model.MilestoneOverdueAlerts > 0) { <span class="badge bg-dark ms-1">@Model.MilestoneOverdueAlerts</span> }
+                </a>
+                <a asp-action="EscalationDashboard" asp-route-typeFilter="@MonitoringAlertType.RevisionOverdue"
+                   class="btn btn-sm @(Model.CurrentTypeFilter == MonitoringAlertType.RevisionOverdue ? "btn-secondary" : "btn-outline-secondary")">
+                    <i class="bi bi-arrow-counterclockwise"></i> Revisions Overdue
+                    @if (Model.RevisionOverdueAlerts > 0) { <span class="badge bg-dark ms-1">@Model.RevisionOverdueAlerts</span> }
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Alerts Table -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0"><i class="bi bi-bell"></i> Active Alerts</h5>
+        </div>
+        <div class="card-body p-0">
+            @if (!Model.ActiveAlerts.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-check-circle display-4 text-success"></i>
+                    <h5 class="mt-3">No Active Alerts</h5>
+                    <p class="text-muted">All orders are running smoothly.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Type</th>
+                                <th>Order</th>
+                                <th>Writer</th>
+                                <th>Description</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var alert in Model.ActiveAlerts)
+                            {
+                                <tr>
+                                    <td>
+                                        @switch (alert.AlertType)
+                                        {
+                                            case MonitoringAlertType.NoApplicantsAfter2Hours:
+                                                <span class="badge bg-warning text-dark">No Applicants</span>
+                                                break;
+                                            case MonitoringAlertType.UrgentNoApplicantsAfter30Min:
+                                                <span class="badge bg-danger">Urgent No Apps</span>
+                                                break;
+                                            case MonitoringAlertType.WriterInactive24Hours:
+                                                <span class="badge bg-info text-dark">Writer Inactive</span>
+                                                break;
+                                            case MonitoringAlertType.MilestoneOverdue:
+                                                <span class="badge bg-primary">Milestone Overdue</span>
+                                                break;
+                                            case MonitoringAlertType.RevisionOverdue:
+                                                <span class="badge bg-secondary">Revision Overdue</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-controller="Orders" asp-action="Details" asp-route-id="@alert.OrderId" class="fw-bold text-decoration-none">
+                                            @alert.Order?.OrderNumber
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if (alert.Writer != null)
+                                        {
+                                            <span>@alert.Writer.FirstName @alert.Writer.LastName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 350px;" title="@alert.Description">
+                                            @alert.Description
+                                        </span>
+                                    </td>
+                                    <td><small class="text-muted">@alert.CreatedAt.ToString("MMM dd HH:mm")</small></td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <form asp-action="AcknowledgeAlert" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="alertId" value="@alert.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Acknowledge">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </form>
+                                            <form asp-action="ResolveAlert" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="alertId" value="@alert.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Resolve">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Recently Resolved -->
+    @if (Model.RecentResolvedAlerts.Any())
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="bi bi-check-circle"></i> Recently Resolved</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Type</th>
+                                <th>Order</th>
+                                <th>Description</th>
+                                <th>Resolved</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var alert in Model.RecentResolvedAlerts)
+                            {
+                                <tr class="text-muted">
+                                    <td><span class="badge bg-light text-dark">@alert.AlertType</span></td>
+                                    <td>@alert.Order?.OrderNumber</td>
+                                    <td><small>@alert.Description</small></td>
+                                    <td><small>@alert.ResolvedAt?.ToString("MMM dd HH:mm")</small></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

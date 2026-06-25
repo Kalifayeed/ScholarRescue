@@ -1,0 +1,32 @@
+@model IEnumerable<ScholarRescue.Models.Conversation>
+
+@{
+    ViewData["Title"] = "Test Conversations";
+}
+
+<div class="container py-4">
+    <h2>Messaging Test - Conversations</h2>
+    <p class="text-muted">Test endpoint for messaging backend</p>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No conversations found.</div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var conv in Model)
+            {
+                <a asp-action="Messages" asp-route-conversationId="@conv.Id" class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="mb-1">Order: @conv.Order?.OrderNumber</h6>
+                            <small class="text-muted">Created: @conv.CreatedDate.ToString("g")</small>
+                        </div>
+                        <small class="text-muted">@conv.LastMessageDate.ToString("g")</small>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

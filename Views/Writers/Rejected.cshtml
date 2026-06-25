@@ -1,0 +1,92 @@
+@model IEnumerable<ScholarRescue.ViewModels.Order.OrderIndexViewModel>
+@using ScholarRescue.Models.Enums
+
+@{
+    ViewData["Title"] = "Application Rejected";
+    var application = ViewBag.WriterApplication as ScholarRescue.Models.WriterApplication;
+    var feedback = application?.AdminComments ?? ViewBag.AccessState?.AdminFeedback;
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0"><i class="bi bi-x-circle text-danger"></i> Application Rejected</h1>
+            <small class="text-muted">Your writer application was not approved at this time.</small>
+        </div>
+        <span class="badge bg-danger fs-6 py-2 px-3 rounded-pill">
+            <i class="bi bi-x-circle"></i> Rejected
+        </span>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body py-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-x-circle display-1 text-danger"></i>
+                        <h2 class="h4 mt-3 mb-2">We're sorry, @User.Identity?.Name</h2>
+                        <p class="text-muted">Your writer application was rejected after review.</p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(feedback))
+                    {
+                        <div class="alert alert-warning">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-chat-quote"></i> Admin Feedback
+                            </h6>
+                            <hr />
+                            <p class="mb-0">@feedback</p>
+                        </div>
+                    }
+
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>You may submit a new application.</strong>
+                        Please review the feedback above and update your documents or qualifications
+                        before resubmitting.
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-2 mt-4">
+                        <a asp-action="ResubmitApplication" class="btn btn-primary">
+                            <i class="bi bi-arrow-repeat"></i> Resubmit Application
+                        </a>
+                        <a asp-controller="Account" asp-action="Logout" class="btn btn-outline-secondary">
+                            <i class="bi bi-box-arrow-left"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Review Details</h6>
+                </div>
+                <div class="card-body">
+                    @if (application != null)
+                    {
+                        <dl class="row mb-0 small">
+                            <dt class="col-5">Reviewed:</dt>
+                            <dd class="col-7">@application.ReviewedAt?.ToString("MMM dd, yyyy")</dd>
+
+                            @if (application.ReviewedBy != null)
+                            {
+                                <dt class="col-5">By:</dt>
+                                <dd class="col-7">@application.ReviewedBy.FirstName @application.ReviewedBy.LastName</dd>
+                            }
+                        </dl>
+                    }
+                </div>
+            </div>
+
+            <div class="alert alert-secondary">
+                <i class="bi bi-question-circle"></i>
+                <strong>Have questions?</strong>
+                <p class="small mb-0 mt-1">
+                    If you believe your application was rejected in error, please contact support.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

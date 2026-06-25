@@ -1,0 +1,103 @@
+@model ScholarRescue.ViewModels.Notification.NotificationSettingsViewModel
+@{
+    ViewData["Title"] = "Notification Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Notifications</a></li>
+            <li class="breadcrumb-item active">Settings</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-gear"></i> Notification Preferences</h5>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">@TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <p class="text-muted mb-4">
+                        Choose which types of notifications you'd like to receive. These preferences apply to both in-app and real-time notifications.
+                    </p>
+
+                    <form asp-action="Settings" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="NotifyMessages" class="form-check-input" />
+                                <label asp-for="NotifyMessages" class="form-check-label">
+                                    <i class="bi bi-chat-dots text-primary"></i> Messages
+                                    <small class="d-block text-muted">Notifications for new messages in conversations</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="NotifyOrders" class="form-check-input" />
+                                <label asp-for="NotifyOrders" class="form-check-label">
+                                    <i class="bi bi-file-text text-success"></i> Orders
+                                    <small class="d-block text-muted">Notifications for order status changes</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="NotifyAssignments" class="form-check-input" />
+                                <label asp-for="NotifyAssignments" class="form-check-label">
+                                    <i class="bi bi-person-plus text-warning"></i> Assignments
+                                    <small class="d-block text-muted">Notifications when orders are assigned to you</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="NotifyRevisions" class="form-check-input" />
+                                <label asp-for="NotifyRevisions" class="form-check-label">
+                                    <i class="bi bi-arrow-repeat text-info"></i> Revisions
+                                    <small class="d-block text-muted">Notifications when revisions are requested</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="NotifySystemAlerts" class="form-check-input" />
+                                <label asp-for="NotifySystemAlerts" class="form-check-label">
+                                    <i class="bi bi-megaphone text-secondary"></i> System Alerts
+                                    <small class="d-block text-muted">System-wide announcements and alerts</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> Save Preferences
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+}

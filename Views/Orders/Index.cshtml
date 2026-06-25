@@ -1,0 +1,147 @@
+@model IEnumerable<ScholarRescue.ViewModels.Order.OrderIndexViewModel>
+
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6">
+            <i class="bi bi-list-check"></i> Orders
+        </h1>
+        @if (User.IsInRole("Client") || User.IsInRole("Administrator"))
+        {
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create New Order
+            </a>
+        }
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+            <h4 class="mt-3 text-muted">No orders found</h4>
+            @if (User.IsInRole("Client"))
+            {
+                <a asp-action="Create" class="btn btn-primary mt-2">Create Your First Order</a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Order #</th>
+                        <th>Title</th>
+                        <th>Client</th>
+                        <th>Writer</th>
+                        <th>Status</th>
+                        <th>Pages</th>
+                        <th>Budget</th>
+                        <th>Deadline</th>
+                        <th>Created</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@order.OrderNumber</strong>
+                            </td>
+                            <td>
+                                <span title="@order.Title">
+                                    @(order.Title.Length > 40 ? order.Title[..40] + "..." : order.Title)
+                                </span>
+                            </td>
+                            <td>@order.ClientName</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(order.WriterName))
+                                {
+                                    @order.WriterName
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Not assigned</span>
+                                }
+                            </td>
+                            <td>
+                                @{
+                                    string badgeClass = order.Status switch
+                                    {
+                                        ScholarRescue.Models.Enums.OrderStatus.Draft => "bg-secondary",
+                                        ScholarRescue.Models.Enums.OrderStatus.PendingReview => "bg-info text-dark",
+                                        ScholarRescue.Models.Enums.OrderStatus.Open => "bg-primary",
+                                        ScholarRescue.Models.Enums.OrderStatus.Assigned => "bg-primary",
+                                        ScholarRescue.Models.Enums.OrderStatus.InProgress => "bg-warning text-dark",
+                                        ScholarRescue.Models.Enums.OrderStatus.DraftSubmitted => "bg-info",
+                                        ScholarRescue.Models.Enums.OrderStatus.RevisionRequested => "bg-warning text-dark",
+                                        ScholarRescue.Models.Enums.OrderStatus.Completed => "bg-success",
+                                        ScholarRescue.Models.Enums.OrderStatus.Cancelled => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @badgeClass">@order.Status</span>
+                            </td>
+                            <td>@order.Pages</td>
+                            <td>@order.Budget.ToString("C")</td>
+                            <td>
+                                <span title="@order.Deadline.ToString("g")">
+                                    @order.Deadline.ToString("MMM dd, yyyy")
+                                </span>
+                            </td>
+                            <td>
+                                <span title="@order.CreatedAt.ToString("g")">
+                                    @order.CreatedAt.ToString("MMM dd, yyyy")
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="Details" asp-route-id="@order.Id"
+                                       class="btn btn-outline-info" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    @if (User.IsInRole("Client") || User.IsInRole("Administrator"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@order.Id"
+                                           class="btn btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@order.Id"
+                                           class="btn btn-outline-danger" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+}

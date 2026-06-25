@@ -1,0 +1,113 @@
+@model ScholarRescue.Services.Matching.MatchingAnalytics
+@{
+    ViewData["Title"] = "Matching Analytics Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">@Html.ActionLink("Dashboard", "Dashboard")</li>
+            <li class="breadcrumb-item active" aria-current="page">Matching Analytics</li>
+        </ol>
+    </nav>
+
+    <h1 class="h3 mb-4"><i class="bi bi-graph-up me-2"></i>Matching Analytics Dashboard</h1>
+
+    <!-- Key Metrics Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h2 class="text-primary mb-0">@Model.AverageMatchScore%</h2>
+                <small class="text-muted">Average Match Score</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h2 class="text-success mb-0">@Model.AssignmentSuccessRate%</h2>
+                <small class="text-muted">Assignment Success Rate</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h2 class="text-info mb-0">@Model.AutoAssignmentSuccessRate%</h2>
+                <small class="text-muted">Auto-Assignment Success</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h2 class="text-warning mb-0">@Model.TotalRecommendationsGenerated</h2>
+                <small class="text-muted">Recommendations Generated</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h2 class="mb-0">@Model.TotalAutoAssignments</h2>
+                <small class="text-muted">Auto-Assignments</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h2 class="mb-0">@Model.TotalManualAssignments</h2>
+                <small class="text-muted">Manual Assignments</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h2 class="mb-0">@Model.AverageAssignmentTime.ToString(@"d\.hh\:mm")</h2>
+                <small class="text-muted">Avg Assignment Time</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center p-3">
+                <h2 class="mb-0">@Model.TopPerformingWriters.Count</h2>
+                <small class="text-muted">Top Writers Tracked</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performing Writers -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-trophy-fill text-warning me-2"></i>Top Performing Writers</h5>
+        </div>
+        <div class="card-body p-0">
+            @if (!Model.TopPerformingWriters.Any())
+            {
+                <div class="text-center py-4 text-muted"><p class="mb-0">No assignment data yet.</p></div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Writer</th>
+                                <th>Avg Match Score</th>
+                                <th>Assignments</th>
+                                <th>Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var w in Model.TopPerformingWriters)
+                            {
+                                <tr>
+                                    <td>@w.WriterName</td>
+                                    <td>@w.AverageMatchScore%</td>
+                                    <td>@w.AssignmentsCompleted</td>
+                                    <td>
+                                        <span class="@(w.SuccessRate >= 80 ? "text-success" : "text-warning")">
+                                            @w.SuccessRate%
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

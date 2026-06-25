@@ -1,0 +1,193 @@
+@* This is the corrected layout. Support Tickets links added for all 3 roles. *@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ScholarRescue</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="app-topbar d-lg-none">
+        <div class="container-fluid px-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index"><span class="brand-icon"><i class="bi bi-mortarboard-fill"></i></span> ScholarRescue</a>
+                <button class="btn btn-link text-dark p-1" id="mobileMenuToggle"><i class="bi bi-list fs-4"></i></button>
+            </div>
+        </div>
+    </header>
+    <div class="app-wrapper">
+        <aside class="app-sidebar d-none d-lg-flex flex-column" id="appSidebar">
+            <div class="sidebar-brand px-3 py-3">
+                <a class="d-flex align-items-center text-decoration-none" asp-controller="Home" asp-action="Index"><span class="brand-icon me-2"><i class="bi bi-mortarboard-fill"></i></span><span class="fw-bold text-white fs-5">ScholarRescue</span></a>
+            </div>
+            <nav class="sidebar-nav flex-grow-1 px-2">
+                @if (User.IsInRole("Administrator"))
+                {
+                    <div class="sidebar-heading">Administration</div>
+                    <a class="nav-link" asp-controller="Admin" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="Users"><i class="bi bi-people"></i> Users</a>
+                    <a class="nav-link" asp-controller="Orders" asp-action="Index"><i class="bi bi-file-earmark-text"></i> Orders</a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="WriterApplications"><i class="bi bi-person-check"></i> Writer Applications</a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="Conversations"><i class="bi bi-chat-dots"></i> Messages <span id="sidebarUnreadCount" class="badge bg-danger rounded-pill ms-auto" style="display:none;font-size:0.65rem;">0</span></a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="Payments"><i class="bi bi-wallet2"></i> Wallets</a>
+                    <a class="nav-link" asp-controller="Finance" asp-action="Dashboard"><i class="bi bi-cash-coin"></i> Accounting</a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="ContactMessages"><i class="bi bi-envelope"></i> Contact Messages</a>
+                    <a class="nav-link" asp-controller="SupportTickets" asp-action="Index"><i class="bi bi-ticket"></i> Support Tickets</a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="WriterResources"><i class="bi bi-book"></i> Writer Resources</a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="WriterRankings"><i class="bi bi-trophy"></i> Writer Rankings</a>
+                    <div class="sidebar-heading mt-3">System</div>
+                    <a class="nav-link" asp-controller="Admin" asp-action="AuditLogs"><i class="bi bi-journal-text"></i> Audit Logs</a>
+                    <a class="nav-link" asp-controller="Admin" asp-action="Notifications"><i class="bi bi-bell"></i> Notifications</a>
+                }
+                else if (User.IsInRole("Client"))
+                {
+                    <div class="sidebar-heading">Main Menu</div>
+                    <a class="nav-link" asp-controller="Orders" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                    <a class="nav-link" asp-controller="Orders" asp-action="Index"><i class="bi bi-file-earmark-text"></i> Orders</a>
+                    <a class="nav-link" asp-controller="Messages" asp-action="Index"><i class="bi bi-chat-dots"></i> Messages <span id="sidebarUnreadCount" class="badge bg-danger rounded-pill ms-auto" style="display:none;font-size:0.65rem;">0</span></a>
+                    <a class="nav-link" asp-controller="Orders" asp-action="Create"><i class="bi bi-plus-circle"></i> Create Order</a>
+                    <div class="sidebar-heading mt-3">Support</div>
+                    <a class="nav-link" asp-controller="SupportTickets" asp-action="Index"><i class="bi bi-ticket"></i> Support Tickets</a>
+                    <div class="sidebar-heading mt-3">Account</div>
+                    <a class="nav-link" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell"></i> Notifications</a>
+                }
+                else if (User.IsInRole("Writer"))
+                {
+                    <div class="sidebar-heading">Main Menu</div>
+                    <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                    <a class="nav-link" asp-controller="Orders" asp-action="Index"><i class="bi bi-file-earmark-text"></i> Available Orders</a>
+                    <a class="nav-link" asp-controller="Orders" asp-action="Dashboard"><i class="bi bi-folder2-open"></i> My Orders</a>
+                    <a class="nav-link" asp-controller="Messages" asp-action="Index"><i class="bi bi-chat-dots"></i> Messages <span id="sidebarUnreadCount" class="badge bg-danger rounded-pill ms-auto" style="display:none;font-size:0.65rem;">0</span></a>
+                    <div class="sidebar-heading mt-3">Support</div>
+                    <a class="nav-link" asp-controller="SupportTickets" asp-action="Index"><i class="bi bi-ticket"></i> Support Tickets</a>
+                    <div class="sidebar-heading mt-3">Resources</div>
+                    <a class="nav-link" asp-controller="WriterResources" asp-action="Index"><i class="bi bi-book"></i> Knowledge Center</a>
+                    <div class="sidebar-heading mt-3">Finances</div>
+                    <a class="nav-link" asp-controller="Writers" asp-action="Wallet"><i class="bi bi-wallet2"></i> Wallet</a>
+                    <a class="nav-link" asp-controller="Writers" asp-action="Transactions"><i class="bi bi-journal-text"></i> Transactions</a>
+                    <a class="nav-link" asp-controller="Writers" asp-action="Payouts"><i class="bi bi-cash-stack"></i> Payouts</a>
+                    <a class="nav-link" asp-controller="Writers" asp-action="PaymentDetails"><i class="bi bi-credit-card"></i> Payment Details</a>
+                    <div class="sidebar-heading mt-3">Account</div>
+                    <a class="nav-link" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell"></i> Notifications</a>
+                    <div class="sidebar-heading mt-3">Analytics</div>
+                    <a class="nav-link" asp-controller="Writers" asp-action="Analytics"><i class="bi bi-graph-up"></i> Performance</a>
+                }
+            </nav>
+            <div class="sidebar-footer px-3 py-3">
+                <a class="d-flex align-items-center text-decoration-none" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-left text-white-50 me-2"></i><span class="text-white-50 small">Logout</span></a>
+            </div>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <div class="app-content">
+            <header class="app-header d-none d-lg-block">
+                <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+                    <div><h6 class="mb-0 text-muted fw-normal">@ViewData["Title"]</h6></div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="dropdown">
+                            <a class="btn btn-link text-dark position-relative p-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-bell fs-5"></i><span id="notifNavbarBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;font-size:0.55rem;">0</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end notif-dropdown" style="width:320px;max-height:400px;overflow-y:auto;">
+                                <li><h6 class="dropdown-header"><i class="bi bi-bell"></i> Notifications</h6></li>
+                                <li><div id="notifDropdownItems"><div class="text-center py-2"><small class="text-muted">Loading...</small></div></div></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item text-center small" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell"></i> View All</a></li>
+                            </ul>
+                        </div>
+                        <div class="dropdown">
+                            <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;"><i class="bi bi-person-fill small"></i></div>
+                                <span class="ms-2 text-dark fw-medium small d-none d-xl-inline">@User.Identity?.Name</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li class="px-3 py-2"><div class="fw-semibold small">@User.Identity?.Name</div><div class="text-muted" style="font-size:0.75rem;">@if (User.IsInRole("Administrator")) { <span>Administrator</span> } else if (User.IsInRole("Writer")) { <span>Tutor/Writer</span> } else { <span>Client</span> }</div></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><form asp-controller="Account" asp-action="Logout" method="post" class="p-0">@Html.AntiForgeryToken()<button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-left"></i> Logout</button></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <main class="app-main">
+                <div class="container-fluid px-4 py-3">
+                    @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success alert-dismissible fade show" role="alert"><i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+                    @if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger alert-dismissible fade show" role="alert"><i class="bi bi-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+                    @RenderBody()
+                </div>
+            </main>
+            <footer class="app-footer">
+                <div class="container-fluid px-4"><div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2"><div class="text-muted small">&copy; 2026 <strong>ScholarRescue</strong> &mdash; Academic Support Platform</div><div class="text-muted small"><a asp-controller="Home" asp-action="Privacy" class="text-muted">Privacy</a></div></div></div>
+            </footer>
+        </div>
+    </div>
+    <div id="mobileSidebarTemplate" class="d-none">
+        <div class="sidebar-brand px-3 py-3"><a class="d-flex align-items-center text-decoration-none" asp-controller="Home" asp-action="Index"><span class="brand-icon me-2"><i class="bi bi-mortarboard-fill"></i></span><span class="fw-bold text-white fs-5">ScholarRescue</span></a></div>
+        <nav class="sidebar-nav flex-grow-1 px-2">
+            @if (User.IsInRole("Administrator"))
+            {
+                <div class="sidebar-heading">Administration</div>
+                <a class="nav-link" asp-controller="Admin" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a class="nav-link" asp-controller="Admin" asp-action="Users"><i class="bi bi-people"></i> Users</a>
+                <a class="nav-link" asp-controller="Orders" asp-action="Index"><i class="bi bi-file-earmark-text"></i> Orders</a>
+                <a class="nav-link" asp-controller="Admin" asp-action="WriterApplications"><i class="bi bi-person-check"></i> Writer Applications</a>
+                <a class="nav-link" asp-controller="Admin" asp-action="Conversations"><i class="bi bi-chat-dots"></i> Messages</a>
+                <a class="nav-link" asp-controller="Admin" asp-action="Payments"><i class="bi bi-wallet2"></i> Wallets</a>
+                <a class="nav-link" asp-controller="Finance" asp-action="Dashboard"><i class="bi bi-cash-coin"></i> Accounting</a>
+                <a class="nav-link" asp-controller="Admin" asp-action="ContactMessages"><i class="bi bi-envelope"></i> Contact Messages</a>
+                <a class="nav-link" asp-controller="SupportTickets" asp-action="Index"><i class="bi bi-ticket"></i> Support Tickets</a>
+                <a class="nav-link" asp-controller="Admin" asp-action="WriterResources"><i class="bi bi-book"></i> Writer Resources</a>
+                <a class="nav-link" asp-controller="Admin" asp-action="WriterRankings"><i class="bi bi-trophy"></i> Writer Rankings</a>
+                <div class="sidebar-heading mt-3">System</div>
+                <a class="nav-link" asp-controller="Admin" asp-action="AuditLogs"><i class="bi bi-journal-text"></i> Audit Logs</a>
+                <a class="nav-link" asp-controller="Admin" asp-action="Notifications"><i class="bi bi-bell"></i> Notifications</a>
+            }
+            else if (User.IsInRole("Client"))
+            {
+                <div class="sidebar-heading">Main Menu</div>
+                <a class="nav-link" asp-controller="Orders" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a class="nav-link" asp-controller="Orders" asp-action="Index"><i class="bi bi-file-earmark-text"></i> Orders</a>
+                <a class="nav-link" asp-controller="Messages" asp-action="Index"><i class="bi bi-chat-dots"></i> Messages</a>
+                <a class="nav-link" asp-controller="Orders" asp-action="Create"><i class="bi bi-plus-circle"></i> Create Order</a>
+                <div class="sidebar-heading mt-3">Support</div>
+                <a class="nav-link" asp-controller="SupportTickets" asp-action="Index"><i class="bi bi-ticket"></i> Support Tickets</a>
+                <div class="sidebar-heading mt-3">Account</div>
+                <a class="nav-link" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell"></i> Notifications</a>
+            }
+            else if (User.IsInRole("Writer"))
+            {
+                <div class="sidebar-heading">Main Menu</div>
+                <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a class="nav-link" asp-controller="Orders" asp-action="Index"><i class="bi bi-file-earmark-text"></i> Available Orders</a>
+                <a class="nav-link" asp-controller="Orders" asp-action="Dashboard"><i class="bi bi-folder2-open"></i> My Orders</a>
+                <a class="nav-link" asp-controller="Messages" asp-action="Index"><i class="bi bi-chat-dots"></i> Messages</a>
+                <div class="sidebar-heading mt-3">Support</div>
+                <a class="nav-link" asp-controller="SupportTickets" asp-action="Index"><i class="bi bi-ticket"></i> Support Tickets</a>
+                <div class="sidebar-heading mt-3">Resources</div>
+                <a class="nav-link" asp-controller="WriterResources" asp-action="Index"><i class="bi bi-book"></i> Knowledge Center</a>
+                <div class="sidebar-heading mt-3">Finances</div>
+                <a class="nav-link" asp-controller="Writers" asp-action="Wallet"><i class="bi bi-wallet2"></i> Wallet</a>
+                <a class="nav-link" asp-controller="Writers" asp-action="Transactions"><i class="bi bi-journal-text"></i> Transactions</a>
+                <a class="nav-link" asp-controller="Writers" asp-action="Payouts"><i class="bi bi-cash-stack"></i> Payouts</a>
+                <a class="nav-link" asp-controller="Writers" asp-action="PaymentDetails"><i class="bi bi-credit-card"></i> Payment Details</a>
+                <div class="sidebar-heading mt-3">Account</div>
+                <a class="nav-link" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell"></i> Notifications</a>
+                <div class="sidebar-heading mt-3">Analytics</div>
+                <a class="nav-link" asp-controller="Writers" asp-action="Analytics"><i class="bi bi-graph-up"></i> Performance</a>
+            }
+        </nav>
+        <div class="sidebar-footer px-3 py-3"><a class="d-flex align-items-center text-decoration-none" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-left text-white-50 me-2"></i><span class="text-white-50 small">Logout</span></a></div>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',function(){var t=document.getElementById('mobileMenuToggle'),s=document.getElementById('appSidebar'),o=document.getElementById('sidebarOverlay'),m=document.getElementById('mobileSidebarTemplate');if(t&&s&&o){if(m&&window.innerWidth<992){s.innerHTML=m.innerHTML;s.classList.add('d-flex')}t.addEventListener('click',function(){s.classList.toggle('mobile-open');o.classList.toggle('active')});o.addEventListener('click',function(){s.classList.remove('mobile-open');o.classList.remove('active')})}var p=window.location.pathname.toLowerCase();s.querySelectorAll('.nav-link').forEach(function(l){var h=l.getAttribute('href');if(h&&p===h.toLowerCase())l.classList.add('active')});if(document.getElementById('sidebarUnreadCount')){r();try{var c=new signalR.HubConnectionBuilder().withUrl('/chatHub').build();c.on('ReceiveMessage',function(){setTimeout(r,500)});c.on('ReceiveNotification',function(){setTimeout(r,500)});c.start().catch(function(){})}catch(e){}}var b=document.getElementById('notifNavbarBadge');if(b)n()});function r(){fetch('/Messages/UnreadCount').then(function(r){return r.json()}).then(function(d){if(!d)return;var b=document.getElementById('sidebarUnreadCount');if(b){if(d.count>0){b.textContent=d.count;b.style.display='inline-block'}else b.style.display='none'}}).catch(function(){})}function n(){fetch('/Notifications/Recent?take=5').then(function(r){return r.json()}).then(function(d){var b=document.getElementById('notifNavbarBadge'),c=document.getElementById('notifDropdownItems');if(!d||!c)return;if(d.unreadCount>0&&b){b.textContent=d.unreadCount;b.style.display='inline-block'}if(!d.notifications||d.notifications.length===0){c.innerHTML='<div class="text-center py-3"><small class="text-muted">No notifications</small></div>';return}var h='';d.notifications.forEach(function(n){h+='<a href="/Notifications/Details/'+n.id+'" class="list-group-item list-group-item-action py-2 px-3"><div class="small fw-medium">'+(n.title||'Notification')+'</div><div class="text-muted" style="font-size:0.75rem;">'+(n.message||'')+'</div></a>'});c.innerHTML=h}).catch(function(){})}</script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

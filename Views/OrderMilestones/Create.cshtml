@@ -1,0 +1,70 @@
+@model ScholarRescue.Models.OrderMilestone
+@using ScholarRescue.Models
+@{
+    var order = ViewBag.Order as Order;
+    ViewData["Title"] = "Create Milestone";
+}
+
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-action="Timeline" asp-route-orderId="@Model.OrderId" class="text-decoration-none">Timeline</a></li>
+            <li class="breadcrumb-item active">Create</li>
+        </ol>
+    </nav>
+    <h4 class="mb-1"><i class="bi bi-flag me-2"></i>Create Milestone</h4>
+    <p class="text-muted small mb-0">
+        For Order <strong>@order?.OrderNumber</strong> (@order?.Pages pages,
+        budget $@order?.Budget.ToString("F2"))
+    </p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="OrderId" />
+            <input type="hidden" asp-for="Status" value="Pending" />
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-medium">Title <span class="text-danger">*</span></label>
+                        <input asp-for="Title" class="form-control" placeholder="e.g. Chapter 1-2 Draft, Research Section, Final Submission" />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Pages" class="form-label fw-medium">Pages <span class="text-danger">*</span></label>
+                            <input asp-for="Pages" type="number" min="1" class="form-control" />
+                            <span asp-validation-for="Pages" class="text-danger small"></span>
+                            <span class="text-muted small">Order total: @order?.Pages pages</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SortOrder" class="form-label fw-medium">Display Order</label>
+                            <input asp-for="SortOrder" type="number" min="0" class="form-control" />
+                            <span class="text-muted small">0 = first</span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Deadline" class="form-label fw-medium">Deadline <span class="text-danger">*</span></label>
+                            <input asp-for="Deadline" type="datetime-local" class="form-control"
+                                   value="@Model.Deadline.ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="Deadline" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Create Milestone
+                </button>
+                <a asp-action="Timeline" asp-route-orderId="@Model.OrderId" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

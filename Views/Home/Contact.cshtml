@@ -1,0 +1,128 @@
+@model ScholarRescue.Models.ContactMessage
+
+@{
+    ViewData["Title"] = "Contact Us";
+    Layout = "~/Views/Shared/_Layout.Public.cshtml";
+}
+
+<!-- Page Header -->
+<section class="py-5" style="background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);">
+    <div class="container">
+        <h1 class="display-5 fw-bold text-white">Contact Us</h1>
+        <p class="text-white-50 lead mb-0">We'd love to hear from you. Get in touch with our team.</p>
+    </div>
+</section>
+
+<!-- Contact Content -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-7">
+                <h3 class="fw-bold mb-4">Send Us a Message</h3>
+                @if (TempData["ContactSuccess"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>@TempData["ContactSuccess"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                <form asp-action="Contact" asp-controller="Home" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label">Name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Your full name" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" placeholder="your@email.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Subject" class="form-label">Subject</label>
+                            <input asp-for="Subject" class="form-control" placeholder="How can we help?" />
+                            <span asp-validation-for="Subject" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Message" class="form-label">Message</label>
+                            <textarea asp-for="Message" class="form-control" rows="6" placeholder="Tell us more about your inquiry..."></textarea>
+                            <span asp-validation-for="Message" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send me-2"></i>Send Message
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-5">
+                <h3 class="fw-bold mb-4">Contact Information</h3>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                                <i class="bi bi-envelope text-primary"></i>
+                            </div>
+                            <div>
+                                <strong class="small">Email</strong>
+                                <div class="text-muted small">support@scholarrescue.com</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                                <i class="bi bi-clock text-success"></i>
+                            </div>
+                            <div>
+                                <strong class="small">Response Time</strong>
+                                <div class="text-muted small">Within 24 hours on business days</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                                <i class="bi bi-globe text-info"></i>
+                            </div>
+                            <div>
+                                <strong class="small">Availability</strong>
+                                <div class="text-muted small">24/7 platform access. Support available Mon-Fri.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">Quick Links</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <a asp-controller="Home" asp-action="FAQ" class="text-muted small">
+                                    <i class="bi bi-chevron-right text-primary me-1"></i> Frequently Asked Questions
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a asp-controller="Home" asp-action="About" class="text-muted small">
+                                    <i class="bi bi-chevron-right text-primary me-1"></i> About ScholarRescue
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a asp-controller="Home" asp-action="BecomeATutor" class="text-muted small">
+                                    <i class="bi bi-chevron-right text-primary me-1"></i> Become a Tutor
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="Home" asp-action="Privacy" class="text-muted small">
+                                    <i class="bi bi-chevron-right text-primary me-1"></i> Privacy Policy
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

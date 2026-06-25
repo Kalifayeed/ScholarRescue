@@ -1,0 +1,36 @@
+# ScholarRescue Development Rules
+
+## Rule 1: Never scan entire repository unless requested.
+- Use `read_file` on specific files rather than `list_files` with `recursive: true`
+- Only use `search_files` when looking for specific patterns
+- When a task mentions a feature, identify the exact files involved from AI_MEMORY before reading
+
+## Rule 2: Read AI_MEMORY files first.
+- Always read these files at the start of any new task:
+  - `AI_MEMORY/PROJECT_OVERVIEW.md`
+  - `AI_MEMORY/CURRENT_TASK.md`
+  - `AI_MEMORY/COMPLETED_PHASES.md`
+  - `AI_MEMORY/DATABASE_SCHEMA.md`
+- Read additional files only if the task requires deeper context:
+  - `AI_MEMORY/ARCHITECTURE_DECISIONS.md`
+  - `AI_MEMORY/KNOWN_ISSUES.md`
+
+## Rule 3: Edit minimum number of files.
+- Prefer `replace_in_file` over `write_to_file` for existing files
+- Make targeted changes, not full rewrites
+- When creating new files, keep them focused and minimal
+
+## Rule 4: Reuse existing services.
+- Check existing service interfaces before creating new ones
+- Call existing methods rather than duplicating logic
+- Extend existing patterns (e.g., use INotificationService, IAuditLog patterns)
+
+## Rule 5: Do not regenerate completed modules.
+- See AI_MEMORY/COMPLETED_PHASES.md for what is done
+- Never rewrite files for completed phases unless explicitly asked
+- Focus only on the current task scope
+
+## Rule 6: Stop after each milestone.
+- After completing a defined section of work, use `attempt_completion`
+- Let the user review before starting the next piece
+- Never chain multiple major changes without user confirmation

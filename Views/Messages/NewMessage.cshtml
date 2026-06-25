@@ -1,0 +1,172 @@
+@model CreateSupportMessageViewModel
+@{
+    ViewData["Title"] = "New Message";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-envelope-plus"></i> New Support Message
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Send a message to a ScholarRescue department. Your request will be automatically converted into a support ticket.
+                    </p>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> Please correct the errors below.
+                        </div>
+                    }
+
+                    <form asp-action="NewMessage" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Department -->
+                        <div class="mb-3">
+                            <label asp-for="Department" class="form-label fw-semibold">
+                                Department <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="Department" class="form-select" required>
+                                <option value="">-- Select Department --</option>
+                                <option value="GeneralSupport">General Support</option>
+                                <option value="Orders">Orders Department</option>
+                                <option value="WriterApplications">Writer Applications</option>
+                                <option value="BillingPayments">Billing & Payments</option>
+                                <option value="DisputesCompliance">Disputes & Compliance</option>
+                                <option value="TechnicalSupport">Technical Support</option>
+                                <option value="Administration">Administration</option>
+                            </select>
+                            <span asp-validation-for="Department" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Subject -->
+                        <div class="mb-3">
+                            <label asp-for="Subject" class="form-label fw-semibold">
+                                Subject <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Subject" class="form-control" maxlength="200" placeholder="e.g. Payment Not Reflected, Unable To Upload Files, Order Inquiry" required />
+                            <small class="text-muted">
+                                <span id="subjectCount">0</span>/200 characters
+                            </small>
+                            <span asp-validation-for="Subject" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Message -->
+                        <div class="mb-3">
+                            <label asp-for="Message" class="form-label fw-semibold">
+                                Message <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Message" class="form-control" rows="6" maxlength="10000"
+                                      placeholder="Describe your issue in detail (minimum 10 characters)" required></textarea>
+                            <small class="text-muted">
+                                <span id="messageCount">0</span>/10,000 characters (min 10)
+                            </small>
+                            <span asp-validation-for="Message" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Attachments -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                Attachments <small class="text-muted">(optional)</small>
+                            </label>
+                            <input type="file" name="Attachments" class="form-control" multiple
+                                   accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.zip,.rar,.jpg,.jpeg,.png,.gif,.webp" />
+                            <small class="text-muted">
+                                Max 10 files, 25MB each. Supported: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, CSV, ZIP, RAR, JPG, PNG, GIF, WEBP
+                            </small>
+                        </div>
+
+                    <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Send Message
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Knowledge Base Suggestions -->
+                    <div id="kbSuggestions" class="mt-4" style="display:none;">
+                        <div class="card border-info border-opacity-25">
+                            <div class="card-header bg-info bg-opacity-10">
+                                <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Helpful Resources</h6>
+                            </div>
+                            <div class="card-body p-2" id="kbSuggestionsBody">
+                                <div class="text-center py-2">
+                                    <div class="spinner-border spinner-border-sm text-info" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Character counters
+        document.getElementById('Subject')?.addEventListener('input', function () {
+            document.getElementById('subjectCount').textContent = this.value.length;
+        });
+        document.getElementById('Message')?.addEventListener('input', function () {
+            document.getElementById('messageCount').textContent = this.value.length;
+        });
+
+        // Knowledge Base Suggestions
+        var deptSelect = document.getElementById('Department');
+        var kbSection = document.getElementById('kbSuggestions');
+        var kbBody = document.getElementById('kbSuggestionsBody');
+        var kbLoadTimer = null;
+
+        if (deptSelect) {
+            deptSelect.addEventListener('change', function () {
+                var dept = this.value;
+                if (!dept) { kbSection.style.display = 'none'; return; }
+                clearTimeout(kbLoadTimer);
+                kbLoadTimer = setTimeout(function () { loadKbSuggestions(dept); }, 300);
+            });
+        }
+
+        function loadKbSuggestions(dept) {
+            kbSection.style.display = 'block';
+            kbBody.innerHTML = '<div class="text-center py-2"><div class="spinner-border spinner-border-sm text-info" role="status"></div></div>';
+
+            fetch('/WriterResources/ByDepartment?department=' + encodeURIComponent(dept))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data || !data.success || !data.resources || data.resources.length === 0) {
+                        kbBody.innerHTML = '<p class="text-muted small mb-0 px-2">No specific resources found. Please submit your question and our team will assist you.</p>';
+                        return;
+                    }
+                    var html = '<div class="list-group list-group-flush">';
+                    data.resources.forEach(function (r) {
+                        html += '<a href="/WriterResources/Article/' + r.id + '" target="_blank" class="list-group-item list-group-item-action py-2 px-3">' +
+                            '<i class="bi bi-file-text text-info me-1"></i> <strong class="small">' + escapeHtml(r.title) + '</strong>' +
+                            (r.summary ? '<br><small class="text-muted">' + escapeHtml(r.summary).substring(0, 120) + '...</small>' : '') +
+                            '</a>';
+                    });
+                    html += '</div>';
+                    html += '<div class="px-3 py-1"><small class="text-muted"><i class="bi bi-info-circle"></i> Check these resources before submitting your ticket.</small></div>';
+                    kbBody.innerHTML = html;
+                })
+                .catch(function () {
+                    kbBody.innerHTML = '<p class="text-muted small mb-0 px-2">Could not load resources. Please submit your question directly.</p>';
+                });
+        }
+
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
+        }
+    </script>
+}

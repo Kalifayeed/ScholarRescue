@@ -1,0 +1,30 @@
+@model IEnumerable<ScholarRescue.Models.Message>
+
+@{
+    ViewData["Title"] = "Test Messages";
+}
+
+<div class="container py-4">
+    <h2>Messaging Test - Messages</h2>
+    <a asp-action="Conversations" class="btn btn-sm btn-secondary mb-3">&laquo; Back to Conversations</a>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No messages in this conversation.</div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var msg in Model)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <strong>@msg.Sender?.Email</strong>
+                        <small class="text-muted">@msg.CreatedDate.ToString("g")</small>
+                    </div>
+                    <p class="mb-0 mt-2">@msg.MessageText</p>
+                </div>
+            }
+        </div>
+    }
+</div>

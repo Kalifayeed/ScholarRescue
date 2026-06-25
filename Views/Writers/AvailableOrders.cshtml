@@ -1,0 +1,293 @@
+@model IEnumerable<ScholarRescue.Models.Order>
+@using ScholarRescue.Models.Enums
+@{
+    ViewData["Title"] = "Available Orders";
+    Layout = "~/Views/Shared/_Layout.App.cshtml";
+    var myAppliedOrderIds = ViewBag.MyAppliedOrderIds as HashSet<int> ?? new HashSet<int>();
+
+    // Preserve filter values
+    var currentDiscipline = ViewBag.Discipline as string;
+    var currentAcademicLevel = ViewBag.AcademicLevel as AcademicLevel?;
+    var currentMinPages = ViewBag.MinPages as int?;
+    var currentMaxPages = ViewBag.MaxPages as int?;
+    var deadlineFrom = ViewBag.DeadlineFrom as DateTime?;
+    var deadlineTo = ViewBag.DeadlineTo as DateTime?;
+    var currentMinPrice = ViewBag.MinPrice as decimal?;
+    var currentMaxPrice = ViewBag.MaxPrice as decimal?;
+    var currentCitationStyle = ViewBag.CitationStyle as CitationFormat?;
+    var currentUrgency = ViewBag.Urgency as PriorityLevel?;
+    var currentSortBy = ViewBag.CurrentSortBy as string ?? "newest";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0"><i class="bi bi-shop"></i> Available Orders</h1>
+            <small class="text-muted">Browse and apply to open orders in the marketplace.</small>
+        </div>
+        <span class="badge bg-primary fs-6 py-2 px-3 rounded-pill">
+            @Model.Count() order(s) available
+        </span>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filter & Sort Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-funnel"></i> Filters</h5>
+                <div class="d-flex gap-2">
+                    <a asp-action="AvailableOrders" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                    </a>
+                    <button type="submit" form="filterForm" class="btn btn-sm btn-primary">
+                        <i class="bi bi-search"></i> Apply
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form id="filterForm" method="get" asp-action="AvailableOrders">
+                <!-- Sort By - prominent row -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Sort By</label>
+                        <select name="sortBy" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="newest" selected="@(currentSortBy == "newest")">Newest</option>
+                            <option value="highest_price" selected="@(currentSortBy == "highest_price")">Highest Price</option>
+                            <option value="closest_deadline" selected="@(currentSortBy == "closest_deadline")">Closest Deadline</option>
+                            <option value="most_pages" selected="@(currentSortBy == "most_pages")">Most Pages</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filter Row 1: Discipline, Academic Level, Citation Style -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Discipline / Subject</label>
+                        <input type="text" name="discipline" class="form-control form-control-sm"
+                               placeholder="e.g., Mathematics, History..."
+                               value="@currentDiscipline" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Academic Level</label>
+                        <select name="academicLevel" class="form-select form-select-sm">
+                            <option value="">All Levels</option>
+                            @foreach (var level in Enum.GetValues<AcademicLevel>())
+                            {
+                                <option value="@level" selected="@(currentAcademicLevel == level)">@level</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Citation Style</label>
+                        <select name="citationStyle" class="form-select form-select-sm">
+                            <option value="">All Styles</option>
+                            @foreach (var style in Enum.GetValues<CitationFormat>())
+                            {
+                                <option value="@style" selected="@(currentCitationStyle == style)">@style</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filter Row 2: Pages, Deadline, Urgency -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Min Pages</label>
+                        <input type="number" name="minPages" class="form-control form-control-sm"
+                               min="1" placeholder="1" value="@currentMinPages" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Max Pages</label>
+                        <input type="number" name="maxPages" class="form-control form-control-sm"
+                               min="1" placeholder="1000" value="@currentMaxPages" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Urgency</label>
+                        <select name="urgency" class="form-select form-select-sm">
+                            <option value="">Any Urgency</option>
+                            @foreach (var prio in Enum.GetValues<PriorityLevel>())
+                            {
+                                <option value="@prio" selected="@(currentUrgency == prio)">@prio</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Deadline Before</label>
+                        <input type="date" name="deadlineTo" class="form-control form-control-sm"
+                               value="@(deadlineTo?.ToString("yyyy-MM-dd"))" />
+                    </div>
+                </div>
+
+                <!-- Filter Row 3: Price, Deadline From -->
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Min Price ($)</label>
+                        <input type="number" name="minPrice" class="form-control form-control-sm"
+                               min="0" step="0.01" placeholder="0.00" value="@currentMinPrice" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Max Price ($)</label>
+                        <input type="number" name="maxPrice" class="form-control form-control-sm"
+                               min="0" step="0.01" placeholder="9999.99" value="@currentMaxPrice" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Deadline From</label>
+                        <input type="date" name="deadlineFrom" class="form-control form-control-sm"
+                               value="@(deadlineFrom?.ToString("yyyy-MM-dd"))" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted"></i>
+                <h4 class="mt-3">No Available Orders</h4>
+                <p class="text-muted">
+                    @if (ViewBag.Discipline != null || ViewBag.AcademicLevel != null || ViewBag.MinPages != null ||
+                         ViewBag.MaxPages != null || ViewBag.MinPrice != null || ViewBag.CitationStyle != null ||
+                         ViewBag.Urgency != null || ViewBag.DeadlineFrom != null || ViewBag.DeadlineTo != null)
+                    {
+                        <span>No orders match your current filter criteria. Try adjusting your filters.</span>
+                    }
+                    else
+                    {
+                        <span>There are currently no open orders in the marketplace. Check back soon!</span>
+                    }
+                </p>
+                @if (ViewBag.Discipline != null || ViewBag.AcademicLevel != null || ViewBag.MinPages != null ||
+                     ViewBag.MaxPages != null || ViewBag.MinPrice != null || ViewBag.CitationStyle != null ||
+                     ViewBag.Urgency != null || ViewBag.DeadlineFrom != null || ViewBag.DeadlineTo != null)
+                {
+                    <a asp-action="AvailableOrders" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
+                    </a>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order #</th>
+                                <th>Subject</th>
+                                <th>Academic Level</th>
+                                <th>Pages</th>
+                                <th>Sources</th>
+                                <th>Deadline</th>
+                                <th>Price</th>
+                                <th>Citation</th>
+                                <th>Urgency</th>
+                                <th>Posted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-action="OrderDetails" asp-route-id="@order.Id" class="fw-bold text-decoration-none">
+                                            @order.OrderNumber
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 180px;"
+                                              title="@order.Subject">
+                                            @order.Subject
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">@order.AcademicLevel</span>
+                                    </td>
+                                    <td>@order.Pages</td>
+                                    <td>@order.NumberOfSources</td>
+                                    <td>
+                                        <span class="@(order.Deadline < DateTime.UtcNow ? "text-danger fw-bold" : "")">
+                                            @order.Deadline.ToString("MMM dd, yyyy")
+                                        </span>
+                                        <br />
+                                        <small class="text-muted">@order.Deadline.ToString("HH:mm")</small>
+                                        <br />
+                                        <small class="text-muted">
+                                            @{
+                                                var remaining = (order.Deadline - DateTime.UtcNow);
+                                                if (remaining.TotalDays > 1)
+                                                {
+                                                    <span>@((int)remaining.TotalDays)d left</span>
+                                                }
+                                                else if (remaining.TotalHours > 1)
+                                                {
+                                                    <span>@((int)remaining.TotalHours)h left</span>
+                                                }
+                                                else if (remaining.TotalMinutes > 0)
+                                                {
+                                                    <span>@((int)remaining.TotalMinutes)m left</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-danger">Overdue</span>
+                                                }
+                                            }
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <strong>@order.Budget.ToString("C")</strong>
+                                        <br />
+                                        <small class="text-muted">Earn: @order.WriterEarnings.ToString("C")</small>
+                                    </td>
+                                    <td><small>@order.CitationFormat</small></td>
+                                    <td>
+                                        <span class="badge @(order.Priority == PriorityLevel.Urgent ? "bg-danger" :
+                                                            order.Priority == PriorityLevel.High ? "bg-warning text-dark" :
+                                                            order.Priority == PriorityLevel.Normal ? "bg-success" : "bg-secondary")">
+                                            @order.Priority
+                                        </span>
+                                    </td>
+                                    <td><small class="text-muted">@order.CreatedAt.ToString("MMM dd")</small></td>
+                                    <td>
+                                        @if (myAppliedOrderIds.Contains(order.Id))
+                                        {
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-check"></i> Applied
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="OrderDetails" asp-route-id="@order.Id"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

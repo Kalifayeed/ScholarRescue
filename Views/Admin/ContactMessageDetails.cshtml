@@ -1,0 +1,88 @@
+@model ScholarRescue.Models.ContactMessage
+
+@{
+    ViewData["Title"] = "Contact Message Details";
+}
+
+<div class="mb-4">
+    <a asp-action="ContactMessages" class="text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i> Back to Contact Messages
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-envelope"></i> @Model.Subject</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                        <i class="bi bi-person-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <strong>@Model.Name</strong>
+                        <div class="text-muted small">@Model.Email</div>
+                    </div>
+                    <div class="ms-auto text-end">
+                        <small class="text-muted">@Model.SubmittedAt.ToString("MMM dd, yyyy HH:mm")</small>
+                        <div>
+                            @if (Model.IsRead)
+                            {
+                                <span class="badge bg-secondary">Read</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">New</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <p style="white-space:pre-wrap;">@Model.Message</p>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.AdminResponse != null)
+        {
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="bi bi-reply"></i> Admin Response</h6>
+                </div>
+                <div class="card-body">
+                    <p style="white-space:pre-wrap;">@Model.AdminResponse</p>
+                    <small class="text-muted">Responded on @Model.RespondedAt?.ToString("MMM dd, yyyy HH:mm")</small>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header fw-semibold">Contact Information</div>
+            <div class="card-body">
+                <div class="mb-2"><strong>Name:</strong> @Model.Name</div>
+                <div class="mb-2"><strong>Email:</strong> <a href="mailto:@Model.Email">@Model.Email</a></div>
+                <div class="mb-2"><strong>Date:</strong> @Model.SubmittedAt.ToString("MMM dd, yyyy HH:mm")</div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header fw-semibold">Respond</div>
+            <div class="card-body">
+                <form asp-action="RespondToContact" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="mb-3">
+                        <textarea name="response" class="form-control" rows="5" placeholder="Type your response...">@Model.AdminResponse</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-send me-1"></i> Save Response
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

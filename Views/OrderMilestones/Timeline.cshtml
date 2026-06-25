@@ -1,0 +1,171 @@
+@model List<ScholarRescue.Services.MilestoneTimelineEntry>
+@using ScholarRescue.Models
+@using ScholarRescue.Models.Enums
+@{
+    var order = ViewBag.Order as Order;
+    string pageRule = ViewBag.PageRule as string ?? "";
+    bool isAdmin = ViewBag.IsAdmin as bool? ?? false;
+    bool isClient = ViewBag.IsClient as bool? ?? false;
+    bool isWriter = ViewBag.IsWriter as bool? ?? false;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <h4 class="mb-1"><i class="bi bi-flag me-2"></i>Progressive Delivery Timeline</h4>
+        <p class="text-muted small mb-0">
+            Order <strong>@order?.OrderNumber</strong> &middot; @order?.Pages pages
+            &middot; <span class="badge bg-info bg-opacity-10 text-info">@pageRule</span>
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        @if (isAdmin)
+        {
+            <a asp-action="Create" asp-route-orderId="@order?.Id" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>New Milestone
+            </a>
+        }
+        <a asp-controller="Orders" asp-action="Details" asp-route-id="@order?.Id" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back to Order
+        </a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-flag fs-1 text-muted"></i>
+        <p class="text-muted mt-2">
+            @if (isAdmin)
+            {
+                <span>No milestones have been created yet. Click "New Milestone" to add the first one.</span>
+            }
+            else
+            {
+                <span>No milestones have been created for this order yet.</span>
+            }
+        </p>
+    </div>
+}
+else
+{
+    <div class="timeline">
+        @foreach (var m in Model)
+        {
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                    <div>
+                        <span class="badge bg-secondary me-2">M{m.SortOrder + 1}</span>
+                        <strong>@m.Title</strong>
+                        <span class="text-muted small ms-2">(@m.Pages pages)</span>
+                    </div>
+                    <div>
+                        @{var statusBg = m.Status switch {
+                            MilestoneStatus.Pending => "secondary",
+                            MilestoneStatus.Submitted => "warning",
+                            MilestoneStatus.Approved => "success",
+                            _ => "secondary" };}
+                        <span class="badge bg-@statusBg">@m.Status</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row small text-muted mb-2">
+                        <div class="col-md-4">
+                            <i class="bi bi-calendar-event me-1"></i>Deadline: <strong>@m.Deadline.ToString("MMM dd, yyyy")</strong>
+                        </div>
+                        @if (m.SubmittedAt.HasValue)
+                        {
+                            <div class="col-md-4">
+                                <i class="bi bi-cloud-upload me-1"></i>Submitted: <strong>@m.SubmittedAt.Value.ToString("MMM dd, yyyy HH:mm")</strong>
+                            </div>
+                        }
+                        @if (m.ApprovedAt.HasValue)
+                        {
+                            <div class="col-md-4">
+                                <i class="bi bi-check-circle me-1"></i>Approved: <strong>@m.ApprovedAt.Value.ToString("MMM dd, yyyy")</strong>
+                                &middot; Earned: <strong class="text-success">$@m.ApprovedEarnings.ToString("F2")</strong>
+                            </div>
+                        }
+                    </div>
+
+                    @if (m.Files != null && m.Files.Any())
+                    {
+                        <div class="mt-2">
+                            <small class="text-muted d-block mb-1"><i class="bi bi-paperclip me-1"></i>Files:</small>
+                            <ul class="list-unstyled small mb-0">
+                                @foreach (var f in m.Files)
+                                {
+                                    <li class="ms-3">
+                                        <a href="@f.FilePath" target="_blank" class="text-decoration-none">
+                                            <i class="bi bi-file-earmark-arrow-down me-1"></i>@f.FileName
+                                        </a>
+                                        <span class="text-muted">(@((f.FileSizeBytes / 1024.0).ToString("F1")) KB)</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <div class="mt-3 d-flex gap-2 flex-wrap">
+                        @if (isWriter && m.Status == MilestoneStatus.Pending)
+                        {
+                            <a asp-action="Submit" asp-route-id="@m.Id" class="btn btn-primary btn-sm">
+                                <i class="bi bi-cloud-upload me-1"></i>Upload Files
+                            </a>
+                        }
+                        @if (isClient && m.Status == MilestoneStatus.Submitted)
+                        {
+                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#approveModal-@m.Id">
+                                <i class="bi bi-check-circle me-1"></i>Approve Milestone
+                            </button>
+                        }
+                        @if (isAdmin && m.Status != MilestoneStatus.Approved)
+                        {
+                            <form asp-action="Delete" method="post" class="d-inline"
+                                  onsubmit="return confirm('Delete this milestone?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@m.Id" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (isClient && m.Status == MilestoneStatus.Submitted)
+            {
+                <div class="modal fade" id="approveModal-@m.Id" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form asp-action="Approve" method="post">
+                                @Html.AntiForgeryToken()
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Approve Milestone</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" name="id" value="@m.Id" />
+                                    <p>Approve <strong>@m.Title</strong> (@m.Pages pages)?</p>
+                                    <p class="small text-muted">
+                                        Writer will earn approximately
+                                        <strong>$@(((decimal)m.Pages / (order?.Pages ?? 1) * (order?.Budget ?? 0) * 0.90m).ToString("F2"))</strong>
+                                        (90% of proportional order budget).
+                                    </p>
+                                    <div class="mb-2">
+                                        <label class="form-label fw-medium">Notes (optional)</label>
+                                        <textarea name="notes" class="form-control" rows="3" placeholder="Feedback for the writer..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-success">Approve</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}

@@ -1,0 +1,316 @@
+@model ScholarRescue.ViewModels.Order.OrderDetailsViewModel
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Orders</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.OrderNumber</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6">
+            <i class="bi bi-file-text"></i> Order @Model.OrderNumber
+        </h1>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs mb-4" id="orderTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">
+                <i class="bi bi-info-circle"></i> Overview
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab" aria-controls="files" aria-selected="false">
+                <i class="bi bi-paperclip"></i> Files
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab" aria-controls="notes" aria-selected="false">
+                <i class="bi bi-journal-text"></i> Notes
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages" type="button" role="tab" aria-controls="messages" aria-selected="false">
+                <i class="bi bi-chat-dots"></i> Messages
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="orderTabsContent">
+        <!-- Overview Tab -->
+        <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+            <div class="row">
+                <!-- Order Information -->
+                <div class="col-md-8">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0"><i class="bi bi-info-circle"></i> Order Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Title:</div>
+                                <div class="col-sm-9">@Model.Title</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Description:</div>
+                                <div class="col-sm-9">
+                                    <p class="mb-0 text-break">@Model.Description</p>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Subject:</div>
+                                <div class="col-sm-9">@Model.Subject</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Academic Level:</div>
+                                <div class="col-sm-9">@Model.AcademicLevelName</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Citation Format:</div>
+                                <div class="col-sm-9">@Model.CitationFormatName</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Pages:</div>
+                                <div class="col-sm-9">@Model.Pages</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Word Count:</div>
+                                <div class="col-sm-9">@Model.WordCount</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Budget:</div>
+                                <div class="col-sm-9 fw-bold text-success">@Model.Budget.ToString("C")</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Priority:</div>
+                                <div class="col-sm-9">
+                                    <span class="badge @GetPriorityBadgeClass(Model.Priority)">@Model.Priority</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status & Timeline -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="card-title mb-0"><i class="bi bi-flag"></i> Status</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            @{
+                                string statusBadgeClass = Model.Status switch
+                                {
+                                    ScholarRescue.Models.Enums.OrderStatus.Draft => "bg-secondary",
+                                    ScholarRescue.Models.Enums.OrderStatus.PendingReview => "bg-info text-dark",
+                                    ScholarRescue.Models.Enums.OrderStatus.Open => "bg-primary",
+                                    ScholarRescue.Models.Enums.OrderStatus.Assigned => "bg-primary",
+                                    ScholarRescue.Models.Enums.OrderStatus.InProgress => "bg-warning text-dark",
+                                    ScholarRescue.Models.Enums.OrderStatus.DraftSubmitted => "bg-info",
+                                    ScholarRescue.Models.Enums.OrderStatus.RevisionRequested => "bg-warning text-dark",
+                                    ScholarRescue.Models.Enums.OrderStatus.Completed => "bg-success",
+                                    ScholarRescue.Models.Enums.OrderStatus.Cancelled => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @statusBadgeClass fs-6 py-2 px-3">@Model.Status</span>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="card-title mb-0"><i class="bi bi-clock"></i> Timeline</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <small class="text-muted">Deadline</small>
+                                <div class="fw-bold">@Model.Deadline.ToString("MMMM dd, yyyy h:mm tt")</div>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">Created At</small>
+                                <div>@Model.CreatedAt.ToString("MMMM dd, yyyy h:mm tt")</div>
+                            </div>
+                            <div>
+                                <small class="text-muted">Last Updated</small>
+                                <div>@Model.UpdatedAt.ToString("MMMM dd, yyyy h:mm tt")</div>
+                            </div>
+                            @if (Model.CompletedAt.HasValue)
+                            {
+                                <div class="mb-2">
+                                    <small class="text-muted">Completed At</small>
+                                    <div>@Model.CompletedAt.Value.ToString("MMMM dd, yyyy h:mm tt")</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="card-title mb-0"><i class="bi bi-people"></i> People</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <small class="text-muted">Client</small>
+                                <div class="fw-bold">@Model.ClientName</div>
+                                <div><a href="mailto:@Model.ClientEmail">@Model.ClientEmail</a></div>
+                            </div>
+                            <hr />
+                            <div>
+                                <small class="text-muted">Writer</small>
+                                @if (!string.IsNullOrEmpty(Model.WriterName))
+                                {
+                                    <div class="fw-bold">@Model.WriterName</div>
+                                    <div><a href="mailto:@Model.WriterEmail">@Model.WriterEmail</a></div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted fst-italic">Not yet assigned</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Files Tab -->
+        <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="files-tab">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="bi bi-paperclip"></i> Order Files</h5>
+                    <button type="button" class="btn btn-sm btn-light" id="uploadFileBtn">
+                        <i class="bi bi-upload"></i> Upload File
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-folder2-open display-4 d-block mb-2"></i>
+                        <h6>No files uploaded yet</h6>
+                        <p class="small">Files for this order will appear here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Tab -->
+        <div class="tab-pane fade" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="bi bi-journal-text"></i> Order Notes</h5>
+                    <button type="button" class="btn btn-sm btn-light" id="addNoteBtn">
+                        <i class="bi bi-plus-circle"></i> Add Note
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-journal display-4 d-block mb-2"></i>
+                        <h6>No notes yet</h6>
+                        <p class="small">Notes and internal comments will appear here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Tab -->
+        <div class="tab-pane fade" id="messages" role="tabpanel" aria-labelledby="messages-tab">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-chat-dots"></i> Order Conversation</h5>
+                </div>
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-chat-square-text display-4 d-block mb-3 text-muted"></i>
+                    <h5>Discuss this order with your writer or client</h5>
+                    <p class="text-muted mb-4">Open the conversation to send messages, share updates, and track communication.</p>
+                    <a asp-controller="Messages" asp-action="ForOrder" asp-route-orderId="@Model.Id"
+                       class="btn btn-primary btn-lg">
+                        <i class="bi bi-chat-dots"></i> Open Conversation
+                    </a>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-shield-check"></i> Only authorized participants can view this conversation.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script>
+        // Preserve active tab on page navigation
+        document.addEventListener('DOMContentLoaded', function () {
+            var triggerTabList = [].slice.call(document.querySelectorAll('#orderTabs button'));
+            triggerTabList.forEach(function (triggerEl) {
+                var tabTrigger = new bootstrap.Tab(triggerEl);
+                triggerEl.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    tabTrigger.show();
+                });
+            });
+
+            // Restore active tab from localStorage
+            var activeTab = localStorage.getItem('orderActiveTab');
+            if (activeTab) {
+                var tab = document.querySelector('#orderTabs button[data-bs-target="' + activeTab + '"]');
+                if (tab) {
+                    var tabTrigger = new bootstrap.Tab(tab);
+                    tabTrigger.show();
+                }
+            }
+
+            // Save active tab
+            document.querySelectorAll('#orderTabs button').forEach(function (tab) {
+                tab.addEventListener('shown.bs.tab', function (e) {
+                    localStorage.setItem('orderActiveTab', e.target.getAttribute('data-bs-target'));
+                });
+            });
+        });
+    </script>
+}
+
+@functions {
+    private string GetPriorityBadgeClass(PriorityLevel priority)
+    {
+        return priority switch
+        {
+            PriorityLevel.Low => "bg-secondary",
+            PriorityLevel.Normal => "bg-primary",
+            PriorityLevel.High => "bg-warning text-dark",
+            PriorityLevel.Urgent => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}

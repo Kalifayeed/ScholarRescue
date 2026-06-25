@@ -1,0 +1,310 @@
+@model ScholarRescue.ViewModels.Admin.UserDetailsViewModel
+
+@{
+    ViewData["Title"] = "User Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>User Details</h2>
+        <a asp-action="Users" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Users
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- User Info Card -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Name</dt>
+                        <dd class="col-sm-8">@Model.FullName</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">Phone</dt>
+                        <dd class="col-sm-8">@(Model.PhoneNumber ?? "N/A")</dd>
+
+                        <dt class="col-sm-4">User Type</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-primary">@Model.UserType</span>
+                        </dd>
+
+                        <dt class="col-sm-4">Role</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-info text-dark">@Model.Role</span>
+                        </dd>
+
+                        <dt class="col-sm-4">Email Confirmed</dt>
+                        <dd class="col-sm-8">
+                            @(Model.EmailConfirmed ? "<i class='bi bi-check-circle text-success'></i>" : "<i class='bi bi-x-circle text-danger'></i>")
+                        </dd>
+
+                        <dt class="col-sm-4">Active</dt>
+                        <dd class="col-sm-8">
+                            @(Model.IsActive ? "<i class='bi bi-check-circle text-success'></i>" : "<i class='bi bi-x-circle text-danger'></i>")
+                        </dd>
+
+                        <dt class="col-sm-4">Deleted</dt>
+                        <dd class="col-sm-8">
+                            @(Model.IsDeleted ? "<i class='bi bi-check-circle text-danger'></i>" : "<i class='bi bi-x-circle text-success'></i>")
+                        </dd>
+
+                        <dt class="col-sm-4">Locked</dt>
+                        <dd class="col-sm-8">
+                            @(Model.IsLockedOut ? "<i class='bi bi-lock text-warning'></i>" : "<i class='bi bi-unlock text-success'></i>")
+                        </dd>
+
+                        <dt class="col-sm-4">Registered</dt>
+                        <dd class="col-sm-8">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+
+                        <dt class="col-sm-4">Last Login</dt>
+                        <dd class="col-sm-8">@(Model.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "Never") UTC</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Actions Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        @if (!Model.IsActive && !Model.IsDeleted)
+                        {
+                            <form asp-action="ActivateUser" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Activate this user?');">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> Activate User
+                                </button>
+                            </form>
+                        }
+                        else if (Model.IsActive && !Model.IsDeleted)
+                        {
+                            <form asp-action="SuspendUser" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Suspend this user?');">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-pause-circle"></i> Suspend User
+                                </button>
+                            </form>
+                        }
+
+                        @if (!Model.IsDeleted)
+                        {
+                            <form asp-action="DeleteUser" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Soft delete this user? This action cannot be undone easily.');">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash"></i> Delete User (Soft)
+                                </button>
+                            </form>
+                        }
+
+                        <a asp-action="AssignRole" asp-route-id="@Model.Id" class="btn btn-info text-white">
+                            <i class="bi bi-person-badge"></i> Assign Role
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders & Application -->
+        <div class="col-md-8">
+            <!-- Writer Application -->
+            @if (Model.WriterApplication != null)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Writer Application</h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-3">Status</dt>
+                            <dd class="col-sm-9">
+                                <span class="badge @GetStatusBadgeClass(Model.WriterApplication.Status)">
+                                    @Model.WriterApplication.Status
+                                </span>
+                            </dd>
+
+                            <dt class="col-sm-3">Education Level</dt>
+                            <dd class="col-sm-9">@Model.WriterApplication.EducationLevel</dd>
+
+                            <dt class="col-sm-3">Institution</dt>
+                            <dd class="col-sm-9">@Model.WriterApplication.Institution</dd>
+
+                            <dt class="col-sm-3">Specializations</dt>
+                            <dd class="col-sm-9">@Model.WriterApplication.Specializations</dd>
+
+                            <dt class="col-sm-3">Experience</dt>
+                            <dd class="col-sm-9">@Model.WriterApplication.ExperienceYears years</dd>
+
+                            <dt class="col-sm-3">Submitted</dt>
+                            <dd class="col-sm-9">@Model.WriterApplication.SubmittedDate.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+
+                            @if (Model.WriterApplication.ReviewedDate.HasValue)
+                            {
+                                <dt class="col-sm-3">Reviewed</dt>
+                                <dd class="col-sm-9">@Model.WriterApplication.ReviewedDate.Value.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+
+                                <dt class="col-sm-3">Reviewed By</dt>
+                                <dd class="col-sm-9">@(Model.WriterApplication.ReviewedBy?.Email ?? "N/A")</dd>
+                            }
+
+                            @if (!string.IsNullOrEmpty(Model.WriterApplication.ReviewNotes))
+                            {
+                                <dt class="col-sm-3">Review Notes</dt>
+                                <dd class="col-sm-9">@Model.WriterApplication.ReviewNotes</dd>
+                            }
+                        </dl>
+
+                        @if (Model.WriterApplication.ResumePath != null)
+                        {
+                            <a href="@Model.WriterApplication.ResumePath" target="_blank" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-file-earmark-text"></i> View Resume
+                            </a>
+                        }
+                        @if (Model.WriterApplication.CertificatePath != null)
+                        {
+                            <a href="@Model.WriterApplication.CertificatePath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-award"></i> View Certificate
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Orders as Client -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Orders as Client (@Model.OrdersAsClient.Count)</h5>
+                    <a asp-controller="Orders" asp-action="Index" class="btn btn-sm btn-outline-secondary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.OrdersAsClient.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Title</th>
+                                        <th>Status</th>
+                                        <th>Budget</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.OrdersAsClient)
+                                    {
+                                        <tr>
+                                            <td>@order.OrderNumber</td>
+                                            <td>@order.Title</td>
+                                            <td><span class="badge @GetOrderStatusBadgeClass(order.Status)">@order.Status</span></td>
+                                             <td>@order.Budget.ToString("C")</td>
+                                            <td>@order.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">No orders as client</div>
+                    }
+                </div>
+            </div>
+
+            <!-- Orders as Writer -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Orders as Writer (@Model.OrdersAsWriter.Count)</h5>
+                    <a asp-controller="Orders" asp-action="Index" class="btn btn-sm btn-outline-secondary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.OrdersAsWriter.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Title</th>
+                                        <th>Status</th>
+                                        <th>Budget</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.OrdersAsWriter)
+                                    {
+                                        <tr>
+                                            <td>@order.OrderNumber</td>
+                                            <td>@order.Title</td>
+                                            <td><span class="badge @GetOrderStatusBadgeClass(order.Status)">@order.Status</span></td>
+                                            <td>@order.Budget.ToString("C")</td>
+                                            <td>@order.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">No orders as writer</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusBadgeClass(WriterApplicationStatus status)
+    {
+        return status switch
+        {
+            WriterApplicationStatus.Pending => "bg-warning text-dark",
+            WriterApplicationStatus.Approved => "bg-success",
+            WriterApplicationStatus.Rejected => "bg-danger",
+            WriterApplicationStatus.MoreInformationRequired => "bg-info text-dark",
+            _ => "bg-secondary"
+        };
+    }
+
+            private string GetOrderStatusBadgeClass(OrderStatus status)
+            {
+                return status switch
+                {
+                    OrderStatus.Draft => "bg-secondary",
+                    OrderStatus.PendingReview => "bg-info text-dark",
+                    OrderStatus.Open => "bg-primary",
+                    OrderStatus.Assigned => "bg-primary",
+                    OrderStatus.InProgress => "bg-warning text-dark",
+                    OrderStatus.DraftSubmitted => "bg-info",
+                    OrderStatus.RevisionRequested => "bg-warning text-dark",
+                    OrderStatus.Completed => "bg-success",
+                    OrderStatus.Cancelled => "bg-danger",
+                    _ => "bg-secondary"
+                };
+            }
+}

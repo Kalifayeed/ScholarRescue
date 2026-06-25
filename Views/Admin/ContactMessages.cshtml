@@ -1,0 +1,77 @@
+@model List<ScholarRescue.Models.ContactMessage>
+
+@{
+    ViewData["Title"] = "Contact Messages";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0"><i class="bi bi-envelope"></i> Contact Messages</h1>
+        <small class="text-muted">Messages submitted through the public contact form</small>
+    </div>
+    <span class="badge bg-primary fs-6 py-2 px-3 rounded-pill">@Model.Count Total</span>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox d-block mb-2" style="font-size:2rem;"></i>
+                            No contact messages yet.
+                        </td>
+                    </tr>
+                }
+                @foreach (var msg in Model)
+                {
+                    <tr class="@(msg.IsRead ? "" : "table-active")">
+                        <td>
+                            @if (msg.IsRead)
+                            {
+                                <span class="badge bg-secondary">Read</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">New</span>
+                            }
+                            @if (msg.RespondedAt.HasValue)
+                            {
+                                <span class="badge bg-success">Responded</span>
+                            }
+                        </td>
+                        <td class="fw-semibold">@msg.Name</td>
+                        <td>@msg.Email</td>
+                        <td>@msg.Subject</td>
+                        <td><small class="text-muted">@msg.SubmittedAt.ToString("MMM dd, yyyy HH:mm")</small></td>
+                        <td>
+                            <a asp-action="ContactMessageDetails" asp-route-id="@msg.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

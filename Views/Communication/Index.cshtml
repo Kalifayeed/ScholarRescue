@@ -1,0 +1,262 @@
+@model CommunicationHubViewModel
+@{
+    ViewData["Title"] = "Communication Hub";
+    var userRole = ViewBag.UserRole as string ?? "Client";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-chat-dots me-2"></i>Communication Hub
+            </h1>
+            <p class="text-muted small mb-0">Centralized messaging, notifications, tickets, and announcements</p>
+        </div>
+    </div>
+
+    <!-- Badge Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-3" data-bs-toggle="tab" data-bs-target="#messages-tab-pane" role="tab" style="cursor:pointer;">
+                    <i class="bi bi-envelope fs-3 text-primary"></i>
+                    <h6 class="mt-2 mb-0">Messages</h6>
+                    <span class="badge bg-primary rounded-pill" id="messageBadge">@Model.UnreadMessageCount</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-3" data-bs-toggle="tab" data-bs-target="#notifications-tab-pane" role="tab" style="cursor:pointer;">
+                    <i class="bi bi-bell fs-3 text-warning"></i>
+                    <h6 class="mt-2 mb-0">Notifications</h6>
+                    <span class="badge bg-warning text-dark rounded-pill" id="notificationBadge">@Model.UnreadNotificationCount</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-3" data-bs-toggle="tab" data-bs-target="#tickets-tab-pane" role="tab" style="cursor:pointer;">
+                    <i class="bi bi-ticket fs-3 text-info"></i>
+                    <h6 class="mt-2 mb-0">Support Tickets</h6>
+                    <span class="badge bg-info text-dark rounded-pill" id="ticketBadge">@Model.OpenTicketCount</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-3" data-bs-toggle="tab" data-bs-target="#announcements-tab-pane" role="tab" style="cursor:pointer;">
+                    <i class="bi bi-megaphone fs-3 text-success"></i>
+                    <h6 class="mt-2 mb-0">Announcements</h6>
+                    <span class="badge bg-success rounded-pill" id="announcementBadge">@Model.UnreadAnnouncementCount</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <ul class="nav nav-tabs card-header-tabs" id="communicationTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link @(Model.ActiveTab == "messages" ? "active" : "")" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages-tab-pane" type="button" role="tab">
+                        <i class="bi bi-envelope me-1"></i>Messages
+                        <span class="badge bg-primary ms-1" id="messageTabBadge">@Model.UnreadMessageCount</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link @(Model.ActiveTab == "notifications" ? "active" : "")" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications-tab-pane" type="button" role="tab">
+                        <i class="bi bi-bell me-1"></i>Notifications
+                        <span class="badge bg-warning text-dark ms-1" id="notificationTabBadge">@Model.UnreadNotificationCount</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link @(Model.ActiveTab == "tickets" ? "active" : "")" id="tickets-tab" data-bs-toggle="tab" data-bs-target="#tickets-tab-pane" type="button" role="tab">
+                        <i class="bi bi-ticket me-1"></i>Support Tickets
+                        <span class="badge bg-info text-dark ms-1" id="ticketTabBadge">@Model.OpenTicketCount</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link @(Model.ActiveTab == "announcements" ? "active" : "")" id="announcements-tab" data-bs-toggle="tab" data-bs-target="#announcements-tab-pane" type="button" role="tab">
+                        <i class="bi bi-megaphone me-1"></i>Announcements
+                        <span class="badge bg-success ms-1" id="announcementTabBadge">@Model.UnreadAnnouncementCount</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="communicationTabContent">
+                <!-- Messages Tab -->
+                <div class="tab-pane fade @(Model.ActiveTab == "messages" ? "show active" : "")" id="messages-tab-pane" role="tabpanel">
+                    <div class="text-center py-5">
+                        <i class="bi bi-chat-text display-1 text-muted"></i>
+                        <h4 class="mt-3">Messages</h4>
+                        <p class="text-muted">View and manage your order conversations here.</p>
+                        <a href="/Messages" class="btn btn-primary">
+                            <i class="bi bi-arrow-right me-1"></i>Go to Messages
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div class="tab-pane fade @(Model.ActiveTab == "notifications" ? "show active" : "")" id="notifications-tab-pane" role="tabpanel">
+                    <div class="text-center py-5">
+                        <i class="bi bi-bell display-1 text-muted"></i>
+                        <h4 class="mt-3">Notifications</h4>
+                        <p class="text-muted">Review your recent platform notifications.</p>
+                        <a href="/Notifications" class="btn btn-warning">
+                            <i class="bi bi-arrow-right me-1"></i>Go to Notifications
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Support Tickets Tab -->
+                <div class="tab-pane fade @(Model.ActiveTab == "tickets" ? "show active" : "")" id="tickets-tab-pane" role="tabpanel">
+                    <div class="text-center py-5">
+                        <i class="bi bi-ticket display-1 text-muted"></i>
+                        <h4 class="mt-3">Support Tickets</h4>
+                        <p class="text-muted">Submit and track support requests.</p>
+                        <a href="/SupportTickets" class="btn btn-info">
+                            <i class="bi bi-arrow-right me-1"></i>Go to Support Tickets
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Announcements Tab -->
+                <div class="tab-pane fade @(Model.ActiveTab == "announcements" ? "show active" : "")" id="announcements-tab-pane" role="tabpanel">
+                    <div id="announcementsList">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading announcements...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        // SignalR Connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/communicationHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.start().catch(err => console.error("SignalR connection error:", err));
+
+        connection.on("BadgeCountUpdated", function(data) {
+            const badgeMap = {
+                'messages': { badge: 'messageBadge', tab: 'messageTabBadge' },
+                'notifications': { badge: 'notificationBadge', tab: 'notificationTabBadge' },
+                'tickets': { badge: 'ticketBadge', tab: 'ticketTabBadge' },
+                'announcements': { badge: 'announcementBadge', tab: 'announcementTabBadge' }
+            };
+            const ids = badgeMap[data.badgeType];
+            if (ids) {
+                document.getElementById(ids.badge).textContent = data.count;
+                document.getElementById(ids.tab).textContent = data.count;
+            }
+        });
+
+        connection.on("ReceiveAnnouncement", function(data) {
+            loadAnnouncements();
+        });
+
+        // Load Announcements
+        function loadAnnouncements() {
+            fetch('/Communication/Announcements')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const container = document.getElementById('announcementsList');
+                        if (data.announcements.length === 0) {
+                            container.innerHTML = `
+                                <div class="text-center py-5">
+                                    <i class="bi bi-megaphone display-1 text-muted"></i>
+                                    <h4 class="mt-3">No Announcements</h4>
+                                    <p class="text-muted">There are no active announcements at this time.</p>
+                                </div>`;
+                            return;
+                        }
+                        let html = '';
+                        data.announcements.forEach(a => {
+                            html += `
+                                <div class="card mb-3 border-${a.priorityColor}">
+                                    <div class="card-header bg-${a.priorityColor} bg-opacity-10 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="badge bg-${a.priorityColor} me-2">${a.priority}</span>
+                                            <strong>${a.title}</strong>
+                                            ${a.broadcastType ? `<span class="badge bg-secondary ms-2">${a.broadcastType}</span>` : ''}
+                                        </div>
+                                        <small class="text-muted">${a.timeAgo}</small>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text">${a.content}</p>
+                                        <small class="text-muted">
+                                            <i class="bi bi-person me-1"></i>${a.createdBy}
+                                            <i class="bi bi-clock ms-3 me-1"></i>${a.createdDate}
+                                        </small>
+                                    </div>
+                                    <div class="card-footer bg-white text-end">
+                                        <button class="btn btn-sm btn-outline-success mark-read-btn" data-id="${a.id}">
+                                            <i class="bi bi-check2 me-1"></i>Mark as Read
+                                        </button>
+                                    </div>
+                                </div>`;
+                        });
+                        container.innerHTML = html;
+
+                        // Attach click handlers
+                        document.querySelectorAll('.mark-read-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const id = this.dataset.id;
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = `/Communication/MarkAnnouncementRead/${id}`;
+                                const token = document.createElement('input');
+                                token.name = '__RequestVerificationToken';
+                                token.type = 'hidden';
+                                token.value = '@GetAntiXsrfToken()';
+                                form.appendChild(token);
+                                document.body.appendChild(form);
+                                form.submit();
+                            });
+                        });
+                    }
+                })
+                .catch(err => console.error("Error loading announcements:", err));
+        }
+
+        // Load announcements on page load if tab is active
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeTab = '@Model.ActiveTab';
+            if (activeTab === 'announcements') {
+                loadAnnouncements();
+            }
+
+            // Listen for tab changes
+            document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(e) {
+                    if (e.target.id === 'announcements-tab') {
+                        loadAnnouncements();
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+@functions {
+    // Simple anti-XSRF token helper
+    private string GetAntiXsrfToken()
+    {
+        var tokenProvider = Context.RequestServices.GetRequiredService<Microsoft.AspNetCore.Antiforgery.IAntiforgery>();
+        var tokens = tokenProvider.GetAndStoreTokens(Context);
+        return tokens.RequestToken ?? "";
+    }
+}

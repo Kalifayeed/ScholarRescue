@@ -1,0 +1,229 @@
+@using ScholarRescue.Models.Enums
+@model TicketThreadViewModel
+@{
+    ViewData["Title"] = $"Ticket #{Model.TicketNumber}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Messages</a></li>
+                    <li class="breadcrumb-item active">@Model.TicketNumber</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Ticket Header -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center @(Model.Status == TicketStatus.Open || Model.Status == TicketStatus.PendingResponse ? "bg-warning bg-opacity-10" : Model.Status == TicketStatus.Resolved || Model.Status == TicketStatus.Closed ? "bg-success bg-opacity-10" : "bg-info bg-opacity-10")">
+                    <div>
+                        <h5 class="mb-0">[@Model.TicketNumber] @Model.Subject</h5>
+                        <small class="text-muted">
+                            Created by <strong>@Model.CreatorName</strong> on @Model.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")
+                        </small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge @GetStatusBadgeClass(Model.Status) fs-6">@Model.StatusDisplay</span>
+                        @if (Model.Priority != TicketPriority.Normal)
+                        {
+                            <span class="badge bg-danger ms-1">@Model.Priority</span>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row small text-muted mb-3">
+                        <div class="col-md-4"><strong>Department:</strong> @Model.DepartmentDisplay</div>
+                        @if (!string.IsNullOrEmpty(Model.QueueName))
+                        {
+                            <div class="col-md-4"><strong>Queue:</strong> @Model.QueueName</div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.AssignedAdminName))
+                        {
+                            <div class="col-md-4"><strong>Assigned To:</strong> @Model.AssignedAdminName</div>
+                        }
+                    </div>
+                    <div class="p-3 bg-light rounded">
+                        <p class="mb-0">@Model.Description</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attachments -->
+            @if (Model.Attachments.Any())
+            {
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-paperclip"></i> Attachments (@Model.Attachments.Count)</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var att in Model.Attachments)
+                            {
+                                <a href="@att.FilePath" target="_blank" class="btn btn-outline-secondary btn-sm" title="@att.FileName">
+                                    <i class="bi bi-file-earmark"></i> @att.FileName
+                                    <small class="text-muted">(@FormatFileSize(att.FileSizeBytes))</small>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Conversation Thread -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-chat-dots"></i> Conversation Thread (@Model.Notes.Count replies)</h6>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Original Message -->
+                    <div class="p-3 border-bottom bg-light">
+                        <div class="d-flex justify-content-between">
+                            <strong>@Model.CreatorName</strong>
+                            <small class="text-muted">@Model.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</small>
+                        </div>
+                        <p class="mb-0 mt-1">@Model.Description</p>
+                    </div>
+
+                    <!-- Replies -->
+                    @foreach (var note in Model.Notes.Where(n => !n.IsInternal || Model.IsAdmin))
+                    {
+                        <div class="p-3 border-bottom @(note.IsAdminNote ? "bg-primary bg-opacity-5" : "") @(note.IsInternal ? "bg-warning bg-opacity-10" : "")">
+                            <div class="d-flex justify-content-between">
+                                <strong>
+                                    @note.AuthorName
+                                    @if (note.IsAdminNote)
+                                    {
+                                        <span class="badge bg-primary ms-1">Staff</span>
+                                    }
+                                    @if (note.IsInternal)
+                                    {
+                                        <span class="badge bg-warning text-dark ms-1">Internal</span>
+                                    }
+                                </strong>
+                                <small class="text-muted">@note.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</small>
+                            </div>
+                            <p class="mb-0 mt-1">@note.Content</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Reply Form -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-reply"></i> Add Reply</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Status == TicketStatus.Resolved || Model.Status == TicketStatus.Closed)
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> This ticket is @Model.StatusDisplay.ToLower().
+                            <form asp-action="ReopenTicket" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-warning ms-2">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reopen Ticket
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="TicketReply" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-3">
+                                <textarea name="content" class="form-control" rows="4" placeholder="Type your reply..." required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">Attachments (optional)</label>
+                                <input type="file" name="attachments" class="form-control form-control-sm" multiple
+                                       accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.zip,.rar,.jpg,.jpeg,.png,.gif,.webp" />
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Send Reply
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header"><h6 class="mb-0"><i class="bi bi-info-circle"></i> Ticket Info</h6></div>
+                <div class="card-body small">
+                    <dl class="mb-0">
+                        <dt>Ticket Number</dt>
+                        <dd>@Model.TicketNumber</dd>
+                        <dt>Department</dt>
+                        <dd>@Model.DepartmentDisplay</dd>
+                        <dt>Status</dt>
+                        <dd><span class="badge @GetStatusBadgeClass(Model.Status)">@Model.StatusDisplay</span></dd>
+                        <dt>Queue</dt>
+                        <dd>@(Model.QueueName ?? "Not assigned")</dd>
+                        <dt>Assigned Admin</dt>
+                        <dd>@(Model.AssignedAdminName ?? "Not assigned")</dd>
+                        <dt>Created</dt>
+                        <dd>@Model.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (Model.IsAdmin)
+            {
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header"><h6 class="mb-0"><i class="bi bi-tools"></i> Admin Actions</h6></div>
+                    <div class="card-body small">
+                        <div class="d-grid gap-2">
+                            <form asp-controller="SupportTickets" asp-action="ChangeStatus" asp-route-id="@Model.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <div class="input-group input-group-sm mb-2">
+                                    <select name="newStatus" class="form-select">
+                                        @foreach (var s in Enum.GetValues<TicketStatus>())
+                                        {
+                                            <option value="@s" selected="@(s == Model.Status)">@s.ToString()</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="btn btn-outline-primary">Set Status</button>
+                                </div>
+                            </form>
+                            <a asp-controller="SupportTickets" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-list"></i> All Tickets
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    private static string GetStatusBadgeClass(TicketStatus status) => status switch
+    {
+        TicketStatus.Open => "bg-primary",
+        TicketStatus.PendingResponse => "bg-warning text-dark",
+        TicketStatus.InProgress => "bg-info text-dark",
+        TicketStatus.WaitingForUser => "bg-secondary",
+        TicketStatus.Resolved => "bg-success",
+        TicketStatus.Closed => "bg-dark",
+        _ => "bg-secondary"
+    };
+
+    private static string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / (1024.0 * 1024.0):F1} MB";
+    }
+}
+
+<style>
+    .bg-opacity-5 { --bs-bg-opacity: 0.05; }
+</style>

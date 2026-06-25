@@ -1,0 +1,202 @@
+@model ScholarRescue.Models.Order
+@using ScholarRescue.Models.Enums
+@{
+    ViewData["Title"] = $"Order {Model.OrderNumber}";
+    Layout = "~/Views/Shared/_Layout.App.cshtml";
+    var myApplication = ViewBag.MyApplication as ScholarRescue.Models.OrderApplication;
+    var isAssigned = (bool)(ViewBag.IsAssignedWriter ?? false);
+    var isAdmin = (bool)(ViewBag.IsAdmin ?? false);
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0"><i class="bi bi-file-earmark-text"></i> Order @Model.OrderNumber</h1>
+            <small class="text-muted">@Model.Title</small>
+        </div>
+        <a asp-action="AvailableOrders" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Order Details</h5>
+                </div>
+                <div class="card-body">
+                    <h4 class="mb-3">@Model.Title</h4>
+
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">Subject:</dt>
+                        <dd class="col-sm-9">@Model.Subject</dd>
+
+                        <dt class="col-sm-3">Academic Level:</dt>
+                        <dd class="col-sm-9"><span class="badge bg-info text-dark">@Model.AcademicLevel</span></dd>
+
+                        <dt class="col-sm-3">Pages:</dt>
+                        <dd class="col-sm-9">@Model.Pages</dd>
+
+                        <dt class="col-sm-3">Sources Required:</dt>
+                        <dd class="col-sm-9">@Model.NumberOfSources</dd>
+
+                        <dt class="col-sm-3">Citation Format:</dt>
+                        <dd class="col-sm-9">@Model.CitationFormat</dd>
+
+                        <dt class="col-sm-3">Deadline:</dt>
+                        <dd class="col-sm-9">
+                            <span class="@(Model.Deadline < DateTime.UtcNow ? "text-danger" : "")">
+                                @Model.Deadline.ToString("MMMM dd, yyyy 'at' HH:mm")
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-3">Posted:</dt>
+                        <dd class="col-sm-9">@Model.CreatedAt.ToString("MMMM dd, yyyy 'at' HH:mm")</dd>
+                    </dl>
+
+                    <hr />
+
+                    <h6 class="fw-bold">Instructions</h6>
+                    <div class="bg-light p-3 rounded">
+                        @Html.Raw(Model.Description.Replace("\n", "<br />"))
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Documents != null && Model.Documents.Any())
+            {
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Attachments</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            @foreach (var doc in Model.Documents)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="bi bi-file-earmark"></i>
+                                        @doc.FileName
+                                    </span>
+                                    <a href="@doc.FilePath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Budget</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h2 class="text-success mb-1">@Model.Budget.ToString("C")</h2>
+                    <small class="text-muted">Your earnings: <strong>@Model.WriterEarnings.ToString("C")</strong></small>
+                </div>
+            </div>
+
+            @if (!isAssigned && !isAdmin)
+            {
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Apply for this Order</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (myApplication != null)
+                        {
+                            <div class="alert alert-info">
+                                <h6 class="alert-heading">
+                                    <i class="bi bi-check-circle"></i> Application Submitted
+                                </h6>
+                                <hr />
+                                <p class="mb-1">
+                                    <strong>Status:</strong>
+                                    <span class="badge @GetApplicationBadgeClass(myApplication.Status)">
+                                        @myApplication.Status
+                                    </span>
+                                </p>
+                                <p class="mb-0 small">
+                                    Applied on @myApplication.AppliedAt.ToString("MMM dd, yyyy 'at' HH:mm")
+                                </p>
+                            </div>
+                            @if (myApplication.Status == OrderApplicationStatus.Pending)
+                            {
+                                <form asp-action="WithdrawApplication" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="applicationId" value="@myApplication.Id" />
+                                    <button type="submit" class="btn btn-outline-danger w-100">
+                                        <i class="bi bi-x"></i> Withdraw Application
+                                    </button>
+                                </form>
+                            }
+                        }
+                        else
+                        {
+                            <form asp-action="ApplyForOrder" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <div class="mb-3">
+                                    <label for="message" class="form-label small">Message to admin (optional)</label>
+                                    <textarea name="message" class="form-control" rows="3"
+                                              placeholder="Why are you a good fit for this order?"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100"
+                                        onclick="return confirm('Apply for this order?');">
+                                    <i class="bi bi-send"></i> Apply For Order
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Client</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1">
+                        <i class="bi bi-person"></i>
+                        <strong>@Model.Client.FirstName @Model.Client.LastName</strong>
+                    </p>
+                    <p class="mb-0 small text-muted">
+                        <i class="bi bi-envelope"></i> @Model.Client.Email
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetApplicationBadgeClass(OrderApplicationStatus status)
+    {
+        return status switch
+        {
+            OrderApplicationStatus.Pending => "bg-warning text-dark",
+            OrderApplicationStatus.Selected => "bg-success",
+            OrderApplicationStatus.Declined => "bg-danger",
+            OrderApplicationStatus.Withdrawn => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}

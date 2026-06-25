@@ -1,0 +1,106 @@
+@model ScholarRescue.ViewModels.Notification.NotificationViewModel
+@{
+    ViewData["Title"] = "Notification Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Notifications</a></li>
+            <li class="breadcrumb-item active">@Model.Title</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-bell"></i> Notification Details</h5>
+            <div>
+                <a asp-action="Index" class="btn btn-light btn-sm">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-sm-3 fw-bold">Title:</div>
+                <div class="col-sm-9">@Model.Title</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3 fw-bold">Message:</div>
+                <div class="col-sm-9">
+                    <p class="mb-0 text-break">@Model.Message</p>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3 fw-bold">Category:</div>
+                <div class="col-sm-9">
+                    <span class="badge @GetBadgeClass(Model.Category)">@Model.Category</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3 fw-bold">Status:</div>
+                <div class="col-sm-9">
+                    @if (Model.IsRead)
+                    {
+                        <span class="badge bg-secondary">Read</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-primary">Unread</span>
+                    }
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3 fw-bold">Received:</div>
+                <div class="col-sm-9">
+                    @Model.CreatedDate.ToLocalTime().ToString("MMMM dd, yyyy h:mm tt")
+                    <small class="text-muted">(@Model.TimeAgo)</small>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.RelatedUrl))
+            {
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Related:</div>
+                    <div class="col-sm-9">
+                        <a href="@Model.RelatedUrl" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-box-arrow-up-right"></i> View Related
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="card-footer d-flex gap-2">
+            <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </form>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Notifications
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+}
+
+@functions {
+    private static string GetBadgeClass(ScholarRescue.Models.Enums.NotificationCategory cat)
+    {
+        return cat switch
+        {
+            ScholarRescue.Models.Enums.NotificationCategory.Messages => "bg-primary",
+            ScholarRescue.Models.Enums.NotificationCategory.Orders => "bg-success",
+            ScholarRescue.Models.Enums.NotificationCategory.Assignments => "bg-warning text-dark",
+            ScholarRescue.Models.Enums.NotificationCategory.Revisions => "bg-info text-dark",
+            ScholarRescue.Models.Enums.NotificationCategory.Applications => "bg-success",
+            ScholarRescue.Models.Enums.NotificationCategory.System => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}

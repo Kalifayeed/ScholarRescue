@@ -1,0 +1,57 @@
+@{
+    ViewData["Title"] = "Assign Role";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0"><i class="bi bi-shield"></i> Assign Role</h1>
+            <small class="text-muted">Change role for <strong>@ViewBag.UserName</strong></small>
+        </div>
+        <a asp-action="Users" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Users
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h5>User: @ViewBag.UserName</h5>
+                        <p class="text-muted mb-0">Current Role: <strong>@ViewBag.CurrentRole</strong></p>
+                    </div>
+
+                    <form asp-action="AssignRole" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@ViewBag.UserId" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Select New Role</label>
+                            <select name="role" class="form-select form-select-lg">
+                                <option value="">-- No Role --</option>
+                                @foreach (var role in (List<string>)ViewBag.AllRoles)
+                                {
+                                    <option value="@role" selected="@(role == ViewBag.CurrentRole ? true : null)">
+                                        @role
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Users" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Update Role
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+}

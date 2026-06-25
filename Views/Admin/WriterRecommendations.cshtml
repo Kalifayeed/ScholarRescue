@@ -1,0 +1,251 @@
+@model ScholarRescue.ViewModels.Admin.WriterRecommendationsViewModel
+@{
+    ViewData["Title"] = $"Writer Recommendations - Order #{Model.OrderNumber}";
+}
+
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">@Html.ActionLink("Dashboard", "Dashboard")</li>
+            <li class="breadcrumb-item">@Html.ActionLink("Orders", "OrderManagement")</li>
+            <li class="breadcrumb-item active" aria-current="page">Recommendations</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Writer Recommendations</h1>
+            <p class="text-muted mb-0">
+                Order #@Model.OrderNumber &mdash; @Model.OrderTitle
+                <span class="badge bg-info ms-2">@Model.OrderSubject</span>
+                <span class="badge bg-secondary ms-1">@Model.AcademicLevel</span>
+            </p>
+        </div>
+        <div class="text-end">
+            <a asp-action="OrderManagement" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Orders
+            </a>
+        </div>
+    </div>
+
+    @if (Model.IsAssigned)
+    {
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill"></i>
+            This order is already assigned to <strong>@Model.AssignedWriterName</strong>.
+            Recommendations are shown for reference.
+        </div>
+    }
+
+    <!-- Auto-Assignment Status -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-gear-fill me-2"></i>Auto-Assignment Engine</h5>
+            @if (Model.AutoAssignment.IsEnabled)
+            {
+                <span class="badge bg-success">Automatic Assignment</span>
+            }
+            else if (Model.AutoAssignment.IsRecommendationOnly)
+            {
+                <span class="badge bg-warning text-dark">Recommendation Only</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary">Disabled</span>
+            }
+        </div>
+        <div class="card-body">
+            <p class="mb-2">@Model.AutoAssignment.StatusMessage</p>
+            @if (Model.AutoAssignment.CanAutoAssign)
+            {
+                <form asp-action="ExecuteAutoAssign" method="post" class="d-inline">
+                    <input type="hidden" name="orderId" value="@Model.OrderId" />
+                    <button type="submit" class="btn btn-success btn-sm"
+                            onclick="return confirm('Auto-assign the highest-ranked writer to this order?')">
+                        <i class="bi bi-lightning-fill"></i> Execute Auto-Assignment
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <!-- Top Writers Recommendation List -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">
+                <i class="bi bi-trophy-fill text-warning me-2"></i>
+                Top 10 Recommended Writers
+                <span class="badge bg-primary ms-2">@Model.Recommendations.Count matches</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            @if (!Model.Recommendations.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-search" style="font-size: 2rem;"></i>
+                    <p class="mt-2">No eligible writers found. Orders must be in "Open" status.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Writer</th>
+                                <th>Match</th>
+                                <th>Rating</th>
+                                <th>Reliability</th>
+                                <th>Capacity</th>
+                                <th>Quality</th>
+                                <th>Completed</th>
+                                <th>Reasoning</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var rec in Model.Recommendations)
+                            {
+                                <tr class="@(rec.Rank == 1 ? "table-warning" : "")">
+                                    <td class="text-center">
+                                        @if (rec.Rank == 1)
+                                        {
+                                            <span class="badge bg-warning text-dark rounded-pill fs-6">#1</span>
+                                        }
+                                        else if (rec.Rank <= 3)
+                                        {
+                                            <span class="badge bg-info rounded-pill">#@rec.Rank</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">#@rec.Rank</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong>@rec.WriterName</strong>
+                                        <br /><small class="text-muted">@rec.WriterEmail</small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 8px; width: 80px;">
+                                                <div class="progress-bar @(rec.MatchPercentage >= 80 ? "bg-success" : rec.MatchPercentage >= 60 ? "bg-warning" : "bg-danger")"
+                                                     role="progressbar" style="width: @rec.MatchPercentage%"></div>
+                                            </div>
+                                            <strong>@rec.MatchPercentage%</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (rec.Rating > 0)
+                                        {
+                                            <span>@rec.Rating.ToString("F1") ⭐</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="@(rec.ReliabilityScore >= 90 ? "text-success" : rec.ReliabilityScore >= 70 ? "text-warning" : "text-danger")">
+                                            @rec.ReliabilityScore%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (rec.CapacityPercent >= 80)
+                                        {
+                                            <span class="text-danger">@rec.CapacityPercent%</span>
+                                        }
+                                        else if (rec.CapacityPercent >= 50)
+                                        {
+                                            <span class="text-warning">@rec.CapacityPercent%</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success">@rec.CapacityPercent%</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="@(rec.QualityScore >= 85 ? "text-success" : "text-warning")">@rec.QualityScore</span>
+                                    </td>
+                                    <td>@rec.CompletedOrders</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="popover"
+                                                title="Why ranked highly?" data-bs-content="@rec.Explanation">
+                                            <i class="bi bi-info-circle"></i>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        @if (!Model.IsAssigned)
+                                        {
+                                            <form asp-action="AssignWriter" method="post" class="d-inline">
+                                                <input type="hidden" name="orderId" value="@Model.OrderId" />
+                                                <input type="hidden" name="writerId" value="@rec.WriterId" />
+                                                <button type="submit" class="btn btn-sm btn-primary"
+                                                        onclick="return confirm('Assign @rec.WriterName to this order?')">
+                                                    <i class="bi bi-person-check"></i> Assign
+                                                </button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Matching Explanation Section -->
+    @if (Model.Recommendations.Any())
+    {
+        var top = Model.Recommendations.First();
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Top Match Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <h6>@top.WriterName &mdash; @top.MatchPercentage% Match</h6>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Expertise Match
+                                <span class="badge bg-primary rounded-pill">@top.MatchPercentage%</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Reliability Match
+                                <span class="badge bg-info rounded-pill">@top.ReliabilityScore%</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Performance Match
+                                <span class="badge bg-success rounded-pill">@top.QualityScore</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Capacity Match
+                                <span class="badge bg-secondary rounded-pill">@top.CapacityPercent% used</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded">
+                            <strong>Detailed Reasoning:</strong>
+                            <pre class="mt-2 mb-0 small" style="white-space: pre-wrap;">@top.Explanation</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            popoverTriggerList.map(function (el) {
+                return new bootstrap.Popover(el, { trigger: 'hover' });
+            });
+        });
+    </script>
+}

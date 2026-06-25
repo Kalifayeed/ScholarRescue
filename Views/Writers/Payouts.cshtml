@@ -1,0 +1,161 @@
+@model List<PayoutRequest>
+@{
+    ViewData["Title"] = "Payout Requests";
+}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-action="Wallet">My Wallet</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Payout Requests</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-cash-stack"></i> Payout Requests</h1>
+        <a asp-action="Wallet" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Back to Wallet
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Payout Window Status -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Payout Window</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <span class="badge @(ViewBag.PayoutWindowOpen ? "bg-success" : "bg-secondary") fs-6 me-3">
+                    <i class="bi bi-@(ViewBag.PayoutWindowOpen ? "check-circle" : "x-circle")"></i>
+                    @(ViewBag.PayoutWindowOpen ? "OPEN" : "CLOSED")
+                </span>
+                <div>
+                    <p class="mb-1">@ViewBag.PayoutWindowMessage</p>
+                    @if (!ViewBag.PayoutWindowOpen)
+                    {
+                        <small class="text-muted">
+                            Next window opens in: 
+                            <strong>@ViewBag.TimeUntilNextWindow.Days d @ViewBag.TimeUntilNextWindow.Hours h @ViewBag.TimeUntilNextWindow.Minutes m</strong>
+                        </small>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Payout Form -->
+    @if (ViewBag.PayoutWindowOpen)
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Request New Payout</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="RequestPayout" method="post" class="row g-3 align-items-end">
+                    @Html.AntiForgeryToken()
+                    <div class="col-md-4">
+                        <label class="form-label">Amount ($)</label>
+                        <input type="number" name="amount" class="form-control" step="0.01" min="1" required placeholder="Enter amount" />
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-send"></i> Request Payout
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Only available balance can be withdrawn. Minimum: $1.00</small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    <!-- Payout History -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-clock-history"></i> Payout History</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Requested</th>
+                            <th>Approved</th>
+                            <th>Paid</th>
+                            <th>Transaction #</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                    No payout requests yet.
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var payout in Model)
+                        {
+                            <tr>
+                                <td>@payout.Id</td>
+                                <td><strong>$@payout.Amount.ToString("N2")</strong></td>
+                                <td>
+                                    @switch (payout.Status)
+                                    {
+                                        case PayoutStatus.Pending:
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            break;
+                                        case PayoutStatus.Approved:
+                                            <span class="badge bg-info text-dark">Approved</span>
+                                            break;
+                                        case PayoutStatus.Rejected:
+                                            <span class="badge bg-danger">Rejected</span>
+                                            break;
+                                        case PayoutStatus.Paid:
+                                            <span class="badge bg-success">Paid</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@payout.RequestedDate.ToString("MMM dd, yyyy HH:mm")</td>
+                                <td>@payout.ApprovedDate?.ToString("MMM dd, yyyy")</td>
+                                <td>@payout.PayoutDate?.ToString("MMM dd, yyyy")</td>
+                                <td><code>@payout.TransactionNumber</code></td>
+                            </tr>
+                            @if (!string.IsNullOrEmpty(payout.AdminNotes))
+                            {
+                                <tr class="table-light">
+                                    <td colspan="7">
+                                        <small class="text-muted">
+                                            <strong>Admin Notes:</strong> @payout.AdminNotes
+                                        </small>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

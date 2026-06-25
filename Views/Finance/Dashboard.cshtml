@@ -1,0 +1,142 @@
+@model FinancialDashboardViewModel
+@{
+    ViewData["Title"] = "Financial Dashboard";
+}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Financial Dashboard</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-cash-coin"></i> Financial Dashboard</h1>
+        <div>
+            <a asp-action="Transactions" class="btn btn-outline-primary">
+                <i class="bi bi-list"></i> Transactions
+            </a>
+            <a asp-action="Payouts" class="btn btn-outline-success">
+                <i class="bi bi-wallet2"></i> Payouts
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-building"></i> Platform Balance</h5>
+                    <h2 class="mb-0">$@Model.PlatformBalance.ToString("N2")</h2>
+                    <small>Available balance</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-graph-up"></i> Total Revenue</h5>
+                    <h2 class="mb-0">$@Model.TotalRevenue.ToString("N2")</h2>
+                    <small>Lifetime platform revenue</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-percent"></i> Total Commission</h5>
+                    <h2 class="mb-0">$@Model.TotalCommission.ToString("N2")</h2>
+                    <small>Lifetime commission collected</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-clock"></i> Pending Payouts</h5>
+                    <h2 class="mb-0">$@Model.PendingPayouts.ToString("N2")</h2>
+                    <small>@Model.PendingPayoutCount pending requests</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-success"><i class="bi bi-check-circle"></i> Approved Payouts</h5>
+                    <h3>$@Model.ApprovedPayouts.ToString("N2")</h3>
+                    <small>Awaiting payment</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-info"><i class="bi bi-check-all"></i> Paid Payouts</h5>
+                    <h3>$@Model.PaidPayouts.ToString("N2")</h3>
+                    <small>Total paid out to writers</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-secondary h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary"><i class="bi bi-journal-text"></i> Total Transactions</h5>
+                    <h3>@Model.TotalTransactions.ToString("N0")</h3>
+                    <small>Ledger entries recorded</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Reports & Management</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <a asp-action="RevenueReport" class="btn btn-outline-primary w-100 text-start">
+                        <i class="bi bi-currency-dollar"></i> Revenue Report
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a asp-action="CommissionReport" class="btn btn-outline-success w-100 text-start">
+                        <i class="bi bi-percent"></i> Commission Report
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a asp-action="WriterEarningsReport" class="btn btn-outline-info w-100 text-start">
+                        <i class="bi bi-person-badge"></i> Writer Earnings
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a asp-action="PayoutReport" class="btn btn-outline-warning w-100 text-start">
+                        <i class="bi bi-wallet2"></i> Payout Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

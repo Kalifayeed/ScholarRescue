@@ -1,0 +1,35 @@
+@model List<ScholarRescue.Models.Order>
+@using ScholarRescue.Models.Enums
+@{ ViewData["Title"] = "Pending QA Review"; }
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1"><i class="bi bi-check2-square me-2"></i>Pending QA Review</h4>
+        <p class="text-muted small mb-0">Review final submissions before delivery to clients.</p>
+    </div>
+</div>
+
+@if (!Model.Any()) { <div class="text-center py-5"><i class="bi bi-check2-square fs-1 text-muted"></i><p class="text-muted mt-2">No orders pending QA review.</p></div> }
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light"><tr><th>Order #</th><th>Title</th><th>Writer</th><th>Client</th><th>Updated</th><th class="text-end">Actions</th></tr></thead>
+                <tbody>
+                    @foreach (var o in Model)
+                    {
+                        <tr>
+                            <td class="fw-medium">@o.OrderNumber</td>
+                            <td>@(o.Title.Length > 40 ? o.Title[..40] + "..." : o.Title)</td>
+                            <td>@(o.AssignedWriter?.FirstName ?? "N/A") @(o.AssignedWriter?.LastName ?? "")</td>
+                            <td>@o.Client.FirstName @o.Client.LastName</td>
+                            <td class="text-muted small">@o.UpdatedAt.ToString("MMM dd, yyyy")</td>
+                            <td class="text-end"><a asp-action="QaReview" asp-route-orderId="@o.Id" class="btn btn-primary btn-sm"><i class="bi bi-check-circle me-1"></i>Review</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

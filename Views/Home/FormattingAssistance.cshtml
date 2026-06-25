@@ -1,0 +1,111 @@
+@{
+    ViewData["Title"] = "Formatting Assistance";
+    Layout = "~/Views/Shared/_Layout.Public.cshtml";
+}
+
+<!-- Hero Section -->
+<section class="py-5" style="background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold text-white mb-3">Formatting Assistance</h1>
+                <p class="text-white-50 lead mb-0">
+                    Professional formatting to ensure your academic documents comply with institutional and stylistic guidelines.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-accent btn-lg px-4 me-2">
+                    <i class="bi bi-rocket-takeoff me-2"></i>Get Started
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Content Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <h2 class="fw-bold mb-4">Professional Formatting for Academic Compliance</h2>
+                <p class="text-muted lead mb-4">
+                    Academic institutions often require documents to follow strict formatting guidelines. Our formatting assistance service helps students ensure that assignments, dissertations, theses, research papers, and reports comply with institutional and academic standards.
+                </p>
+                <p class="text-muted">
+                    We assist with page layouts, headings, margins, spacing, font requirements, tables of contents, page numbering, appendices, figures, tables, and overall document presentation. Many students spend significant amounts of time adjusting formatting details instead of focusing on content and research.
+                </p>
+                <p class="text-muted">
+                    Our specialists help streamline this process by applying the required formatting standards accurately and consistently throughout the document. Whether your institution requires APA, MLA, Chicago, Harvard, or custom university guidelines, we ensure that your work meets the specified requirements while maintaining a professional appearance.
+                </p>
+                <p class="text-muted">
+                    Proper formatting improves readability, demonstrates attention to detail, and creates a stronger impression during assessment and review. By ensuring compliance with institutional expectations, our formatting assistance service allows students to submit polished, professional, and academically compliant documents with confidence.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5" style="background:var(--bg-main);">
+    <div class="container">
+        <h2 class="fw-bold text-center mb-5">Why Choose Our Formatting Assistance Service</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-secondary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
+                            <i class="bi bi-layout-text-window fs-4 text-secondary"></i>
+                        </div>
+                        <h6 class="fw-bold">Comprehensive Layout</h6>
+                        <p class="text-muted small mb-0">Assistance with margins, headings, spacing, fonts, page numbers, and tables of contents.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
+                            <i class="bi bi-file-earmark-check fs-4 text-primary"></i>
+                        </div>
+                        <h6 class="fw-bold">Style Compliance</h6>
+                        <p class="text-muted small mb-0">Adherence to APA, MLA, Chicago, Harvard, and custom university formatting standards.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
+                            <i class="bi bi-clock-history fs-4 text-success"></i>
+                        </div>
+                        <h6 class="fw-bold">Time Savings</h6>
+                        <p class="text-muted small mb-0">Focus on your content and research while we handle the formatting requirements.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 cta-section">
+    <div class="container text-center">
+        <h2 class="fw-bold text-white mb-3">Ready to Perfect Your Document Formatting?</h2>
+        <p class="text-white-50 mb-4">Ensure your academic work meets institutional standards with a professional, polished appearance.</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-accent btn-lg px-4">
+                <i class="bi bi-rocket-takeoff me-2"></i>Get Started
+            </a>
+            <a asp-controller="Home" asp-action="OrderNow" class="btn btn-outline-light btn-lg px-4">
+                <i class="bi bi-cart me-2"></i>Order Now
+            </a>
+            <a asp-controller="Account" asp-action="Register" asp-route-userType="Writer" class="btn btn-outline-light btn-lg px-4">
+                <i class="bi bi-person-plus me-2"></i>Register as Tutor
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .cta-section { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
+</style>

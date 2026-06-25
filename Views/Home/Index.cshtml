@@ -1,0 +1,447 @@
+﻿@{
+    ViewData["Title"] = "Home";
+    Layout = "~/Views/Shared/_Layout.Public.cshtml";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-6">
+                <h1 class="display-5 fw-bold text-white mb-3">ScholarRescue Academic Support Platform</h1>
+                <p class="lead text-white-50 mb-4">
+                    Connect with qualified tutors, research mentors, editors, proofreaders and academic support professionals.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a asp-controller="Home" asp-action="OrderNow" class="btn btn-accent btn-lg px-4">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>Order Now
+                    </a>
+                    <a asp-controller="Home" asp-action="BecomeATutor" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-person-plus me-2"></i>Become a Tutor
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block text-center">
+                <div class="hero-illustration">
+                    <i class="bi bi-mortarboard" style="font-size:8rem;color:rgba(255,255,255,0.15);"></i>
+                    <i class="bi bi-book" style="font-size:4rem;color:rgba(245,166,35,0.3);position:absolute;top:20%;right:20%;"></i>
+                    <i class="bi bi-pencil-square" style="font-size:3rem;color:rgba(255,255,255,0.2);position:absolute;bottom:20%;left:20%;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Our Services</h2>
+            <p class="text-muted">Comprehensive academic support tailored to your needs</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm service-card text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;">
+                            <i class="bi bi-person-workspace fs-3 text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold">Tutoring</h5>
+                        <p class="text-muted small">One-on-one tutoring sessions with qualified professionals across various academic subjects.</p>
+                        <a asp-controller="Home" asp-action="Tutoring" class="btn btn-outline-primary btn-sm">Learn More <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm service-card text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;">
+                            <i class="bi bi-search fs-3 text-success"></i>
+                        </div>
+                        <h5 class="fw-bold">Research Guidance</h5>
+                        <p class="text-muted small">Expert guidance through every stage of your research process, from proposal to completion.</p>
+                        <a asp-controller="Home" asp-action="ResearchGuidance" class="btn btn-outline-success btn-sm">Learn More <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm service-card text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;">
+                            <i class="bi bi-pencil fs-3 text-info"></i>
+                        </div>
+                        <h5 class="fw-bold">Editing</h5>
+                        <p class="text-muted small">Professional editing services to refine your academic papers and scholarly documents.</p>
+                        <a asp-controller="Home" asp-action="Editing" class="btn btn-outline-info btn-sm">Learn More <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm service-card text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;">
+                            <i class="bi bi-check2-circle fs-3 text-warning"></i>
+                        </div>
+                        <h5 class="fw-bold">Proofreading</h5>
+                        <p class="text-muted small">Thorough proofreading to eliminate errors and ensure your work meets the highest standards.</p>
+                        <a asp-controller="Home" asp-action="Proofreading" class="btn btn-outline-warning btn-sm">Learn More <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm service-card text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;">
+                            <i class="bi bi-book fs-3 text-danger"></i>
+                        </div>
+                        <h5 class="fw-bold">Citation Assistance</h5>
+                        <p class="text-muted small">Expert help with citations and references in APA, MLA, Chicago, Harvard and more.</p>
+                        <a asp-controller="Home" asp-action="CitationAssistance" class="btn btn-outline-danger btn-sm">Learn More <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm service-card text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle bg-secondary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;">
+                            <i class="bi bi-layout-text-window fs-3 text-secondary"></i>
+                        </div>
+                        <h5 class="fw-bold">Formatting Assistance</h5>
+                        <p class="text-muted small">Ensure your papers meet institutional formatting guidelines and academic standards.</p>
+                        <a asp-controller="Home" asp-action="FormattingAssistance" class="btn btn-outline-secondary btn-sm">Learn More <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm service-card text-center p-4">
+                    <div class="card-body">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;">
+                            <i class="bi bi-lightbulb fs-3 text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold">Academic Coaching</h5>
+                        <p class="text-muted small">Personalized academic coaching to develop study skills and achieve your educational goals.</p>
+                        <a asp-controller="Home" asp-action="About" class="btn btn-outline-primary btn-sm">Learn More <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose ScholarRescue -->
+<section class="py-5" style="background:var(--bg-main);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Why Choose ScholarRescue</h2>
+            <p class="text-muted">Trusted by thousands of students worldwide</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-patch-check-fill text-primary fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Verified Tutors</h6>
+                        <p class="text-muted small mb-0">All tutors undergo rigorous verification of qualifications and expertise.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-chat-dots-fill text-success fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Secure Messaging</h6>
+                        <p class="text-muted small mb-0">Communicate safely through our encrypted messaging system.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-tag-fill text-info fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Transparent Pricing</h6>
+                        <p class="text-muted small mb-0">Clear, upfront pricing with no hidden fees or surprise charges.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-shield-lock-fill text-warning fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Protected Payments</h6>
+                        <p class="text-muted small mb-0">Your payments are held securely until you're satisfied with the work.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-graph-up-arrow text-danger fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Progress Tracking</h6>
+                        <p class="text-muted small mb-0">Monitor the progress of your orders in real-time through your dashboard.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                        <i class="bi bi-award-fill text-primary fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Quality Assurance</h6>
+                        <p class="text-muted small mb-0">Every deliverable is reviewed to ensure it meets the highest academic standards.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">How It Works</h2>
+            <p class="text-muted">Getting academic support has never been easier</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6 text-center">
+                <div class="position-relative">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center fw-bold fs-4 mb-3" style="width:64px;height:64px;">1</div>
+                    <h6 class="fw-bold">Create Account</h6>
+                    <p class="text-muted small">Sign up for free and set up your academic profile in minutes.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 text-center">
+                <div class="position-relative">
+                    <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center fw-bold fs-4 mb-3" style="width:64px;height:64px;">2</div>
+                    <h6 class="fw-bold">Submit Request</h6>
+                    <p class="text-muted small">Describe your academic support needs and submit your request.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 text-center">
+                <div class="position-relative">
+                    <div class="rounded-circle bg-accent text-white d-inline-flex align-items-center justify-content-center fw-bold fs-4 mb-3" style="width:64px;height:64px;background:var(--accent);">3</div>
+                    <h6 class="fw-bold">Get Matched</h6>
+                    <p class="text-muted small">We match you with the best tutor for your specific needs.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 text-center">
+                <div class="position-relative">
+                    <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center fw-bold fs-4 mb-3" style="width:64px;height:64px;">4</div>
+                    <h6 class="fw-bold">Track Progress</h6>
+                    <p class="text-muted small">Monitor the progress of your order through your personal dashboard.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 text-center">
+                <div class="position-relative">
+                    <div class="rounded-circle bg-info text-white d-inline-flex align-items-center justify-content-center fw-bold fs-4 mb-3" style="width:64px;height:64px;">5</div>
+                    <h6 class="fw-bold">Receive Assistance</h6>
+                    <p class="text-muted small">Get high-quality academic support delivered to your specifications.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5" style="background:var(--bg-main);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">What Our Students Say</h2>
+            <p class="text-muted">Trusted by students from universities worldwide</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="text-muted mb-3">"ScholarRescue connected me with an incredible research mentor who helped me navigate my thesis. The platform is easy to use and the tutors are highly qualified."</p>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:40px;height:40px;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div>
+                                <strong class="small">Sarah M.</strong>
+                                <div class="text-muted" style="font-size:0.75rem;">PhD Student, Education</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="text-muted mb-3">"The transparent pricing and secure payment system gave me confidence. My editing tutor delivered exceptional work on time. Highly recommended!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:40px;height:40px;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div>
+                                <strong class="small">James K.</strong>
+                                <div class="text-muted" style="font-size:0.75rem;">Masters Student, Business</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-half text-warning"></i>
+                        </div>
+                        <p class="text-muted mb-3">"The progress tracking feature is fantastic. I could see exactly where my order was at every step. The messaging system made communication seamless."</p>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:40px;height:40px;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div>
+                                <strong class="small">Emily R.</strong>
+                                <div class="text-muted" style="font-size:0.75rem;">Undergraduate, Psychology</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Preview -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Frequently Asked Questions</h2>
+            <p class="text-muted">Find answers to common questions</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="homeFaq">
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                How do I get started as a student?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#homeFaq">
+                            <div class="accordion-body text-muted">
+                                Simply create an account, submit your academic support request with the details of what you need, and we'll match you with a qualified tutor. You can track your order progress through your dashboard.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                How are tutors verified?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#homeFaq">
+                            <div class="accordion-body text-muted">
+                                All tutors undergo a rigorous verification process that includes credential verification, academic background checks, and a sample work assessment. Only qualified professionals are approved on the platform.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                Is my payment secure?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#homeFaq">
+                            <div class="accordion-body text-muted">
+                                Yes. Your payment is held in escrow until you approve the delivered work. This ensures both parties are protected throughout the process.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                What subjects do you cover?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#homeFaq">
+                            <div class="accordion-body text-muted">
+                                We cover a wide range of academic subjects including sciences, humanities, business, engineering, nursing, social sciences, and many more. Our tutors specialize in various academic levels from undergraduate to PhD.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                Can I communicate directly with my tutor?
+                            </button>
+                        </h2>
+                        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#homeFaq">
+                            <div class="accordion-body text-muted">
+                                Yes, our secure messaging system allows you to communicate directly with your assigned tutor. You can share files, ask questions, and track progress all within the platform.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <a asp-controller="Home" asp-action="FAQ" class="btn btn-primary">View All FAQs <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 cta-section">
+    <div class="container text-center">
+        <h2 class="fw-bold text-white mb-3">Need Academic Support?</h2>
+        <p class="text-white-50 mb-4">Join thousands of students who trust ScholarRescue for their academic success.</p>
+        <a asp-controller="Account" asp-action="Register" class="btn btn-accent btn-lg px-5">
+            <i class="bi bi-rocket-takeoff me-2"></i>Create Account
+        </a>
+    </div>
+</section>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        padding: 5rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-illustration {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 300px;
+    }
+    .min-vh-50 { min-height: 50vh; }
+    .service-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .service-card:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.15) !important; }
+    .cta-section {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+</style>

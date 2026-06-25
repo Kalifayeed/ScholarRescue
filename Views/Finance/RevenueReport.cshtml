@@ -1,0 +1,119 @@
+@model List<RevenueReportRow>
+@{
+    ViewData["Title"] = "Revenue Report";
+    var fromDate = ViewBag.FromDate as DateTime?;
+    var toDate = ViewBag.ToDate as DateTime?;
+}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-action="Dashboard">Financial Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Revenue Report</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-currency-dollar"></i> Revenue Report</h1>
+    </div>
+
+    <!-- Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="fromDate" class="form-control" value="@fromDate?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="toDate" class="form-control" value="@toDate?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-filter"></i> Filter</button>
+                    <a asp-action="RevenueReport" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Total Revenue</h5>
+                    <h3>$@Model.Sum(r => r.TotalRevenue).ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5>Total Commission</h5>
+                    <h3>$@Model.Sum(r => r.TotalCommission).ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Total Writer Earnings</h5>
+                    <h3>$@Model.Sum(r => r.TotalWriterEarnings).ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Date</th>
+                            <th>Orders</th>
+                            <th>Revenue</th>
+                            <th>Commission</th>
+                            <th>Writer Earnings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                    No revenue data found.
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var row in Model)
+                        {
+                            <tr>
+                                <td>@row.Period</td>
+                                <td>@row.Date.ToString("MMM dd, yyyy")</td>
+                                <td>@row.OrderCount</td>
+                                <td>$@row.TotalRevenue.ToString("N2")</td>
+                                <td>$@row.TotalCommission.ToString("N2")</td>
+                                <td>$@row.TotalWriterEarnings.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="2">TOTAL</td>
+                            <td>@Model.Sum(r => r.OrderCount)</td>
+                            <td>$@Model.Sum(r => r.TotalRevenue).ToString("N2")</td>
+                            <td>$@Model.Sum(r => r.TotalCommission).ToString("N2")</td>
+                            <td>$@Model.Sum(r => r.TotalWriterEarnings).ToString("N2")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

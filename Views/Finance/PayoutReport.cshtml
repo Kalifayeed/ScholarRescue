@@ -1,0 +1,142 @@
+@model List<PayoutReportRow>
+@{
+    ViewData["Title"] = "Payout Report";
+    var fromDate = ViewBag.FromDate as DateTime?;
+    var toDate = ViewBag.ToDate as DateTime?;
+    var writerId = ViewBag.WriterId as string;
+}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-action="Dashboard">Financial Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Payout Report</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-wallet2"></i> Payout Report</h1>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="fromDate" class="form-control" value="@fromDate?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="toDate" class="form-control" value="@toDate?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Writer ID</label>
+                    <input type="text" name="writerId" class="form-control" value="@writerId" placeholder="Filter by writer ID" />
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-filter"></i> Filter</button>
+                    <a asp-action="PayoutReport" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Total Payouts</h5>
+                    <h3>$@Model.Where(r => r.Status == "Paid").Sum(r => r.Amount).ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5>Pending</h5>
+                    <h3>$@Model.Where(r => r.Status == "Pending").Sum(r => r.Amount).ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5>Approved (Unpaid)</h5>
+                    <h3>$@Model.Where(r => r.Status == "Approved").Sum(r => r.Amount).ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Payout ID</th>
+                            <th>Writer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Requested</th>
+                            <th>Approved</th>
+                            <th>Paid</th>
+                            <th>Transaction #</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                    No payout data found.
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var row in Model)
+                        {
+                            <tr>
+                                <td>@row.PayoutId</td>
+                                <td><strong>@row.WriterName</strong></td>
+                                <td><strong>$@row.Amount.ToString("N2")</strong></td>
+                                <td>
+                                    @switch (row.Status)
+                                    {
+                                        case "Pending":
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            break;
+                                        case "Approved":
+                                            <span class="badge bg-info text-dark">Approved</span>
+                                            break;
+                                        case "Rejected":
+                                            <span class="badge bg-danger">Rejected</span>
+                                            break;
+                                        case "Paid":
+                                            <span class="badge bg-success">Paid</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@row.Status</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@row.RequestedDate.ToString("MMM dd, yyyy")</td>
+                                <td>@row.ApprovedDate?.ToString("MMM dd, yyyy")</td>
+                                <td>@row.PayoutDate?.ToString("MMM dd, yyyy")</td>
+                                <td><code>@row.TransactionNumber</code></td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="2">TOTAL</td>
+                            <td>$@Model.Sum(r => r.Amount).ToString("N2")</td>
+                            <td colspan="5"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

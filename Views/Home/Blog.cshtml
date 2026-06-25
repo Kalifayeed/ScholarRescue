@@ -1,0 +1,184 @@
+@{
+    ViewData["Title"] = "Blog";
+    Layout = "~/Views/Shared/_Layout.Public.cshtml";
+}
+
+<!-- Page Header -->
+<section class="py-5" style="background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);">
+    <div class="container">
+        <h1 class="display-5 fw-bold text-white">Blog</h1>
+        <p class="text-white-50 lead mb-3">Insights, tips, and news from ScholarRescue</p>
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="input-group">
+                    <input type="text" class="form-control form-control-lg" placeholder="Search articles..." />
+                    <button class="btn btn-accent" type="button"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="py-3 border-bottom bg-white">
+    <div class="container">
+        <div class="d-flex gap-3 flex-wrap">
+            <span class="badge bg-primary rounded-pill px-3 py-2">All</span>
+            <span class="badge bg-light text-dark rounded-pill px-3 py-2" style="cursor:pointer;">Study Tips</span>
+            <span class="badge bg-light text-dark rounded-pill px-3 py-2" style="cursor:pointer;">Research</span>
+            <span class="badge bg-light text-dark rounded-pill px-3 py-2" style="cursor:pointer;">Academic Writing</span>
+            <span class="badge bg-light text-dark rounded-pill px-3 py-2" style="cursor:pointer;">Career</span>
+            <span class="badge bg-light text-dark rounded-pill px-3 py-2" style="cursor:pointer;">Platform Updates</span>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Article -->
+<section class="py-5">
+    <div class="container">
+        <h3 class="fw-bold mb-4"><i class="bi bi-star-fill text-warning me-2"></i>Featured Article</h3>
+        <div class="card border-0 shadow-sm">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <div class="h-100 rounded-start" style="background:linear-gradient(135deg, var(--primary), var(--secondary));min-height:250px;">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-journal-richtext" style="font-size:4rem;color:rgba(255,255,255,0.3);"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body p-4">
+                        <span class="badge bg-primary mb-2">Academic Writing</span>
+                        <h4 class="fw-bold">How to Write a Winning Research Proposal</h4>
+                        <p class="text-muted">A comprehensive guide to crafting research proposals that impress academic committees. Learn the essential components, common pitfalls to avoid, and strategies for making your proposal stand out...</p>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <small class="text-muted"><i class="bi bi-calendar me-1"></i> June 5, 2026</small>
+                            <small class="text-muted"><i class="bi bi-clock me-1"></i> 8 min read</small>
+                        </div>
+                        <a href="#" class="btn btn-primary btn-sm">Read Article <i class="bi bi-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest Articles -->
+<section class="py-5" style="background:var(--bg-main);">
+    <div class="container">
+        <h3 class="fw-bold mb-4"><i class="bi bi-clock-history text-primary me-2"></i>Latest Articles</h3>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="rounded-top" style="background:linear-gradient(135deg, #28a745, #20c997);height:160px;">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-search" style="font-size:3rem;color:rgba(255,255,255,0.3);"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="badge bg-success mb-2">Research</span>
+                        <h6 class="fw-bold">5 Tips for Effective Literature Reviews</h6>
+                        <p class="text-muted small mb-3">Master the art of literature review with these practical strategies for finding, evaluating, and synthesizing academic sources.</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted"><i class="bi bi-calendar me-1"></i> June 3, 2026</small>
+                            <small class="text-muted"><i class="bi bi-clock me-1"></i> 5 min</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="rounded-top" style="background:linear-gradient(135deg, #17a2b8, #6f42c1);height:160px;">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-lightbulb" style="font-size:3rem;color:rgba(255,255,255,0.3);"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="badge bg-info mb-2">Study Tips</span>
+                        <h6 class="fw-bold">Time Management Strategies for Graduate Students</h6>
+                        <p class="text-muted small mb-3">Learn how to balance coursework, research, and personal life with proven time management techniques.</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted"><i class="bi bi-calendar me-1"></i> May 28, 2026</small>
+                            <small class="text-muted"><i class="bi bi-clock me-1"></i> 6 min</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="rounded-top" style="background:linear-gradient(135deg, #f5a623, #e67e22);height:160px;">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-pencil-square" style="font-size:3rem;color:rgba(255,255,255,0.3);"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="badge bg-warning text-dark mb-2">Academic Writing</span>
+                        <h6 class="fw-bold">Understanding APA Citation Style: A Complete Guide</h6>
+                        <p class="text-muted small mb-3">Everything you need to know about APA format, from in-text citations to reference lists and formatting rules.</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted"><i class="bi bi-calendar me-1"></i> May 20, 2026</small>
+                            <small class="text-muted"><i class="bi bi-clock me-1"></i> 10 min</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="rounded-top" style="background:linear-gradient(135deg, #dc3545, #c0392b);height:160px;">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-briefcase" style="font-size:3rem;color:rgba(255,255,255,0.3);"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="badge bg-danger mb-2">Career</span>
+                        <h6 class="fw-bold">Building Your Academic Career: From Student to Scholar</h6>
+                        <p class="text-muted small mb-3">Explore pathways for transitioning from student to academic professional with actionable career advice.</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted"><i class="bi bi-calendar me-1"></i> May 15, 2026</small>
+                            <small class="text-muted"><i class="bi bi-clock me-1"></i> 7 min</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="rounded-top" style="background:linear-gradient(135deg, var(--primary), var(--secondary));height:160px;">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-gear" style="font-size:3rem;color:rgba(255,255,255,0.3);"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="badge bg-primary mb-2">Platform Updates</span>
+                        <h6 class="fw-bold">ScholarRescue v2.0: What's New</h6>
+                        <p class="text-muted small mb-3">Discover the latest features and improvements to the ScholarRescue platform for an enhanced experience.</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted"><i class="bi bi-calendar me-1"></i> May 10, 2026</small>
+                            <small class="text-muted"><i class="bi bi-clock me-1"></i> 4 min</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="rounded-top" style="background:linear-gradient(135deg, #28a745, #17a2b8);height:160px;">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-book" style="font-size:3rem;color:rgba(255,255,255,0.3);"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="badge bg-success mb-2">Research</span>
+                        <h6 class="fw-bold">Qualitative vs Quantitative Research: When to Use Each</h6>
+                        <p class="text-muted small mb-3">Understand the differences between research methodologies and choose the right approach for your study.</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted"><i class="bi bi-calendar me-1"></i> May 5, 2026</small>
+                            <small class="text-muted"><i class="bi bi-clock me-1"></i> 8 min</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <p class="text-muted">More articles coming soon. Stay tuned for academic insights and tips!</p>
+        </div>
+    </div>
+</section>

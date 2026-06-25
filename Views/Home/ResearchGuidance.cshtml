@@ -1,0 +1,111 @@
+@{
+    ViewData["Title"] = "Research Guidance";
+    Layout = "~/Views/Shared/_Layout.Public.cshtml";
+}
+
+<!-- Hero Section -->
+<section class="py-5" style="background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold text-white mb-3">Research Guidance</h1>
+                <p class="text-white-50 lead mb-0">
+                    Expert support at every stage of your academic research process, from proposal development to final submission.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-accent btn-lg px-4 me-2">
+                    <i class="bi bi-rocket-takeoff me-2"></i>Get Started
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Content Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <h2 class="fw-bold mb-4">Comprehensive Research Support From Start to Finish</h2>
+                <p class="text-muted lead mb-4">
+                    Research projects can be complex, demanding, and time-consuming. Our research guidance service is designed to support students and researchers at every stage of the academic research process.
+                </p>
+                <p class="text-muted">
+                    Whether you are developing a research proposal, refining a research question, conducting a literature review, selecting a methodology, or interpreting findings, our experienced academic specialists provide expert guidance to help you move forward with confidence.
+                </p>
+                <p class="text-muted">
+                    We assist students in understanding research design, data collection techniques, qualitative and quantitative methodologies, academic sources, and scholarly writing standards. Our goal is not simply to help complete a project but to strengthen your understanding of the research process itself.
+                </p>
+                <p class="text-muted">
+                    This service is suitable for undergraduate, postgraduate, master's, and doctoral students working on assignments, dissertations, theses, or independent research projects. By providing personalized feedback and practical recommendations, we help students avoid common research mistakes while improving the overall quality, clarity, and credibility of their work. The result is a more organized, academically sound, and professionally presented research project.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5" style="background:var(--bg-main);">
+    <div class="container">
+        <h2 class="fw-bold text-center mb-5">Why Choose Our Research Guidance Service</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
+                            <i class="bi bi-search fs-4 text-success"></i>
+                        </div>
+                        <h6 class="fw-bold">End-to-End Support</h6>
+                        <p class="text-muted small mb-0">Guidance from proposal development through to final submission and presentation.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
+                            <i class="bi bi-bar-chart fs-4 text-primary"></i>
+                        </div>
+                        <h6 class="fw-bold">Methodology Expertise</h6>
+                        <p class="text-muted small mb-0">Assistance with qualitative, quantitative, and mixed-method research approaches.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
+                            <i class="bi bi-pencil-square fs-4 text-info"></i>
+                        </div>
+                        <h6 class="fw-bold">Scholarly Writing Standards</h6>
+                        <p class="text-muted small mb-0">Help with academic writing conventions and publishing standards.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 cta-section">
+    <div class="container text-center">
+        <h2 class="fw-bold text-white mb-3">Ready to Advance Your Research?</h2>
+        <p class="text-white-50 mb-4">Get expert guidance on your research project and achieve academic excellence.</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-accent btn-lg px-4">
+                <i class="bi bi-rocket-takeoff me-2"></i>Get Started
+            </a>
+            <a asp-controller="Home" asp-action="OrderNow" class="btn btn-outline-light btn-lg px-4">
+                <i class="bi bi-cart me-2"></i>Order Now
+            </a>
+            <a asp-controller="Account" asp-action="Register" asp-route-userType="Writer" class="btn btn-outline-light btn-lg px-4">
+                <i class="bi bi-person-plus me-2"></i>Register as Tutor
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .cta-section { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
+</style>

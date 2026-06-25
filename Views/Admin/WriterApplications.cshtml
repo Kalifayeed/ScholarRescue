@@ -1,0 +1,133 @@
+@model ScholarRescue.ViewModels.Admin.WriterApplicationsViewModel
+
+@{
+    ViewData["Title"] = "Writer Applications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Writer Applications</h2>
+        <a asp-action="Dashboard" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(Model.CurrentFilter == null ? "active" : "")" 
+               asp-action="WriterApplications" asp-route-status="@(null)">
+                All (@Model.Applications.Count)
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(Model.CurrentFilter == WriterApplicationStatus.Pending ? "active" : "")" 
+               asp-action="WriterApplications" asp-route-status="@WriterApplicationStatus.Pending">
+                Pending (@Model.Applications.Count(a => a.Status == WriterApplicationStatus.Pending))
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(Model.CurrentFilter == WriterApplicationStatus.Approved ? "active" : "")" 
+               asp-action="WriterApplications" asp-route-status="@WriterApplicationStatus.Approved">
+                Approved (@Model.Applications.Count(a => a.Status == WriterApplicationStatus.Approved))
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(Model.CurrentFilter == WriterApplicationStatus.Rejected ? "active" : "")" 
+               asp-action="WriterApplications" asp-route-status="@WriterApplicationStatus.Rejected">
+                Rejected (@Model.Applications.Count(a => a.Status == WriterApplicationStatus.Rejected))
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link @(Model.CurrentFilter == WriterApplicationStatus.MoreInformationRequired ? "active" : "")" 
+               asp-action="WriterApplications" asp-route-status="@WriterApplicationStatus.MoreInformationRequired">
+                More Info (@Model.Applications.Count(a => a.Status == WriterApplicationStatus.MoreInformationRequired))
+            </a>
+        </li>
+    </ul>
+
+    <!-- Applications Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            @if (Model.Applications.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Applicant</th>
+                                <th>Email</th>
+                                <th>Education</th>
+                                <th>Institution</th>
+                                <th>Experience</th>
+                                <th>Status</th>
+                                <th>Submitted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var app in Model.Applications)
+                            {
+                                <tr>
+                                    <td>@app.User.FirstName @app.User.LastName</td>
+                                    <td>@app.User.Email</td>
+                                    <td>@app.EducationLevel</td>
+                                    <td>@app.Institution</td>
+                                    <td>@app.ExperienceYears years</td>
+                                    <td>
+                                        <span class="badge @GetStatusBadgeClass(app.Status)">
+                                            @app.Status
+                                        </span>
+                                    </td>
+                                    <td>@app.SubmittedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>
+                                        <a asp-action="WriterApplicationDetails" asp-route-id="@app.Id" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mt-2">No writer applications found.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusBadgeClass(WriterApplicationStatus status)
+    {
+        return status switch
+        {
+            WriterApplicationStatus.Pending => "bg-warning text-dark",
+            WriterApplicationStatus.Approved => "bg-success",
+            WriterApplicationStatus.Rejected => "bg-danger",
+            WriterApplicationStatus.MoreInformationRequired => "bg-info text-dark",
+            _ => "bg-secondary"
+        };
+    }
+}
