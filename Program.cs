@@ -65,13 +65,6 @@ if (string.IsNullOrEmpty(cs))
         "Set environment variable ConnectionStrings__DefaultConnection.");
 }
 
-if (cs.Contains("Username=postgres", StringComparison.OrdinalIgnoreCase))
-{
-    startupLogger.LogCritical("FATAL: Connection string uses 'Username=postgres' which is forbidden.");
-    throw new InvalidOperationException(
-        "Connection string uses 'Username=postgres'. Create a dedicated database user instead.");
-}
-
 if (cs.Contains("${PROD_DB_PASSWORD}"))
 {
     startupLogger.LogCritical("FATAL: Connection string contains unresolved placeholder '${PROD_DB_PASSWORD}'.");
@@ -182,7 +175,7 @@ builder.Services.AddScoped<IAdminAuditService, AdminAuditService>();
 builder.Services.AddScoped<IWriterMatchingService, WriterMatchingService>();
 builder.Services.AddScoped<IVerificationService, VerificationService>();
 builder.Services.AddScoped<IAccountFraudService, AccountFraudService>();
-builder.Services.AddScoped<IConfigurationHealthCheck, ConfigurationHealthCheck>();
+builder.Services.AddScoped<IDeploymentValidator, DeploymentValidator>();
 
 // PostgreSQL Database Connection — single source of truth
 builder.Services.AddDbContext<ScholarRescueDbContext>(options =>
@@ -206,12 +199,12 @@ builder.Services
 var app = builder.Build();
 
 // ============================================================
-// CONFIGURATION HEALTH CHECK — validates DB before serving
+// DEPLOYMENT VALIDATOR — comprehensive startup verification
 // ============================================================
 using (var scope = app.Services.CreateScope())
 {
-    var healthCheck = scope.ServiceProvider.GetRequiredService<IConfigurationHealthCheck>();
-    await healthCheck.RunAsync();
+    var validator = scope.ServiceProvider.GetRequiredService<IDeploymentValidator>();
+    await validator.ValidateAsync();
 }
 
 // Configure the HTTP request pipeline.

@@ -1,11 +1,11 @@
--# Configuration Refactoring Progress
+# Deployment Validator & Production Readiness
 
-- [ ] 1. Clean up appsettings.json - remove hardcoded credentials, use safe local defaults
-- [ ] 2. Clean up appsettings.Staging.json - remove placeholder variables and hardcoded postgres user
-- [ ] 3. Clean up appsettings.Production.json - remove placeholder variables and hardcoded postgres user
-- [ ] 4. Refactor Program.cs - explicit configuration loading with validation, startup logging
-- [ ] 5. Create ConfigurationHealthCheck service
-- [ ] 6. Register ConfigurationHealthCheck in Program.cs
-- [ ] 7. Update ScholarRescue.csproj - remove CopyToPublishDirectory exclusion
-- [ ] 8. Update deployment script comment
-- [ ] 9. Commit all changes to git
+- [ ] 1. Create DeploymentValidator service with comprehensive checks and report
+- [ ] 2. Remove hardcoded Username=postgres rejection (just warn)
+- [ ] 3. Add directory creation at startup
+- [ ] 4. Add Platform:BaseUrl, SupportEmail, Name validation
+- [ ] 5. Add BaseUrl domain validation
+- [ ] 6. Add Redis, SMTP, Stripe, Paystack checks
+- [ ] 7. Refactor Program.cs to call DeploymentValidator.ValidateAsync()
+- [ ] 8. Delete old IConfigurationHealthCheck
+- [ ] 9. Build and commit
