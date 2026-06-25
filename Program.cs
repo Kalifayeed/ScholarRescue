@@ -94,9 +94,15 @@ builder.Services.AddScoped<IVerificationService, VerificationService>();
 builder.Services.AddScoped<IAccountFraudService, AccountFraudService>();
 
 // PostgreSQL Database Connection
+var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+
+Console.WriteLine("========================================");
+Console.WriteLine("CONNECTION STRING:");
+Console.WriteLine(cs);
+Console.WriteLine("========================================");
+
 builder.Services.AddDbContext<ScholarRescueDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(cs));
 
 // ASP.NET Core Identity
 builder.Services
