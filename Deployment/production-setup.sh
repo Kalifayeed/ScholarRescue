@@ -65,7 +65,12 @@ systemctl enable redis-server
 systemctl start redis-server
 
 echo ""
-echo "=== Step 6: Configure appsettings.Production.json ==="
+echo "=== Step 6: Set environment variables for secrets ==="
+echo ""
+echo "NOTE: appsettings files no longer contain secrets or connection strings."
+echo "Set the database connection string via environment variable:"
+echo "  ConnectionStrings__DefaultConnection"
+echo ""
 cat > $APP_DIR/appsettings.Production.json << EOFCONF
 {
   "ConnectionStrings": {

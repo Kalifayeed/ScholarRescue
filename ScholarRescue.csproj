@@ -20,11 +20,4 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
   </ItemGroup>
 
-  <!-- Prevent appsettings.Production.json from overwriting the server's
-       correct file during deployment. The deployment script (production-setup.sh)
-       generates this file on the server with the proper credentials. -->
-  <ItemGroup>
-    <Content Update="appsettings.Production.json" CopyToPublishDirectory="Never" />
-  </ItemGroup>
-
 </Project>

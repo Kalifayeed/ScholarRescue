@@ -1,12 +1,11 @@
-# Phase 12C – Writer Screen Names, Account Uniqueness & Multi-Account Fraud Detection
+-# Configuration Refactoring Progress
 
-## Implementation Plan
-
-### Core Files Created/Modified:
-- [ ] `Models/AccountFraudAlert.cs` ✅ Created
-- [ ] `Services/IAccountFraudService.cs` ✅ Renamed
-- [ ] `Services/AccountFraudService.cs` - Rename from FraudDetectionService.cs
-- [ ] `Models/ApplicationUser.cs` - Add ScreenName, WriterId, LastKnownIPAddress, RegistrationIPAddress, LastUsernameChangeDate, UsernameChangeCount
-- [ ] `Data/ScholarRescueDbContext.cs` - Add AccountFraudAlerts DbSet
-- [ ] `Program.cs` - Register IAccountFraudService
-- [ ] Migration for new columns/tables
+- [ ] 1. Clean up appsettings.json - remove hardcoded credentials, use safe local defaults
+- [ ] 2. Clean up appsettings.Staging.json - remove placeholder variables and hardcoded postgres user
+- [ ] 3. Clean up appsettings.Production.json - remove placeholder variables and hardcoded postgres user
+- [ ] 4. Refactor Program.cs - explicit configuration loading with validation, startup logging
+- [ ] 5. Create ConfigurationHealthCheck service
+- [ ] 6. Register ConfigurationHealthCheck in Program.cs
+- [ ] 7. Update ScholarRescue.csproj - remove CopyToPublishDirectory exclusion
+- [ ] 8. Update deployment script comment
+- [ ] 9. Commit all changes to git

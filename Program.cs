@@ -12,6 +12,96 @@ using ScholarRescue.Services.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ============================================================
+// CONFIGURATION — deterministic loading order
+// ============================================================
+// 1. appsettings.json (base, no secrets)
+// 2. appsettings.{Environment}.json (environment-specific, no secrets)
+// 3. Environment Variables (the ONLY place for secrets)
+//
+// This is the default ASP.NET Core order, made explicit here
+// to prevent any accidental reordering or duplicate loading.
+// ============================================================
+builder.Configuration.Sources.Clear();
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: false)
+    .AddEnvironmentVariables();
+
+// ============================================================
+// STARTUP LOGGING — print configuration sources
+// ============================================================
+var loggerFactory = LoggerFactory.Create(logging =>
+{
+    logging.AddConsole();
+    logging.SetMinimumLevel(LogLevel.Information);
+});
+var startupLogger = loggerFactory.CreateLogger("Startup");
+
+startupLogger.LogInformation("========================================");
+startupLogger.LogInformation("SCHOLARRESCUE STARTUP");
+startupLogger.LogInformation("========================================");
+startupLogger.LogInformation("ASPNETCORE_ENVIRONMENT: {Env}", builder.Environment.EnvironmentName);
+startupLogger.LogInformation("Content Root: {Root}", builder.Environment.ContentRootPath);
+
+// Log which config files were found
+var baseConfigPath = Path.Combine(builder.Environment.ContentRootPath, "appsettings.json");
+var envConfigPath = Path.Combine(builder.Environment.ContentRootPath, $"appsettings.{builder.Environment.EnvironmentName}.json");
+startupLogger.LogInformation("appsettings.json exists: {Exists}", File.Exists(baseConfigPath));
+startupLogger.LogInformation("appsettings.{Env}.json exists: {Exists}",
+    builder.Environment.EnvironmentName, File.Exists(envConfigPath));
+
+// ============================================================
+// CONNECTION STRING VALIDATION
+// ============================================================
+var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrEmpty(cs))
+{
+    startupLogger.LogCritical("FATAL: Connection string 'DefaultConnection' is not configured.");
+    startupLogger.LogCritical("Set environment variable: ConnectionStrings__DefaultConnection");
+    throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' is not configured. " +
+        "Set environment variable ConnectionStrings__DefaultConnection.");
+}
+
+if (cs.Contains("Username=postgres", StringComparison.OrdinalIgnoreCase))
+{
+    startupLogger.LogCritical("FATAL: Connection string uses 'Username=postgres' which is forbidden.");
+    throw new InvalidOperationException(
+        "Connection string uses 'Username=postgres'. Create a dedicated database user instead.");
+}
+
+if (cs.Contains("${PROD_DB_PASSWORD}"))
+{
+    startupLogger.LogCritical("FATAL: Connection string contains unresolved placeholder '${PROD_DB_PASSWORD}'.");
+    throw new InvalidOperationException(
+        "Connection string contains unresolved placeholder '${PROD_DB_PASSWORD}'. " +
+        "Set environment variable ConnectionStrings__DefaultConnection with the actual password.");
+}
+
+// Parse and log connection string details (mask password)
+try
+{
+    var csb = new Npgsql.NpgsqlConnectionStringBuilder(cs);
+    startupLogger.LogInformation("Database Host: {Host}", csb.Host);
+    startupLogger.LogInformation("Database Port: {Port}", csb.Port);
+    startupLogger.LogInformation("Database Name: {Database}", csb.Database);
+    startupLogger.LogInformation("Database User: {Username}", csb.Username);
+    startupLogger.LogInformation("Database Password: {Password}",
+        string.IsNullOrEmpty(csb.Password) ? "(not set)" : "********");
+}
+catch (Exception ex)
+{
+    startupLogger.LogWarning("Could not parse connection string: {Error}", ex.Message);
+}
+
+startupLogger.LogInformation("========================================");
+
+// ============================================================
+// SERVICE REGISTRATION
+// ============================================================
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -92,15 +182,9 @@ builder.Services.AddScoped<IAdminAuditService, AdminAuditService>();
 builder.Services.AddScoped<IWriterMatchingService, WriterMatchingService>();
 builder.Services.AddScoped<IVerificationService, VerificationService>();
 builder.Services.AddScoped<IAccountFraudService, AccountFraudService>();
+builder.Services.AddScoped<IConfigurationHealthCheck, ConfigurationHealthCheck>();
 
-// PostgreSQL Database Connection
-var cs = builder.Configuration.GetConnectionString("DefaultConnection");
-
-Console.WriteLine("========================================");
-Console.WriteLine("CONNECTION STRING:");
-Console.WriteLine(cs);
-Console.WriteLine("========================================");
-
+// PostgreSQL Database Connection — single source of truth
 builder.Services.AddDbContext<ScholarRescueDbContext>(options =>
     options.UseNpgsql(cs));
 
@@ -120,6 +204,15 @@ builder.Services
     .AddDefaultTokenProviders();
 
 var app = builder.Build();
+
+// ============================================================
+// CONFIGURATION HEALTH CHECK — validates DB before serving
+// ============================================================
+using (var scope = app.Services.CreateScope())
+{
+    var healthCheck = scope.ServiceProvider.GetRequiredService<IConfigurationHealthCheck>();
+    await healthCheck.RunAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
