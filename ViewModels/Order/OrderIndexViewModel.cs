@@ -57,5 +57,20 @@ namespace ScholarRescue.ViewModels.Order
         /// Timestamp when the order was created.
         /// </summary>
         public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        /// Academic subject of the order.
+        /// </summary>
+        public string Subject { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Academic level required.
+        /// </summary>
+        public AcademicLevel AcademicLevel { get; set; }
+
+        /// <summary>
+        /// Citation format required.
+        /// </summary>
+        public CitationFormat CitationFormat { get; set; }
     }
 }

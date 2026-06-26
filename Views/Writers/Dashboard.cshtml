@@ -142,97 +142,96 @@
         </div>
     </div>
 
-    @* Assigned Orders List *@
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-dark text-white">
-            <h5 class="mb-0"><i class="bi bi-list-check"></i> My Assigned Orders</h5>
+    @* Available Orders Section *@
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-shop"></i> Available Orders</h5>
+            <a asp-controller="Writers" asp-action="AvailableOrders" class="btn btn-light btn-sm">
+                <i class="bi bi-arrow-right"></i> View All
+            </a>
         </div>
         <div class="card-body">
-            @if (!Model.Any())
+            @{
+                var availableOrders = ViewBag.AvailableOrders as List<ScholarRescue.ViewModels.Order.OrderIndexViewModel>;
+            }
+            @if (availableOrders == null || !availableOrders.Any())
             {
                 <div class="text-center py-4">
                     <i class="bi bi-inbox display-4 text-muted"></i>
-                    <h6 class="mt-2 text-muted">No orders assigned yet</h6>
+                    <h6 class="mt-2 text-muted">No available orders right now.</h6>
+                    <p class="small text-muted">Check back later for new opportunities.</p>
                 </div>
             }
             else
             {
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Order #</th>
-                                <th>Title</th>
-                                <th>Client</th>
-                                <th>Status</th>
-                                <th>Pages</th>
-                                <th>Budget</th>
-                                <th>Deadline</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var order in Model)
-                            {
-                                <tr>
-                                    <td><strong>@order.OrderNumber</strong></td>
-                                    <td>@(order.Title.Length > 30 ? order.Title[..30] + "..." : order.Title)</td>
-                                    <td>@order.ClientName</td>
-                                    <td>
-                                        @{
-                                            var badgeClass = order.Status switch
-                                            {
-                                                ScholarRescue.Models.Enums.OrderStatus.Assigned => "bg-primary",
-                                                ScholarRescue.Models.Enums.OrderStatus.InProgress => "bg-warning text-dark",
-                                                ScholarRescue.Models.Enums.OrderStatus.DraftSubmitted => "bg-info",
-                                                ScholarRescue.Models.Enums.OrderStatus.Completed => "bg-success",
-                                                _ => "bg-secondary"
-                                            };
-                                        }
-                                        <span class="badge @badgeClass">@order.Status</span>
-                                    </td>
-                                    <td>@order.Pages</td>
-                                    <td>@order.Budget.ToString("C")</td>
-                                    <td>
-                                        <span class="@(order.Deadline < DateTime.UtcNow ? "text-danger" : "")">
-                                            @order.Deadline.ToString("MMM dd")
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id"
-                                               class="btn btn-outline-info"><i class="bi bi-eye"></i></a>
-                                            @if (order.Status == ScholarRescue.Models.Enums.OrderStatus.Assigned)
-                                            {
-                                                <form asp-action="UpdateStatus" method="post" style="display:inline;">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@order.Id" />
-                                                    <input type="hidden" name="newStatus" value="InProgress" />
-                                                    <button type="submit" class="btn btn-outline-warning"
-                                                            title="Start Working"><i class="bi bi-play-fill"></i></button>
-                                                </form>
-                                            }
-                                            @if (order.Status == ScholarRescue.Models.Enums.OrderStatus.InProgress)
-                                            {
-                                                <form asp-action="UpdateStatus" method="post" style="display:inline;">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@order.Id" />
-                                                    <input type="hidden" name="newStatus" value="Submitted" />
-                                                    <button type="submit" class="btn btn-outline-success"
-                                                            title="Submit"><i class="bi bi-send"></i></button>
-                                                </form>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                <div class="row g-3">
+                    @foreach (var order in availableOrders)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0 text-truncate fw-semibold">@order.Title</h6>
+                                        <span class="badge bg-success flex-shrink-0 ms-1">Open</span>
+                                    </div>
+                                    <div class="small text-muted mb-2">
+                                        <div><i class="bi bi-book me-1"></i> @order.Subject</div>
+                                        <div><i class="bi bi-mortarboard me-1"></i> @order.AcademicLevel</div>
+                                        <div><i class="bi bi-file-text me-1"></i> @order.Pages pages</div>
+                                        <div><i class="bi bi-quote me-1"></i> @order.CitationFormat</div>
+                                        <div><i class="bi bi-calendar me-1"></i> Due: @order.Deadline.ToString("MMM dd, yyyy")</div>
+                                        <div class="fw-semibold text-primary mt-1">@order.Budget.ToString("C")</div>
+                                    </div>
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-sm btn-outline-info flex-grow-1" disabled title="Coming in Phase 2">
+                                            <i class="bi bi-eye"></i> View Details
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success flex-grow-1" disabled title="Coming in Phase 2">
+                                            <i class="bi bi-hand-index"></i> Place Bid
+                                        </button>
+                                    </div>
+                                    <div class="text-center mt-1">
+                                        <small class="text-muted fst-italic">Coming in Phase 2</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
             }
         </div>
     </div>
-</div>
+
+    @* My Bids Section *@
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-hand-thumbs-up"></i> My Bids</h5>
+        </div>
+        <div class="card-body">
+            @{
+                var myApps = ViewBag.MyApplications as System.Collections.IEnumerable;
+                var myAppsCount = ViewBag.MyApplicationsCount as int? ?? 0;
+            }
+            @if (myAppsCount == 0)
+            {
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox display-4 text-muted"></i>
+                    <h6 class="mt-2 text-muted">You have not placed any bids yet.</h6>
+                    <p class="small text-muted">Browse available orders and apply to get started.</p>
+                    <a asp-controller="Writers" asp-action="AvailableOrders" class="btn btn-primary btn-sm">
+                        <i class="bi bi-shop"></i> Browse Orders
+                    </a>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted small mb-0">You have <strong>@myAppsCount</strong> active bid(s). View details in the full Available Orders page.</p>
+                <a asp-controller="Writers" asp-action="AvailableOrders" class="btn btn-outline-primary btn-sm mt-2">
+                    <i class="bi bi-arrow-right"></i> View My Bids
+                </a>
+            }
+        </div>
+    </div>
 
 @section Scripts {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">

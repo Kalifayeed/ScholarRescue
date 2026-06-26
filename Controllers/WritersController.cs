@@ -179,6 +179,31 @@ namespace ScholarRescue.Controllers
                 ViewBag.Completed = completed;
                 ViewBag.PendingAssignment = pendingAssignment;
 
+                // Available orders for the writer dashboard marketplace section
+                var availableOrders = await _context.Orders
+                    .Where(o => o.Status == OrderStatus.Open
+                        && o.AssignedWriterId == null
+                        && o.IsMarketplaceOpen
+                        && o.Deadline > DateTime.UtcNow)
+                    .OrderByDescending(o => o.CreatedAt)
+                    .Take(5)
+                    .Select(o => new OrderIndexViewModel
+                    {
+                        Id = o.Id,
+                        OrderNumber = o.OrderNumber,
+                        Title = o.Title,
+                        Status = o.Status,
+                        Deadline = o.Deadline,
+                        Pages = o.Pages,
+                        Budget = o.Budget,
+                        CreatedAt = o.CreatedAt,
+                        Subject = o.Subject,
+                        AcademicLevel = o.AcademicLevel,
+                        CitationFormat = o.CitationFormat
+                    })
+                    .ToListAsync();
+                ViewBag.AvailableOrders = availableOrders;
+
                 // Load writer ranking data for badge display
                 var ranking = await _rankingService.GetOrCreateAsync(currentUser.Id);
                 ViewBag.WriterRank = ranking.CurrentRank;

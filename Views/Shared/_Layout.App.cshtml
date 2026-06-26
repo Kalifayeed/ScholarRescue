@@ -1,4 +1,4 @@
-@* This is the corrected layout. Support Tickets links added for all 3 roles. *@
+@* This is the corrected layout with role-specific dashboard navigation. *@
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,22 +61,12 @@
                 {
                     <div class="sidebar-heading">Main Menu</div>
                     <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-                    <a class="nav-link" asp-controller="Orders" asp-action="Index"><i class="bi bi-file-earmark-text"></i> Available Orders</a>
-                    <a class="nav-link" asp-controller="Orders" asp-action="Dashboard"><i class="bi bi-folder2-open"></i> My Orders</a>
+                    <a class="nav-link" asp-controller="Writers" asp-action="AvailableOrders"><i class="bi bi-file-earmark-text"></i> Available Orders</a>
+                    <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-folder2-open"></i> My Bids</a>
+                    <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-journal-text"></i> Assigned Orders</a>
                     <a class="nav-link" asp-controller="Messages" asp-action="Index"><i class="bi bi-chat-dots"></i> Messages <span id="sidebarUnreadCount" class="badge bg-danger rounded-pill ms-auto" style="display:none;font-size:0.65rem;">0</span></a>
-                    <div class="sidebar-heading mt-3">Support</div>
-                    <a class="nav-link" asp-controller="SupportTickets" asp-action="Index"><i class="bi bi-ticket"></i> Support Tickets</a>
-                    <div class="sidebar-heading mt-3">Resources</div>
-                    <a class="nav-link" asp-controller="WriterResources" asp-action="Index"><i class="bi bi-book"></i> Knowledge Center</a>
-                    <div class="sidebar-heading mt-3">Finances</div>
-                    <a class="nav-link" asp-controller="Writers" asp-action="Wallet"><i class="bi bi-wallet2"></i> Wallet</a>
-                    <a class="nav-link" asp-controller="Writers" asp-action="Transactions"><i class="bi bi-journal-text"></i> Transactions</a>
-                    <a class="nav-link" asp-controller="Writers" asp-action="Payouts"><i class="bi bi-cash-stack"></i> Payouts</a>
-                    <a class="nav-link" asp-controller="Writers" asp-action="PaymentDetails"><i class="bi bi-credit-card"></i> Payment Details</a>
                     <div class="sidebar-heading mt-3">Account</div>
                     <a class="nav-link" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell"></i> Notifications</a>
-                    <div class="sidebar-heading mt-3">Analytics</div>
-                    <a class="nav-link" asp-controller="Writers" asp-action="Analytics"><i class="bi bi-graph-up"></i> Performance</a>
                 }
             </nav>
             <div class="sidebar-footer px-3 py-3">
@@ -163,22 +153,12 @@
             {
                 <div class="sidebar-heading">Main Menu</div>
                 <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-                <a class="nav-link" asp-controller="Orders" asp-action="Index"><i class="bi bi-file-earmark-text"></i> Available Orders</a>
-                <a class="nav-link" asp-controller="Orders" asp-action="Dashboard"><i class="bi bi-folder2-open"></i> My Orders</a>
+                <a class="nav-link" asp-controller="Writers" asp-action="AvailableOrders"><i class="bi bi-file-earmark-text"></i> Available Orders</a>
+                <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-folder2-open"></i> My Bids</a>
+                <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-journal-text"></i> Assigned Orders</a>
                 <a class="nav-link" asp-controller="Messages" asp-action="Index"><i class="bi bi-chat-dots"></i> Messages</a>
-                <div class="sidebar-heading mt-3">Support</div>
-                <a class="nav-link" asp-controller="SupportTickets" asp-action="Index"><i class="bi bi-ticket"></i> Support Tickets</a>
-                <div class="sidebar-heading mt-3">Resources</div>
-                <a class="nav-link" asp-controller="WriterResources" asp-action="Index"><i class="bi bi-book"></i> Knowledge Center</a>
-                <div class="sidebar-heading mt-3">Finances</div>
-                <a class="nav-link" asp-controller="Writers" asp-action="Wallet"><i class="bi bi-wallet2"></i> Wallet</a>
-                <a class="nav-link" asp-controller="Writers" asp-action="Transactions"><i class="bi bi-journal-text"></i> Transactions</a>
-                <a class="nav-link" asp-controller="Writers" asp-action="Payouts"><i class="bi bi-cash-stack"></i> Payouts</a>
-                <a class="nav-link" asp-controller="Writers" asp-action="PaymentDetails"><i class="bi bi-credit-card"></i> Payment Details</a>
                 <div class="sidebar-heading mt-3">Account</div>
                 <a class="nav-link" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell"></i> Notifications</a>
-                <div class="sidebar-heading mt-3">Analytics</div>
-                <a class="nav-link" asp-controller="Writers" asp-action="Analytics"><i class="bi bi-graph-up"></i> Performance</a>
             }
         </nav>
         <div class="sidebar-footer px-3 py-3"><a class="d-flex align-items-center text-decoration-none" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-left text-white-50 me-2"></i><span class="text-white-50 small">Logout</span></a></div>
