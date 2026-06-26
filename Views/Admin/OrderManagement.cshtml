@@ -148,6 +148,13 @@
                                                 </button>
                                             </form>
                                         }
+                                        @if (order.AssignedWriterId != null)
+                                        {
+                                            <a asp-controller="Orders" asp-action="Workspace" asp-route-id="@order.Id"
+                                               class="btn btn-outline-success" title="Open Workspace">
+                                                <i class="bi bi-layout-sidebar"></i>
+                                            </a>
+                                        }
                                         <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id"
                                            class="btn btn-outline-info" title="View Details">
                                             <i class="bi bi-eye"></i>

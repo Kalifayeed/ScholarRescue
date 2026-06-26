@@ -120,6 +120,92 @@
         </div>
     </div>
 
+    @* Assigned Orders *@
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-file-text"></i> My Assigned Orders</h5>
+            <a asp-controller="Orders" asp-action="Index" class="btn btn-light btn-sm">
+                <i class="bi bi-arrow-right"></i> All Orders
+            </a>
+        </div>
+        <div class="card-body">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox display-4 text-muted"></i>
+                    <h6 class="mt-2 text-muted">No assigned orders yet.</h6>
+                    <p class="small text-muted">Once an administrator assigns you an order, it will appear here.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order #</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Pages</th>
+                                <th>Budget</th>
+                                <th>Deadline</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td><strong>@order.OrderNumber</strong></td>
+                                    <td>
+                                        <span title="@order.Title">
+                                            @(order.Title.Length > 35 ? order.Title[..35] + "..." : order.Title)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var badgeCls = order.Status switch
+                                            {
+                                                OrderStatus.Assigned => "bg-primary",
+                                                OrderStatus.InProgress => "bg-warning text-dark",
+                                                OrderStatus.DraftSubmitted => "bg-info",
+                                                OrderStatus.RevisionRequested => "bg-warning text-dark",
+                                                OrderStatus.Completed => "bg-success",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @badgeCls">@order.Status</span>
+                                    </td>
+                                    <td>@order.Pages</td>
+                                    <td>@order.Budget.ToString("C")</td>
+                                    <td>
+                                        <span title="@order.Deadline.ToString("g")">@order.Deadline.ToString("MMM dd")</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            @if (order.Status == OrderStatus.Assigned || order.Status == OrderStatus.InProgress ||
+                                                 order.Status == OrderStatus.DraftSubmitted || order.Status == OrderStatus.RevisionRequested)
+                                            {
+                                                <a asp-controller="Orders" asp-action="Workspace" asp-route-id="@order.Id"
+                                                   class="btn btn-outline-success" title="Open Workspace">
+                                                    <i class="bi bi-layout-sidebar"></i>
+                                                </a>
+                                            }
+                                            <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id"
+                                               class="btn btn-outline-info" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
     @* Recent Messages *@
     <div class="row g-3 mb-4">
         <div class="col-12">

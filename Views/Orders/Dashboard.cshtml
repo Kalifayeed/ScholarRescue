@@ -172,18 +172,31 @@
                                             @order.Deadline.ToString("MMM dd")
                                         </span>
                                     </td>
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <a asp-action="Details" asp-route-id="@order.Id"
-                                               class="btn btn-outline-info" title="View Details">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a asp-action="Edit" asp-route-id="@order.Id"
-                                               class="btn btn-outline-primary" title="Edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                        </div>
-                                    </td>
+                                                    <td class="text-center">
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <a asp-action="Details" asp-route-id="@order.Id"
+                                                               class="btn btn-outline-info" title="View Details">
+                                                                <i class="bi bi-eye"></i>
+                                                            </a>
+                                                            @if (order.Status == OrderStatus.Assigned ||
+                                                                 order.Status == OrderStatus.InProgress ||
+                                                                 order.Status == OrderStatus.DraftSubmitted ||
+                                                                 order.Status == OrderStatus.RevisionRequested)
+                                                            {
+                                                                <a asp-action="Workspace" asp-route-id="@order.Id"
+                                                                   class="btn btn-outline-success" title="Open Workspace">
+                                                                    <i class="bi bi-layout-sidebar"></i>
+                                                                </a>
+                                                            }
+                                                            @if (order.Status != OrderStatus.Completed)
+                                                            {
+                                                                <a asp-action="Edit" asp-route-id="@order.Id"
+                                                                   class="btn btn-outline-primary" title="Edit">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </a>
+                                                            }
+                                                        </div>
+                                                    </td>
                                 </tr>
                             }
                         </tbody>

@@ -706,6 +706,116 @@ namespace ScholarRescue.Controllers
             }
         }
 
+        // ═══════════════════════════════════════════════
+        // ASSIGNED ORDER WORKSPACE (Phase 4)
+        // ═══════════════════════════════════════════════
+
+        /// <summary>
+        /// Assigned Order Workspace for client-writer collaboration.
+        /// Route: GET /Orders/Workspace/{id}
+        /// Access: Order owner (Client), Assigned Writer, or Admin.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Workspace(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null) return Challenge();
+
+                var order = await _context.Orders
+                    .Include(o => o.Client)
+                    .Include(o => o.AssignedWriter)
+                    .Include(o => o.Attachments)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(o => o.Id == id);
+
+                if (order == null) return NotFound();
+
+                // Access control: Client (owner), Assigned Writer, or Admin
+                bool isAdmin = User.IsInRole("Administrator");
+                bool isClient = order.ClientId == currentUser.Id;
+                bool isAssignedWriter = order.AssignedWriterId == currentUser.Id;
+
+                if (!isAdmin && !isClient && !isAssignedWriter)
+                    return Forbid();
+
+                // Workspace is only meaningful for assigned orders
+                if (order.AssignedWriterId == null && !isAdmin)
+                {
+                    TempData["ErrorMessage"] = "This order has not been assigned yet. The workspace is available once a writer is assigned.";
+                    return RedirectToAction("Details", new { id });
+                }
+
+                // Find the existing conversation for this order
+                var conversation = await _context.Conversations
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.OrderId == order.Id);
+
+                // Build price breakdown for display labels
+                var breakdown = _pricingService.GetPriceBreakdown(
+                    order.AcademicLevel, order.Pages, order.Deadline);
+
+                // Determine privacy-safe labels
+                string otherPartyLabel;
+                string otherPartyName;
+                string myRole;
+
+                if (isAdmin)
+                {
+                    otherPartyLabel = "Client / Assigned Writer";
+                    otherPartyName = $"{order.Client.FirstName} {order.Client.LastName} / {(order.AssignedWriter != null ? $"{order.AssignedWriter.FirstName} {order.AssignedWriter.LastName}" : "Unassigned")}";
+                    myRole = "Administrator";
+                }
+                else if (isClient)
+                {
+                    otherPartyLabel = "Assigned Writer";
+                    otherPartyName = order.AssignedWriter != null
+                        ? $"{order.AssignedWriter.FirstName} {order.AssignedWriter.LastName}"
+                        : "Awaiting assignment";
+                    myRole = "Client";
+                }
+                else // Assigned Writer
+                {
+                    otherPartyLabel = "Client";
+                    otherPartyName = $"{order.Client.FirstName} {order.Client.LastName}";
+                    myRole = "Writer";
+                }
+
+                var viewModel = new OrderWorkspaceViewModel
+                {
+                    Id = order.Id,
+                    OrderNumber = order.OrderNumber,
+                    Title = order.Title,
+                    Description = order.Description,
+                    Subject = order.Subject,
+                    AcademicLevel = order.AcademicLevel,
+                    AcademicLevelName = breakdown.AcademicLevelName,
+                    CitationFormat = order.CitationFormat,
+                    CitationFormatName = order.CitationFormat.ToDisplayName(),
+                    Deadline = order.Deadline,
+                    Pages = order.Pages,
+                    WordCount = order.WordCount,
+                    Budget = order.Budget,
+                    Status = order.Status,
+                    IsAssigned = order.AssignedWriterId != null,
+                    OtherPartyLabel = otherPartyLabel,
+                    OtherPartyName = otherPartyName,
+                    MyRole = myRole,
+                    ConversationId = conversation?.Id,
+                    Attachments = order.Attachments.ToList()
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading workspace for order {OrderId}.", id);
+                TempData["ErrorMessage"] = "An error occurred while loading the workspace.";
+                return RedirectToAction("Index");
+            }
+        }
+
         /// <summary>
         /// Compatibility redirect: /Orders/Dashboard → /Dashboard
         /// </summary>
