@@ -47,10 +47,15 @@ namespace ScholarRescue.Controllers
 
         /// <summary>
         /// Displays the registration form.
+        /// If the user is already authenticated, redirect to their dashboard.
         /// </summary>
         [HttpGet]
         public IActionResult Register(string? userType = null)
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("RedirectToDashboard");
+            }
             ViewData["PreselectedUserType"] = userType;
             return View();
         }
@@ -176,10 +181,15 @@ namespace ScholarRescue.Controllers
 
         /// <summary>
         /// Displays the login form.
+        /// If the user is already authenticated, redirect to their dashboard.
         /// </summary>
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("RedirectToDashboard");
+            }
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -288,7 +298,7 @@ namespace ScholarRescue.Controllers
                 return RedirectToAction("Dashboard", "Writers");
             }
             // Default to client dashboard
-            return RedirectToAction("Dashboard", "Orders");
+            return RedirectToAction("Index", "Dashboard");
         }
 
         [HttpGet]

@@ -161,6 +161,162 @@ namespace ScholarRescue.Controllers
             }
         }
 
+        // ════════════════════════════════════════════════
+        // BID REVIEW & ASSIGNMENT (Phase 3)
+        // ════════════════════════════════════════════════
+
+        /// <summary>
+        /// Admin reviews all bids submitted for an order.
+        /// Shows real writer identities for admin vetting.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> OrderBids(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Client)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null) return NotFound();
+
+            var bids = await _context.OrderBids
+                .Include(b => b.Writer)
+                .Where(b => b.OrderId == order.Id)
+                .OrderByDescending(b => b.CreatedAt)
+                .Select(b => new ViewModels.Admin.AdminBidItemViewModel
+                {
+                    BidId = b.Id,
+                    WriterId = b.WriterId,
+                    WriterDisplayName = b.Writer.FirstName + " " + b.Writer.LastName,
+                    WriterEmail = b.Writer.Email ?? string.Empty,
+                    Amount = b.Amount,
+                    Message = b.Message,
+                    EstimatedDeliveryDate = b.EstimatedDeliveryDate,
+                    Status = b.Status,
+                    CreatedAt = b.CreatedAt
+                })
+                .ToListAsync();
+
+            var viewModel = new ViewModels.Admin.OrderBidAdminViewModel
+            {
+                OrderId = order.Id,
+                OrderNumber = order.OrderNumber,
+                OrderTitle = order.Title,
+                ClientName = order.Client.FirstName + " " + order.Client.LastName,
+                ClientEmail = order.Client.Email ?? string.Empty,
+                IsAssigned = order.AssignedWriterId != null,
+                AssignedWriterName = null, // populated below if needed
+                Bids = bids
+            };
+
+            if (order.AssignedWriterId != null)
+            {
+                var writer = await _userManager.FindByIdAsync(order.AssignedWriterId);
+                if (writer != null)
+                    viewModel.AssignedWriterName = writer.FirstName + " " + writer.LastName;
+            }
+
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// Admin assigns a writer to an order based on a bid.
+        /// Accepts the selected bid, rejects others, updates order status.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignWriterFromBid(int orderId, int bidId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.Client)
+                    .FirstOrDefaultAsync(o => o.Id == orderId);
+
+                if (order == null) return NotFound();
+
+                var selectedBid = await _context.OrderBids
+                    .Include(b => b.Writer)
+                    .FirstOrDefaultAsync(b => b.Id == bidId && b.OrderId == orderId);
+
+                if (selectedBid == null) return NotFound();
+
+                if (selectedBid.Status != OrderBidStatus.Pending)
+                {
+                    TempData["ErrorMessage"] = "This bid is no longer pending and cannot be accepted.";
+                    return RedirectToAction(nameof(OrderBids), new { orderId });
+                }
+
+                if (order.Status != OrderStatus.Open || order.AssignedWriterId != null)
+                {
+                    TempData["ErrorMessage"] = "This order is no longer available for assignment.";
+                    return RedirectToAction(nameof(OrderBids), new { orderId });
+                }
+
+                // 1. Accept the selected bid
+                selectedBid.Status = OrderBidStatus.Accepted;
+                selectedBid.UpdatedAt = DateTime.UtcNow;
+
+                // 2. Reject all other pending bids for this order
+                var otherPendingBids = await _context.OrderBids
+                    .Where(b => b.OrderId == orderId && b.Id != bidId && b.Status == OrderBidStatus.Pending)
+                    .ToListAsync();
+
+                foreach (var otherBid in otherPendingBids)
+                {
+                    otherBid.Status = OrderBidStatus.Rejected;
+                    otherBid.UpdatedAt = DateTime.UtcNow;
+                }
+
+                // 3. Update the order
+                order.AssignedWriterId = selectedBid.WriterId;
+                order.AssignedAt = DateTime.UtcNow;
+                order.AssignedByAdminId = currentUser.Id;
+                order.IsMarketplaceOpen = false;
+                order.Status = OrderStatus.Assigned;
+                order.UpdatedAt = DateTime.UtcNow;
+
+                // 4. Audit log
+                _context.AuditLogs.Add(new AuditLog
+                {
+                    Action = "Writer Assigned via Bid",
+                    PerformedById = currentUser.Id,
+                    TargetUserId = selectedBid.WriterId,
+                    Description = $"Admin assigned writer {selectedBid.Writer.Email} (bid ${selectedBid.Amount:N2}) to order {order.OrderNumber}. Other pending bids rejected.",
+                    CreatedDate = DateTime.UtcNow
+                });
+
+                // 5. Order history
+                _context.OrderHistories.Add(new OrderHistory
+                {
+                    OrderId = order.Id,
+                    OldStatus = OrderStatus.Open,
+                    NewStatus = OrderStatus.Assigned,
+                    ChangedById = currentUser.Id,
+                    CreatedAt = DateTime.UtcNow,
+                    Notes = $"Writer assigned via bid acceptance. Writer: {selectedBid.Writer.Email}, Amount: ${selectedBid.Amount:N2}"
+                });
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation(
+                    "Admin {AdminId} assigned writer {WriterId} to order {OrderId} via bid {BidId}.",
+                    currentUser.Id, selectedBid.WriterId, orderId, bidId);
+
+                TempData["SuccessMessage"] =
+                    $"Writer '{selectedBid.Writer.FirstName} {selectedBid.Writer.LastName}' assigned successfully. Other pending bids rejected.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error assigning writer from bid for order {OrderId}.", orderId);
+                TempData["ErrorMessage"] = "An error occurred while assigning the writer.";
+            }
+
+            return RedirectToAction(nameof(OrderBids), new { orderId });
+        }
+
         /// <summary>
         /// Displays all users with their roles for management.
         /// </summary>

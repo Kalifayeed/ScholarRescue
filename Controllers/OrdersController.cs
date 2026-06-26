@@ -707,62 +707,13 @@ namespace ScholarRescue.Controllers
         }
 
         /// <summary>
-        /// Client dashboard showing all orders including drafts.
+        /// Compatibility redirect: /Orders/Dashboard → /Dashboard
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = "Client")]
-        public async Task<IActionResult> Dashboard()
+        [Obsolete("Use /Dashboard instead.")]
+        public IActionResult Dashboard()
         {
-            try
-            {
-                var currentUser = await _userManager.GetUserAsync(User);
-                if (currentUser == null) return Challenge();
-
-                var ordersQuery = _context.Orders
-                    .Include(o => o.AssignedWriter)
-                    .Where(o => o.ClientId == currentUser.Id)
-                    .AsNoTracking();
-
-                var totalOrders = await ordersQuery.CountAsync();
-                var openOrders = await ordersQuery.CountAsync(o => o.Status == OrderStatus.Open || o.Status == OrderStatus.PendingReview);
-                var inProgressOrders = await ordersQuery.CountAsync(o => o.Status == OrderStatus.Assigned || o.Status == OrderStatus.InProgress);
-                var completedOrders = await ordersQuery.CountAsync(o => o.Status == OrderStatus.Completed);
-
-                var recentOrders = await ordersQuery
-                    .OrderByDescending(o => o.CreatedAt)
-                    .Take(5)
-                    .Select(o => new OrderIndexViewModel
-                    {
-                        Id = o.Id,
-                        OrderNumber = o.OrderNumber,
-                        Title = o.Title,
-                        ClientName = currentUser.FirstName + " " + currentUser.LastName,
-                        WriterName = o.AssignedWriter != null ? o.AssignedWriter.FirstName + " " + o.AssignedWriter.LastName : null,
-                        Status = o.Status,
-                        Deadline = o.Deadline,
-                        Pages = o.Pages,
-                        Budget = o.Budget,
-                        CreatedAt = o.CreatedAt
-                    })
-                    .ToListAsync();
-
-                var dashboard = new ClientDashboardViewModel
-                {
-                    TotalOrders = totalOrders,
-                    OpenOrders = openOrders,
-                    InProgressOrders = inProgressOrders,
-                    CompletedOrders = completedOrders,
-                    RecentOrders = recentOrders
-                };
-
-                return View(dashboard);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading client dashboard.");
-                TempData["ErrorMessage"] = "An error occurred while loading the dashboard.";
-                return RedirectToAction(nameof(Index));
-            }
+            return RedirectToAction("Index", "Dashboard", new { area = "" });
         }
     }
 }
