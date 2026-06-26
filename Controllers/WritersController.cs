@@ -204,6 +204,25 @@ namespace ScholarRescue.Controllers
                     .ToListAsync();
                 ViewBag.AvailableOrders = availableOrders;
 
+                // Load writer's bids
+                var myBids = await _context.OrderBids
+                    .Where(b => b.WriterId == currentUser.Id)
+                    .OrderByDescending(b => b.CreatedAt)
+                    .Take(10)
+                    .Select(b => new ViewModels.Writer.WriterBidViewModel
+                    {
+                        Id = b.Id,
+                        OrderId = b.OrderId,
+                        OrderNumber = b.Order.OrderNumber,
+                        OrderTitle = b.Order.Title,
+                        Amount = b.Amount,
+                        Status = b.Status,
+                        CreatedAt = b.CreatedAt
+                    })
+                    .ToListAsync();
+                ViewBag.MyBids = myBids;
+                ViewBag.MyBidsCount = myBids.Count;
+
                 // Load writer ranking data for badge display
                 var ranking = await _rankingService.GetOrCreateAsync(currentUser.Id);
                 ViewBag.WriterRank = ranking.CurrentRank;
@@ -347,6 +366,151 @@ namespace ScholarRescue.Controllers
             }
 
             return RedirectToAction("AvailableOrders");
+        }
+
+        // ════════════════════════════════════════════════
+        // ORDER BIDDING (Phase 2)
+        // ════════════════════════════════════════════════
+
+        /// <summary>
+        /// Shows the bid form for a writer to place a bid on an available order.
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = "Writer,Administrator")]
+        public async Task<IActionResult> PlaceBid(int orderId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            if (!User.IsInRole("Administrator") &&
+                !await _writerApplicationService.IsWriterActiveAsync(currentUser.Id))
+            {
+                TempData["ErrorMessage"] = "Your writer application must be approved before you can place bids.";
+                return RedirectToAction("Dashboard");
+            }
+
+            var order = await _context.Orders
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null) return NotFound();
+
+            // Only allow bidding on open/marketplace orders
+            if (order.Status != OrderStatus.Open || !order.IsMarketplaceOpen || order.Deadline <= DateTime.UtcNow)
+            {
+                TempData["ErrorMessage"] = "This order is no longer accepting bids.";
+                return RedirectToAction("AvailableOrders");
+            }
+
+            // Check for existing active bid
+            var existingBid = await _context.OrderBids
+                .AsNoTracking()
+                .FirstOrDefaultAsync(b => b.OrderId == orderId && b.WriterId == currentUser.Id
+                    && (b.Status == OrderBidStatus.Pending || b.Status == OrderBidStatus.Accepted));
+
+            if (existingBid != null)
+            {
+                TempData["ErrorMessage"] = "You already have an active bid on this order.";
+                return RedirectToAction("AvailableOrders");
+            }
+
+            var model = new ViewModels.Writer.PlaceBidViewModel
+            {
+                OrderId = order.Id,
+                OrderTitle = order.Title,
+                OrderNumber = order.OrderNumber,
+                Amount = order.Budget, // Pre-fill with order budget as suggestion
+                EstimatedDeliveryDate = order.Deadline > DateTime.UtcNow ? order.Deadline.AddDays(-1) : null
+            };
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// Processes the writer's bid submission.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Writer,Administrator")]
+        public async Task<IActionResult> PlaceBid(ViewModels.Writer.PlaceBidViewModel viewModel)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            if (!ModelState.IsValid)
+            {
+                // Re-populate order info
+                var order = await _context.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.Id == viewModel.OrderId);
+                if (order != null)
+                {
+                    viewModel.OrderTitle = order.Title;
+                    viewModel.OrderNumber = order.OrderNumber;
+                }
+                return View(viewModel);
+            }
+
+            try
+            {
+                var order = await _context.Orders
+                    .FirstOrDefaultAsync(o => o.Id == viewModel.OrderId);
+
+                if (order == null) return NotFound();
+
+                if (order.Status != OrderStatus.Open || !order.IsMarketplaceOpen)
+                {
+                    TempData["ErrorMessage"] = "This order is no longer accepting bids.";
+                    return RedirectToAction("AvailableOrders");
+                }
+
+                // Prevent duplicate active bids
+                var existingBid = await _context.OrderBids
+                    .FirstOrDefaultAsync(b => b.OrderId == viewModel.OrderId && b.WriterId == currentUser.Id
+                        && (b.Status == OrderBidStatus.Pending || b.Status == OrderBidStatus.Accepted));
+
+                if (existingBid != null)
+                {
+                    TempData["ErrorMessage"] = "You already have an active bid on this order.";
+                    return RedirectToAction("AvailableOrders");
+                }
+
+                var bid = new OrderBid
+                {
+                    OrderId = viewModel.OrderId,
+                    WriterId = currentUser.Id,
+                    Amount = viewModel.Amount,
+                    Message = viewModel.Message,
+                    EstimatedDeliveryDate = viewModel.EstimatedDeliveryDate,
+                    Status = OrderBidStatus.Pending,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.OrderBids.Add(bid);
+
+                // Add audit log
+                _context.AuditLogs.Add(new AuditLog
+                {
+                    Action = "Bid Placed",
+                    PerformedById = currentUser.Id,
+                    TargetUserId = order.ClientId,
+                    Description = $"Writer placed a bid of ${viewModel.Amount:N2} on order {order.OrderNumber}.",
+                    CreatedDate = DateTime.UtcNow
+                });
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Writer {WriterId} placed bid of {Amount} on order {OrderId}.",
+                    currentUser.Id, viewModel.Amount, viewModel.OrderId);
+
+                TempData["SuccessMessage"] = $"Your bid of ${viewModel.Amount:N2} has been submitted successfully!";
+                return RedirectToAction(nameof(Dashboard));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error placing bid for writer {WriterId} on order {OrderId}.",
+                    currentUser.Id, viewModel.OrderId);
+                TempData["ErrorMessage"] = "An error occurred while placing your bid. Please try again.";
+                return View(viewModel);
+            }
         }
 
         /// <summary>

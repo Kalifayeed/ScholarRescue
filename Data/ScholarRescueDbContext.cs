@@ -79,6 +79,7 @@ namespace ScholarRescue.Data
         public DbSet<WriterMatchScore> WriterMatchScores { get; set; }
 public DbSet<AssignmentHistory> AssignmentHistories { get; set; }
 public DbSet<AccountFraudAlert> AccountFraudAlerts { get; set; }
+public DbSet<OrderBid> OrderBids { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -159,6 +160,14 @@ public DbSet<AccountFraudAlert> AccountFraudAlerts { get; set; }
             builder.Entity<AuditLog>(e =>
             {
                 e.HasIndex(l => new { l.Action, l.CreatedDate }).HasDatabaseName("IX_AuditLogs_Action_CreatedDate");
+            });
+            builder.Entity<OrderBid>(e =>
+            {
+                e.HasOne(b => b.Order).WithMany().HasForeignKey(b => b.OrderId).OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(b => b.Writer).WithMany().HasForeignKey(b => b.WriterId).OnDelete(DeleteBehavior.Restrict);
+                e.HasIndex(b => new { b.OrderId, b.WriterId, b.Status }).HasDatabaseName("IX_OrderBids_OrderId_WriterId_Status");
+                e.HasIndex(b => b.OrderId).HasDatabaseName("IX_OrderBids_OrderId");
+                e.HasIndex(b => b.WriterId).HasDatabaseName("IX_OrderBids_WriterId");
             });
         }
     }

@@ -1766,6 +1766,55 @@ namespace ScholarRescue.Migrations
                     b.ToTable("OrderAttachments");
                 });
 
+            modelBuilder.Entity("ScholarRescue.Models.OrderBid", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EstimatedDeliveryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("WriterId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("IX_OrderBids_OrderId");
+
+                    b.HasIndex("WriterId")
+                        .HasDatabaseName("IX_OrderBids_WriterId");
+
+                    b.HasIndex("OrderId", "WriterId", "Status")
+                        .HasDatabaseName("IX_OrderBids_OrderId_WriterId_Status");
+
+                    b.ToTable("OrderBids");
+                });
+
             modelBuilder.Entity("ScholarRescue.Models.OrderDispute", b =>
                 {
                     b.Property<int>("Id")
@@ -4223,6 +4272,25 @@ namespace ScholarRescue.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("UploadedBy");
+                });
+
+            modelBuilder.Entity("ScholarRescue.Models.OrderBid", b =>
+                {
+                    b.HasOne("ScholarRescue.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ScholarRescue.Models.ApplicationUser", "Writer")
+                        .WithMany()
+                        .HasForeignKey("WriterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Writer");
                 });
 
             modelBuilder.Entity("ScholarRescue.Models.OrderDispute", b =>

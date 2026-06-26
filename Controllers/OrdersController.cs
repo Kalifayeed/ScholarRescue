@@ -620,6 +620,93 @@ namespace ScholarRescue.Controllers
         }
 
         /// <summary>
+        /// Shows all bids submitted on a client's order.
+        /// Only the order owner (client) and administrators can view bids.
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = "Client,Administrator")]
+        public async Task<IActionResult> Bids(int? id)
+        {
+            if (id == null) return NotFound();
+
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null) return Challenge();
+
+                var order = await _context.Orders
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(o => o.Id == id);
+
+                if (order == null) return NotFound();
+
+                // Ownership check: only the client who owns the order or admin can view bids
+                if (!User.IsInRole("Administrator") && order.ClientId != currentUser.Id)
+                    return Forbid();
+
+                bool isAdmin = User.IsInRole("Administrator");
+
+                var rawBids = await _context.OrderBids
+                    .Include(b => b.Writer)
+                    .Where(b => b.OrderId == order.Id)
+                    .OrderByDescending(b => b.CreatedAt)
+                    .ToListAsync();
+
+                // Privacy: clients see anonymous writer labels; admin sees real identities
+                int writerCounter = 1;
+                var bids = rawBids.Select(b =>
+                {
+                    string displayName;
+                    string? email = null;
+
+                    if (isAdmin)
+                    {
+                        // Admin sees real writer identity for vetting
+                        displayName = b.Writer.FirstName + " " + b.Writer.LastName;
+                        email = b.Writer.Email;
+                    }
+                    else
+                    {
+                        // Clients see anonymous labels to preserve writer privacy until assignment
+                        displayName = $"Verified Writer #{writerCounter++}";
+                    }
+
+                    return new BidItemViewModel
+                    {
+                        BidId = b.Id,
+                        WriterId = b.WriterId,
+                        WriterDisplayName = displayName,
+                        WriterEmail = email,
+                        Amount = b.Amount,
+                        Message = b.Message,
+                        EstimatedDeliveryDate = b.EstimatedDeliveryDate,
+                        Status = b.Status,
+                        CreatedAt = b.CreatedAt
+                    };
+                }).ToList();
+
+                var viewModel = new OrderBidsViewModel
+                {
+                    OrderId = order.Id,
+                    OrderNumber = order.OrderNumber,
+                    OrderTitle = order.Title,
+                    OrderSubject = order.Subject,
+                    IsClientOwner = order.ClientId == currentUser.Id,
+                    IsAdmin = isAdmin,
+                    Bids = bids
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading bids for order {OrderId}.", id);
+                TempData["ErrorMessage"] = "An error occurred while loading bids.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        /// <summary>
         /// Client dashboard showing all orders including drafts.
         /// </summary>
         [HttpGet]
