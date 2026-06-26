@@ -1762,6 +1762,148 @@ namespace ScholarRescue.Controllers
             }
         }
 
+        // ════════════════════════════════════════════════
+        // ADMIN CONVERSATIONS
+        // ════════════════════════════════════════════════
+
+        /// <summary>
+        /// Lists all conversations for admin monitoring.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Conversations()
+        {
+            try
+            {
+                var conversations = await _context.Conversations
+                    .Include(c => c.Order)
+                    .Include(c => c.Participants)
+                    .ThenInclude(p => p.User)
+                    .OrderByDescending(c => c.LastMessageDate)
+                    .Take(50)
+                    .ToListAsync();
+
+                return View(conversations);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading conversations.");
+                TempData["ErrorMessage"] = "Error loading conversations.";
+                return RedirectToAction(nameof(Dashboard));
+            }
+        }
+
+        // ════════════════════════════════════════════════
+        // ADMIN PAYMENTS (read-only placeholder)
+        // ════════════════════════════════════════════════
+
+        /// <summary>
+        /// Payments administration. Placeholder until payment providers are configured.
+        /// </summary>
+        [HttpGet]
+        public IActionResult Payments()
+        {
+            return View();
+        }
+
+        // ════════════════════════════════════════════════
+        // ADMIN CONTACT MESSAGES
+        // ════════════════════════════════════════════════
+
+        /// <summary>
+        /// Lists all contact messages from the public contact form.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ContactMessages()
+        {
+            try
+            {
+                var messages = await _context.ContactMessages
+                    .OrderByDescending(m => m.SubmittedAt)
+                    .Take(100)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                return View(messages);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading contact messages.");
+                TempData["ErrorMessage"] = "Error loading contact messages.";
+                return RedirectToAction(nameof(Dashboard));
+            }
+        }
+
+        /// <summary>
+        /// Shows details of a single contact message.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ContactMessageDetails(int? id)
+        {
+            if (id == null) return NotFound();
+
+            try
+            {
+                var message = await _context.ContactMessages
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m => m.Id == id);
+
+                if (message == null) return NotFound();
+
+                return View(message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading contact message details.");
+                TempData["ErrorMessage"] = "Error loading message details.";
+                return RedirectToAction(nameof(ContactMessages));
+            }
+        }
+
+        // ════════════════════════════════════════════════
+        // ADMIN AUDIT LOGS (via AuditCenter)
+        // ════════════════════════════════════════════════
+
+        /// <summary>
+        /// Redirects to the full Audit Center page.
+        /// </summary>
+        [HttpGet]
+        public IActionResult AuditLogs()
+        {
+            return RedirectToAction(nameof(AuditCenter));
+        }
+
+        // ════════════════════════════════════════════════
+        // ADMIN NOTIFICATIONS
+        // ════════════════════════════════════════════════
+
+        /// <summary>
+        /// Shows notifications relevant to the current admin.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Notifications()
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null) return Challenge();
+
+                var notifications = await _context.Notifications
+                    .Where(n => n.UserId == currentUser.Id)
+                    .OrderByDescending(n => n.CreatedAt)
+                    .Take(100)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                return View(notifications);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading admin notifications.");
+                TempData["ErrorMessage"] = "Error loading notifications.";
+                return RedirectToAction(nameof(Dashboard));
+            }
+        }
+
         /// <summary>
         /// Toggle auto-assignment mode via admin action.
         /// </summary>
