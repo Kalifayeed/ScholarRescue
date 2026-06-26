@@ -47,7 +47,7 @@
 
     @* Main layout: two columns *@
     <div class="row g-4">
-        @* Left column: Order info + files *@
+        @* Left column: Order info + files + submissions *@
         <div class="col-12 col-lg-4">
             @* Order Summary Card *@
             <div class="card border-0 shadow-sm mb-4">
@@ -163,6 +163,7 @@
                             new { Label = "Posted to Marketplace", Icon = "bi-shop", Complete = Model.Status >= OrderStatus.Open },
                             new { Label = "Writer Assigned", Icon = "bi-person-check", Complete = Model.Status >= OrderStatus.Assigned },
                             new { Label = "In Progress", Icon = "bi-arrow-repeat", Complete = Model.Status >= OrderStatus.InProgress },
+                            new { Label = "Draft Submitted", Icon = "bi-file-earmark-check", Complete = Model.Status >= OrderStatus.DraftSubmitted },
                             new { Label = "Completed", Icon = "bi-check-circle", Complete = Model.Status == OrderStatus.Completed }
                         };
                     }
@@ -219,9 +220,196 @@
             </div>
         </div>
 
-        @* Right column: Messaging *@
+        @* Right column: Submissions + Messaging *@
         <div class="col-12 col-lg-8">
-            <div class="card border-0 shadow-sm h-100">
+            @* Submissions / Drafts Section *@
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-file-earmark-check me-2"></i>
+                        <h5 class="mb-0 d-inline">Submissions & Drafts</h5>
+                    </div>
+                    @if (Model.HasSubmissions)
+                    {
+                        <span class="badge bg-light text-dark">@Model.Submissions.Count submission(s)</span>
+                    }
+                </div>
+                <div class="card-body">
+                    @if (Model.HasSubmissions)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Version</th>
+                                        <th>Type</th>
+                                        <th>File</th>
+                                        <th>Uploaded By</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var sub in Model.Submissions)
+                                    {
+                                        <tr>
+                                            <td>v@(sub.VersionNumber)</td>
+                                            <td>
+                                                <span class="badge @(sub.SubmissionType == SubmissionType.Draft ? "bg-secondary" : sub.SubmissionType == SubmissionType.Revision ? "bg-warning text-dark" : "bg-success")">
+                                                    @sub.SubmissionType
+                                                </span>
+                                            </td>
+                                            <td class="text-truncate" style="max-width:150px;" title="@sub.FileName">@sub.FileName</td>
+                                            <td>
+                                                @if (isAdmin)
+                                                {
+                                                    <span>@(sub.Writer?.FirstName ?? "Writer") @(sub.Writer?.LastName ?? "")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Writer</span>
+                                                }
+                                            </td>
+                                            <td><small>@sub.SubmittedAt.ToString("MMM dd, h:mm tt")</small></td>
+                                            <td>
+                                                <a asp-action="DownloadSubmission" asp-route-submissionId="@sub.Id"
+                                                   class="btn btn-sm btn-outline-primary" title="Download">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        @if (!string.IsNullOrWhiteSpace(sub.Comments))
+                                        {
+                                            <tr class="table-light">
+                                                <td colspan="6" class="py-1 ps-5">
+                                                    <small class="text-muted"><i class="bi bi-chat-quote me-1"></i>@sub.Comments</small>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-file-earmark-plus d-block mb-2" style="font-size:2rem;"></i>
+                            <h6>No drafts submitted yet.</h6>
+                            <p class="small mb-0">The writer will upload drafts here for your review.</p>
+                        </div>
+                    }
+
+                    @* Writer: Upload Draft Form *@
+                    @if (Model.CanSubmitWork)
+                    {
+                        <hr />
+                        <h6 class="fw-semibold"><i class="bi bi-upload me-1"></i> Submit Work</h6>
+                        <form asp-action="SubmitWork" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" class="mt-2">
+                            @Html.AntiForgeryToken()
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <label class="form-label small">File (PDF, DOC, DOCX, ZIP - max 25MB)</label>
+                                    <input type="file" name="file" class="form-control form-control-sm" required accept=".pdf,.doc,.docx,.zip" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small">Notes / Comments (optional)</label>
+                                    <textarea name="comments" class="form-control form-control-sm" rows="2" maxlength="2000" placeholder="Add a note about this submission..."></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" name="submissionType" value="Draft" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-send"></i> Submit Draft
+                                        </button>
+                                        @if (Model.Status == OrderStatus.RevisionRequested)
+                                        {
+                                            <button type="submit" name="submissionType" value="Revision" class="btn btn-warning btn-sm">
+                                                <i class="bi bi-arrow-repeat"></i> Submit Revision
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    }
+
+                    @* Client: Request Revision Form *@
+                    @if (Model.CanRequestRevision)
+                    {
+                        <hr />
+                        <h6 class="fw-semibold text-warning"><i class="bi bi-arrow-repeat me-1"></i> Request Revision</h6>
+                        <form asp-action="RequestRevision" asp-route-id="@Model.Id" method="post" class="mt-2">
+                            @Html.AntiForgeryToken()
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <label class="form-label small">Revision Instructions <span class="text-danger">*</span></label>
+                                    <textarea name="comments" class="form-control form-control-sm" rows="3" maxlength="2000" required
+                                              placeholder="Describe what changes are needed (min 10 characters)..."></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-warning btn-sm">
+                                        <i class="bi bi-arrow-repeat"></i> Request Revision
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    }
+
+                    @* Client: Accept Work Button *@
+                    @if (Model.CanAcceptWork)
+                    {
+                        <hr />
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="fw-semibold text-success mb-1"><i class="bi bi-check-circle me-1"></i> Accept Work</h6>
+                                <small class="text-muted">Mark this order as completed. No payment will be released at this stage.</small>
+                            </div>
+                            <form asp-action="AcceptWork" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-success"
+                                        onclick="return confirm('Mark this order as completed? No payment will be released yet.');">
+                                    <i class="bi bi-check-lg"></i> Accept & Complete
+                                </button>
+                            </form>
+                        </div>
+                    }
+
+                    @* Revision History *@
+                    @if (Model.HasRevisions)
+                    {
+                        <hr />
+                        <h6 class="fw-semibold"><i class="bi bi-clock-history me-1"></i> Revision History</h6>
+                        <div class="list-group list-group-flush mt-2">
+                            @foreach (var rev in Model.RevisionRequests)
+                            {
+                                <div class="list-group-item px-0 border-0">
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">
+                                            <i class="bi bi-person me-1"></i>
+                                            @if (isAdmin)
+                                            {
+                                                <span>@(rev.Client?.FirstName ?? "Client") @(rev.Client?.LastName ?? "")</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Client</span>
+                                            }
+                                        </small>
+                                        <small class="text-muted">@rev.RequestedAt.ToString("MMM dd, h:mm tt")</small>
+                                    </div>
+                                    <p class="mb-0 small mt-1">@rev.Comments</p>
+                                    <span class="badge @(rev.Status == RevisionRequestStatus.Pending ? "bg-warning text-dark" : "bg-success") mt-1">
+                                        @rev.Status
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Messaging Section *@
+            <div class="card border-0 shadow-sm">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <div>
                         <i class="bi bi-chat-dots me-2"></i>
@@ -235,54 +423,34 @@
                         </a>
                     }
                 </div>
-                <div class="card-body d-flex flex-column" style="min-height: 400px;">
+                <div class="card-body d-flex flex-column" style="min-height: 300px;">
                     @if (Model.IsAssigned && (isClient || isWriter || isAdmin))
                     {
                         @if (Model.ConversationId.HasValue)
                         {
-                            <div class="text-center py-5">
+                            <div class="text-center py-4">
                                 <i class="bi bi-chat-square-text display-4 d-block mb-3 text-primary"></i>
                                 <h5>Chat with @Model.OtherPartyLabel</h5>
-                                <p class="text-muted mb-4">
-                                    You can communicate with the @Model.OtherPartyLabel.ToLower() about this order.
-                                    @if (showWorkspace)
-                                    {
-                                        <span>All messages are private between authorized participants.</span>
-                                    }
+                                <p class="text-muted mb-3">
+                                    Communicate with the @Model.OtherPartyLabel.ToLower() about this order.
+                                    All messages are private between authorized participants.
                                 </p>
-                                <div class="d-flex flex-column align-items-center gap-2">
-                                    <a asp-controller="Messages" asp-action="Conversation" asp-route-id="@Model.ConversationId.Value"
-                                       class="btn btn-primary btn-lg px-5">
-                                        <i class="bi bi-chat-dots"></i> Open Conversation
-                                    </a>
-                                    @* Quick message preview area *@
-                                    <div class="mt-3 w-100" style="max-width: 500px;">
-                                        <div class="card bg-light border">
-                                            <div class="card-body py-2 px-3">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-info-circle"></i>
-                                                    A conversation for this order already exists. Click the button above to view and send messages.
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <a asp-controller="Messages" asp-action="Conversation" asp-route-id="@Model.ConversationId.Value"
+                                   class="btn btn-primary px-5">
+                                    <i class="bi bi-chat-dots"></i> Open Conversation
+                                </a>
                             </div>
                         }
                         else
                         {
-                            <div class="text-center py-5">
+                            <div class="text-center py-4">
                                 <i class="bi bi-chat-square-text display-4 d-block mb-3 text-muted"></i>
                                 <h5>No Conversation Yet</h5>
-                                <p class="text-muted mb-4">
-                                    Messages will appear here once a conversation is started.
-                                    @if (isClient || isWriter)
-                                    {
-                                        <span>You can send the first message to begin discussing the order.</span>
-                                    }
+                                <p class="text-muted mb-3">
+                                    Start a conversation to discuss the order.
                                 </p>
                                 <a asp-controller="Messages" asp-action="ForOrder" asp-route-orderId="@Model.Id"
-                                   class="btn btn-primary btn-lg px-5">
+                                   class="btn btn-primary px-5">
                                     <i class="bi bi-chat-dots"></i> Start Conversation
                                 </a>
                             </div>
@@ -290,7 +458,7 @@
                     }
                     else if (!Model.IsAssigned)
                     {
-                        <div class="text-center py-5 text-muted">
+                        <div class="text-center py-4 text-muted">
                             <i class="bi bi-lock display-4 d-block mb-3"></i>
                             <h5>Messaging Unavailable</h5>
                             <p class="mb-0">Messaging is only available after a writer has been assigned to this order.</p>

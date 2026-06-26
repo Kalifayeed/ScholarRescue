@@ -25,6 +25,8 @@ namespace ScholarRescue.Controllers
         private readonly IWalletService _walletService;
         private readonly IVerificationService _verificationService;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IWorkDeliveryService _workDeliveryService;
+        private readonly INotificationService _notificationService;
 
         public OrdersController(
             ScholarRescueDbContext context,
@@ -33,7 +35,9 @@ namespace ScholarRescue.Controllers
             IPricingService pricingService,
             IWalletService walletService,
             IVerificationService verificationService,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            IWorkDeliveryService workDeliveryService,
+            INotificationService notificationService)
         {
             _context = context;
             _userManager = userManager;
@@ -42,6 +46,8 @@ namespace ScholarRescue.Controllers
             _walletService = walletService;
             _verificationService = verificationService;
             _signInManager = signInManager;
+            _workDeliveryService = workDeliveryService;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -782,6 +788,35 @@ namespace ScholarRescue.Controllers
                     myRole = "Writer";
                 }
 
+                // Load submissions and revision requests
+                var submissions = await _workDeliveryService.GetSubmissionsAsync(order.Id);
+                var revisions = await _workDeliveryService.GetOrderRevisionsAsync(order.Id);
+
+                // Determine action permissions
+                bool canSubmitWork = isAssignedWriter && !isAdmin &&
+                    (order.Status == OrderStatus.InProgress || order.Status == OrderStatus.Assigned ||
+                     order.Status == OrderStatus.RevisionRequested);
+
+                bool canRequestRevision = isClient && !isAdmin &&
+                    (order.Status == OrderStatus.DraftSubmitted || order.Status == OrderStatus.RevisionSubmitted ||
+                     order.Status == OrderStatus.FinalSubmitted);
+
+                bool canAcceptWork = isClient && !isAdmin &&
+                    (order.Status == OrderStatus.DraftSubmitted || order.Status == OrderStatus.RevisionSubmitted ||
+                     order.Status == OrderStatus.FinalSubmitted);
+
+                // Admin can do everything if order is submitted
+                if (isAdmin)
+                {
+                    canSubmitWork = true;
+                    canRequestRevision = order.Status == OrderStatus.DraftSubmitted ||
+                                         order.Status == OrderStatus.RevisionSubmitted ||
+                                         order.Status == OrderStatus.FinalSubmitted;
+                    canAcceptWork = order.Status == OrderStatus.DraftSubmitted ||
+                                    order.Status == OrderStatus.RevisionSubmitted ||
+                                    order.Status == OrderStatus.FinalSubmitted;
+                }
+
                 var viewModel = new OrderWorkspaceViewModel
                 {
                     Id = order.Id,
@@ -803,7 +838,12 @@ namespace ScholarRescue.Controllers
                     OtherPartyName = otherPartyName,
                     MyRole = myRole,
                     ConversationId = conversation?.Id,
-                    Attachments = order.Attachments.ToList()
+                    Attachments = order.Attachments.ToList(),
+                    Submissions = submissions,
+                    RevisionRequests = revisions,
+                    CanSubmitWork = canSubmitWork,
+                    CanRequestRevision = canRequestRevision,
+                    CanAcceptWork = canAcceptWork
                 };
 
                 return View(viewModel);
@@ -817,6 +857,182 @@ namespace ScholarRescue.Controllers
         }
 
         /// <summary>
+        /// POST: /Orders/Workspace/{id}/SubmitWork
+        /// Assigned writer uploads a draft/revision submission.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitWork(int id, IFormFile file, string? comments, SubmissionType submissionType = SubmissionType.Draft)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null) return Challenge();
+
+                var order = await _context.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.Id == id);
+                if (order == null) return NotFound();
+
+                if (order.AssignedWriterId != currentUser.Id && !User.IsInRole("Administrator"))
+                    return Forbid();
+
+                await _workDeliveryService.SubmitWorkAsync(id, currentUser.Id, file, comments ?? string.Empty, submissionType);
+
+                TempData["SuccessMessage"] = $"{submissionType} submitted successfully.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error submitting work for order {OrderId}.", id);
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Workspace), new { id });
+        }
+
+        /// <summary>
+        /// POST: /Orders/Workspace/{id}/RequestRevision
+        /// Client requests a revision with required message.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RequestRevision(int id, string comments)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null) return Challenge();
+
+                if (string.IsNullOrWhiteSpace(comments) || comments.Length < 10)
+                {
+                    TempData["ErrorMessage"] = "Please provide detailed revision instructions (min 10 characters).";
+                    return RedirectToAction(nameof(Workspace), new { id });
+                }
+
+                var order = await _context.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.Id == id);
+                if (order == null) return NotFound();
+
+                if (order.ClientId != currentUser.Id && !User.IsInRole("Administrator"))
+                    return Forbid();
+
+                if (User.IsInRole("Administrator"))
+                {
+                    await _workDeliveryService.AdminForceRevisionAsync(id, currentUser.Id, comments);
+                    TempData["SuccessMessage"] = "Revision requested by admin.";
+                }
+                else
+                {
+                    await _workDeliveryService.RequestRevisionAsync(id, currentUser.Id, comments);
+                    TempData["SuccessMessage"] = "Revision requested. The writer has been notified.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error requesting revision for order {OrderId}.", id);
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Workspace), new { id });
+        }
+
+        /// <summary>
+        /// POST: /Orders/Workspace/{id}/AcceptWork
+        /// Client marks work as accepted (completes the order without payment release).
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AcceptWork(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null) return Challenge();
+
+                var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id);
+                if (order == null) return NotFound();
+
+                if (order.ClientId != currentUser.Id && !User.IsInRole("Administrator"))
+                    return Forbid();
+
+                // Simple acceptance: update status to Completed, no payment release
+                order.Status = OrderStatus.Completed;
+                order.UpdatedAt = DateTime.UtcNow;
+                order.CompletedAt = DateTime.UtcNow;
+                order.IsMarketplaceOpen = false;
+
+                _context.AuditLogs.Add(new AuditLog
+                {
+                    Action = "Work Accepted",
+                    PerformedById = currentUser.Id,
+                    TargetUserId = order.AssignedWriterId,
+                    Description = $"Client accepted work for order {order.OrderNumber}.",
+                    CreatedDate = DateTime.UtcNow
+                });
+
+                await _context.SaveChangesAsync();
+
+                await _notificationService.CreateNotificationAsync(
+                    order.AssignedWriterId!,
+                    "Work Accepted",
+                    $"Your work for order {order.OrderNumber} has been accepted.",
+                    NotificationType.OrderCompleted,
+                    order.Id.ToString());
+
+                TempData["SuccessMessage"] = "Work accepted. Order has been marked as completed.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error accepting work for order {OrderId}.", id);
+                TempData["ErrorMessage"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Workspace), new { id });
+        }
+
+        /// <summary>
+        /// GET: /Orders/DownloadSubmission/{submissionId}
+        /// Securely download a submission file. Access: order owner client, assigned writer, admin.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> DownloadSubmission(int submissionId)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null) return Challenge();
+
+                var submission = await _context.Set<OrderSubmission>()
+                    .Include(s => s.Order)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(s => s.Id == submissionId);
+
+                if (submission == null) return NotFound();
+
+                var order = submission.Order;
+                bool isAdmin = User.IsInRole("Administrator");
+                bool isClient = order.ClientId == currentUser.Id;
+                bool isAssignedWriter = order.AssignedWriterId == currentUser.Id;
+
+                if (!isAdmin && !isClient && !isAssignedWriter)
+                    return Forbid();
+
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", submission.FilePath.TrimStart('/'));
+                if (!System.IO.File.Exists(filePath))
+                {
+                    TempData["ErrorMessage"] = "The requested file could not be found on the server.";
+                    return RedirectToAction(nameof(Workspace), new { id = order.Id });
+                }
+
+                var contentType = GetContentType(submission.FileName);
+                return PhysicalFile(filePath, contentType, submission.FileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading submission {SubmissionId}.", submissionId);
+                TempData["ErrorMessage"] = "An error occurred while downloading the file.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        /// <summary>
         /// Compatibility redirect: /Orders/Dashboard → /Dashboard
         /// </summary>
         [HttpGet]
@@ -824,6 +1040,27 @@ namespace ScholarRescue.Controllers
         public IActionResult Dashboard()
         {
             return RedirectToAction("Index", "Dashboard", new { area = "" });
+        }
+
+        private static string GetContentType(string fileName)
+        {
+            var ext = Path.GetExtension(fileName).ToLowerInvariant();
+            return ext switch
+            {
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".zip" => "application/zip",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".txt" => "text/plain",
+                ".ppt" => "application/vnd.ms-powerpoint",
+                ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                ".xls" => "application/vnd.ms-excel",
+                ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ".csv" => "text/csv",
+                _ => "application/octet-stream"
+            };
         }
     }
 }

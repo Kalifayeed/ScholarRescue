@@ -5,7 +5,7 @@ namespace ScholarRescue.ViewModels.Order
 {
     /// <summary>
     /// ViewModel for the Assigned Order Workspace page.
-    /// Shows privacy-safe order details without exposing client/writer contact info.
+    /// Shows privacy-safe order details, submissions, and revision workflow.
     /// </summary>
     public class OrderWorkspaceViewModel
     {
@@ -37,5 +37,22 @@ namespace ScholarRescue.ViewModels.Order
         /// <summary>Order attachments uploaded for this order.</summary>
         public List<OrderAttachment> Attachments { get; set; } = new();
         public bool HasAttachments => Attachments.Count > 0;
+
+        /// <summary>Writer submissions (drafts/revisions/final) for this order.</summary>
+        public List<OrderSubmission> Submissions { get; set; } = new();
+        public bool HasSubmissions => Submissions.Count > 0;
+
+        /// <summary>Revision requests for this order.</summary>
+        public List<RevisionRequest> RevisionRequests { get; set; } = new();
+        public bool HasRevisions => RevisionRequests.Count > 0;
+
+        /// <summary>Whether the current user can submit work (assigned writer with appropriate status).</summary>
+        public bool CanSubmitWork { get; set; }
+
+        /// <summary>Whether the current user can request revision (client with submitted work).</summary>
+        public bool CanRequestRevision { get; set; }
+
+        /// <summary>Whether the current user can accept work (client with submitted work).</summary>
+        public bool CanAcceptWork { get; set; }
     }
 }
