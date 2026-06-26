@@ -1,0 +1,79 @@
+/* ============================================================
+   ScholarRescue - Public Website Styles
+   ============================================================ */
+
+.public-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.public-body main {
+    flex: 1;
+}
+
+/* Public Navbar */
+.public-navbar {
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.6rem 0;
+}
+
+.public-navbar .nav-link {
+    color: var(--text-dark) !important;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.4rem 0.75rem;
+    transition: var(--transition);
+}
+
+.public-navbar .nav-link:hover {
+    color: var(--primary) !important;
+}
+
+/* Public Footer */
+.public-footer {
+    background: var(--primary-dark);
+    color: rgba(255,255,255,0.6);
+    padding: 3rem 0 1.5rem;
+    font-size: 0.85rem;
+    margin-top: auto;
+}
+
+.public-footer a {
+    color: rgba(255,255,255,0.6);
+    transition: var(--transition);
+}
+
+.public-footer a:hover {
+    color: var(--accent) !important;
+}
+
+/* Public Page Hero */
+.public-hero {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    padding: 4rem 0;
+}
+
+.public-hero h1 {
+    color: white;
+}
+
+.public-hero p {
+    color: rgba(255,255,255,0.7);
+}
+
+/* Responsive adjustments for public pages */
+@media (max-width: 991.98px) {
+    .public-navbar .navbar-collapse {
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .public-navbar .navbar-nav .btn {
+        width: 100%;
+        text-align: center;
+    }
+}

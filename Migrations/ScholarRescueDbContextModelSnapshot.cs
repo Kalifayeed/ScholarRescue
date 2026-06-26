@@ -2972,8 +2972,21 @@ namespace ScholarRescue.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsReopened")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastReplyDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int?>("OrderId")
                         .HasColumnType("integer");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("QueueName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime?>("ResolvedAt")
                         .HasColumnType("timestamp with time zone");
@@ -2990,6 +3003,9 @@ namespace ScholarRescue.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<int>("UnreadCount")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

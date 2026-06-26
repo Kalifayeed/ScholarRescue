@@ -199,12 +199,49 @@ builder.Services
 var app = builder.Build();
 
 // ============================================================
-// DEPLOYMENT VALIDATOR — comprehensive startup verification
+// STARTUP SEQUENCE
 // ============================================================
+// 1. Apply all pending EF Core migrations
+// 2. Verify database schema and configuration (DeploymentValidator)
+// 3. Seed Identity roles
+// 4. Seed initial admin user
+// 5. Seed application data (writer resources)
+// 6. Start web application
+//
+// WARNING: Database.Migrate() MUST run BEFORE any seeder or
+// validator that queries the database. The production database
+// may be far behind the code's migration history.
+// ============================================================
+
+// ── STEP 1: Apply pending EF Core migrations ─────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ScholarRescueDbContext>();
+    startupLogger.LogInformation("Applying pending EF Core migrations...");
+    await dbContext.Database.MigrateAsync();
+    startupLogger.LogInformation("EF Core migrations applied successfully.");
+}
+
+// ── STEP 2: Verify database schema and configuration ──────────
 using (var scope = app.Services.CreateScope())
 {
     var validator = scope.ServiceProvider.GetRequiredService<IDeploymentValidator>();
     await validator.ValidateAsync();
+}
+
+// ── STEP 3-5: Seed data (only after schema is fully migrated) ─
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager =
+        scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager =
+        scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    await RoleSeeder.SeedRolesAsync(roleManager);
+    await AdminUserSeeder.SeedAdminUserAsync(userManager, roleManager);
+
+    var dbContext = scope.ServiceProvider.GetRequiredService<ScholarRescueDbContext>();
+    await WriterResourceSeeder.SeedAsync(dbContext);
 }
 
 // Configure the HTTP request pipeline.
@@ -239,20 +276,5 @@ app.MapControllerRoute(
 app.MapHub<ChatHub>("/chatHub");
 app.MapHub<NotificationHub>("/notificationHub");
 app.MapHub<CommunicationHub>("/communicationHub");
-
-// Seed Roles and Default Admin User on application startup
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager =
-        scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager =
-        scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-    await RoleSeeder.SeedRolesAsync(roleManager);
-    await AdminUserSeeder.SeedAdminUserAsync(userManager, roleManager);
-
-    var dbContext = scope.ServiceProvider.GetRequiredService<ScholarRescueDbContext>();
-    await WriterResourceSeeder.SeedAsync(dbContext);
-}
 
 app.Run();
