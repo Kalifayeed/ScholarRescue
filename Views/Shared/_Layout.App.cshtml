@@ -61,11 +61,12 @@
                 {
                     <div class="sidebar-heading">Main Menu</div>
                     <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-                    <a class="nav-link" asp-controller="Writers" asp-action="AvailableOrders"><i class="bi bi-file-earmark-text"></i> Available Orders</a>
-                    <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-folder2-open"></i> My Bids</a>
-                    <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-journal-text"></i> Assigned Orders</a>
+                    <a class="nav-link" asp-controller="Writers" asp-action="AvailableOrders"><i class="bi bi-shop"></i> Available Orders</a>
+                    <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-hand-index-thumb"></i> My Bids</a>
+                    <a class="nav-link" asp-controller="Orders" asp-action="Index"><i class="bi bi-journal-text"></i> Assigned Orders</a>
                     <a class="nav-link" asp-controller="Messages" asp-action="Index"><i class="bi bi-chat-dots"></i> Messages <span id="sidebarUnreadCount" class="badge bg-danger rounded-pill ms-auto" style="display:none;font-size:0.65rem;">0</span></a>
                     <div class="sidebar-heading mt-3">Account</div>
+                    <a class="nav-link" asp-controller="Writers" asp-action="Wallet"><i class="bi bi-wallet2"></i> Wallet</a>
                     <a class="nav-link" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell"></i> Notifications</a>
                 }
             </nav>
@@ -153,11 +154,12 @@
             {
                 <div class="sidebar-heading">Main Menu</div>
                 <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-                <a class="nav-link" asp-controller="Writers" asp-action="AvailableOrders"><i class="bi bi-file-earmark-text"></i> Available Orders</a>
-                <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-folder2-open"></i> My Bids</a>
-                <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-journal-text"></i> Assigned Orders</a>
+                <a class="nav-link" asp-controller="Writers" asp-action="AvailableOrders"><i class="bi bi-shop"></i> Available Orders</a>
+                <a class="nav-link" asp-controller="Writers" asp-action="Dashboard"><i class="bi bi-hand-index-thumb"></i> My Bids</a>
+                <a class="nav-link" asp-controller="Orders" asp-action="Index"><i class="bi bi-journal-text"></i> Assigned Orders</a>
                 <a class="nav-link" asp-controller="Messages" asp-action="Index"><i class="bi bi-chat-dots"></i> Messages</a>
                 <div class="sidebar-heading mt-3">Account</div>
+                <a class="nav-link" asp-controller="Writers" asp-action="Wallet"><i class="bi bi-wallet2"></i> Wallet</a>
                 <a class="nav-link" asp-controller="Notifications" asp-action="Index"><i class="bi bi-bell"></i> Notifications</a>
             }
         </nav>
