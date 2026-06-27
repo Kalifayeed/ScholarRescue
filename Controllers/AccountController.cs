@@ -80,7 +80,7 @@ namespace ScholarRescue.Controllers
                 string requestedType = (viewModel.UserType ?? "Client").Trim();
                 string roleToAssign = requestedType == "Writer" ? "Writer" : "Client";
 
-                // Check if the email is already taken
+                // Check if the email is already taken — prevents cross-role duplicate registration
                 var existingUser = await _userManager.FindByEmailAsync(viewModel.Email);
                 if (existingUser != null)
                 {
@@ -116,6 +116,23 @@ namespace ScholarRescue.Controllers
                     bool isWriter = roleToAssign == "Writer";
                     if (isWriter)
                     {
+                        // Server-side validation: max 5 specializations
+                        if (!string.IsNullOrWhiteSpace(viewModel.SelectedSpecializations))
+                        {
+                            var specializations = viewModel.SelectedSpecializations
+                                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                .Where(s => !string.IsNullOrWhiteSpace(s))
+                                .ToList();
+                            if (specializations.Count > 5)
+                            {
+                                ModelState.AddModelError(nameof(viewModel.SelectedSpecializations),
+                                    "Choose up to 5 specializations.");
+                                await _userManager.DeleteAsync(user);
+                                return View(viewModel);
+                            }
+                            viewModel.Specialization = string.Join(", ", specializations);
+                        }
+
                         try
                         {
                             var uploadsRoot = Path.Combine(_environment.WebRootPath, "uploads");
@@ -219,6 +236,8 @@ namespace ScholarRescue.Controllers
                 {
                     var user = await _userManager.FindByEmailAsync(viewModel.Email);
                     _logger.LogInformation("User {Email} logged in successfully.", viewModel.Email);
+
+                    TempData["SuccessMessage"] = "You have successfully logged in.";
 
                     // Redirect to the original requested URL if valid, otherwise to role-appropriate dashboard
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))

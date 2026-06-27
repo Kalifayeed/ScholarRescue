@@ -69,7 +69,7 @@ namespace ScholarRescue.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<WriterApplicationService> _logger;
 
-        private static readonly string[] AllowedExtensions = { ".pdf", ".doc", ".docx" };
+        private static readonly string[] AllowedExtensions = { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png" };
         private const long MaxFileSize = 5L * 1024 * 1024; // 5 MB
 
         public WriterApplicationService(
