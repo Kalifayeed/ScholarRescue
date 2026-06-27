@@ -259,6 +259,14 @@ namespace ScholarRescue.Services
                     "Order is already assigned. Remove the current writer before reassigning.");
             }
 
+            // Guard: order must be paid/funded before assignment
+            if (order.PaymentStatus != OrderPaymentStatus.Paid &&
+                order.PaymentStatus != OrderPaymentStatus.EscrowFunded)
+            {
+                throw new InvalidOperationException(
+                    "This order must be paid before assigning a writer.");
+            }
+
             // Make sure the writer is approved
             var latestApp = await _context.WriterApplications
                 .Where(a => a.UserId == writerId)
