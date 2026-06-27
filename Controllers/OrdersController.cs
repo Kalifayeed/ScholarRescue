@@ -155,6 +155,9 @@ namespace ScholarRescue.Controllers
                     NumberOfSources = order.NumberOfSources,
                     Priority = order.Priority,
                     Status = order.Status,
+                    PaymentStatus = order.PaymentStatus,
+                    PaystackReference = order.PaystackReference,
+                    PaymentDate = order.PaymentDate,
                     ClientName = $"{order.Client.FirstName} {order.Client.LastName}",
                     ClientEmail = order.Client.Email ?? string.Empty,
                     WriterName = order.AssignedWriter != null

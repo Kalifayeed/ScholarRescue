@@ -1800,9 +1800,15 @@ namespace ScholarRescue.Controllers
         /// Payments administration. Placeholder until payment providers are configured.
         /// </summary>
         [HttpGet]
-        public IActionResult Payments()
+        public async Task<IActionResult> Payments()
         {
-            return View();
+            var payments = await _context.Payments
+                .Include(p => p.Order)
+                    .ThenInclude(o => o!.Client)
+                .OrderByDescending(p => p.CreatedAt)
+                .AsNoTracking()
+                .ToListAsync();
+            return View(payments);
         }
 
         // ════════════════════════════════════════════════

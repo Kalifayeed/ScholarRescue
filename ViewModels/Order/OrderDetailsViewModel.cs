@@ -46,6 +46,9 @@ namespace ScholarRescue.ViewModels.Order
 
         public PriorityLevel Priority { get; set; }
         public OrderStatus Status { get; set; }
+        public OrderPaymentStatus PaymentStatus { get; set; }
+        public string? PaystackReference { get; set; }
+        public DateTime? PaymentDate { get; set; }
         public string ClientName { get; set; } = string.Empty;
         public string ClientEmail { get; set; } = string.Empty;
         public string? WriterName { get; set; }
