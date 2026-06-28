@@ -24,6 +24,7 @@ namespace ScholarRescue.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<AccountController> _logger;
         private readonly IVerificationService _verificationService;
+        private readonly IEmailService _emailService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -33,7 +34,8 @@ namespace ScholarRescue.Controllers
             IWriterApplicationService writerApplicationService,
             IWebHostEnvironment environment,
             ILogger<AccountController> logger,
-            IVerificationService verificationService)
+            IVerificationService verificationService,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -43,6 +45,7 @@ namespace ScholarRescue.Controllers
             _environment = environment;
             _logger = logger;
             _verificationService = verificationService;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -323,6 +326,160 @@ namespace ScholarRescue.Controllers
         [HttpGet]
         public IActionResult AccessDenied()
         {
+            return View();
+        }
+
+        // ════════════════════════════════════════════════
+        // PASSWORD RESET
+        // ════════════════════════════════════════════════
+
+        /// <summary>
+        /// GET: /Account/ForgotPassword
+        /// Displays the forgot password form.
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// POST: /Account/ForgotPassword
+        /// If user exists, generates reset token and sends email.
+        /// Always shows same confirmation to prevent email enumeration.
+        /// </summary>
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null && await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var encodedToken = Uri.EscapeDataString(token);
+                    var resetLink = Url.Action("ResetPassword", "Account",
+                        new { email = model.Email, token = encodedToken },
+                        protocol: Request.Scheme);
+
+                    var body = $@"
+                        <h2>Password Reset Request</h2>
+                        <p>Hello {user.FirstName},</p>
+                        <p>You requested a password reset for your ScholarRescue account.</p>
+                        <p><a href='{resetLink}'>Click here to reset your password</a></p>
+                        <p>If you did not request this, please ignore this email.</p>
+                        <p>This link expires in 24 hours.</p>
+                        <hr />
+                        <p style='color:#888;font-size:0.85em;'>ScholarRescue Academic Support Platform</p>";
+
+                    await _emailService.SendEmailAsync(model.Email, "Password Reset Request", body);
+                }
+
+                // Always show same confirmation
+                return RedirectToAction("ForgotPasswordConfirmation");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing forgot password for {Email}.", model.Email);
+                return RedirectToAction("ForgotPasswordConfirmation");
+            }
+        }
+
+        /// <summary>
+        /// GET: /Account/ForgotPasswordConfirmation
+        /// Shows generic confirmation that an email was sent if the account exists.
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPasswordConfirmation()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// GET: /Account/ResetPassword
+        /// Validates token and displays reset form.
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string? email, string? token)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+            {
+                TempData["ErrorMessage"] = "Invalid password reset link.";
+                return RedirectToAction("Login");
+            }
+
+            var model = new ResetPasswordViewModel
+            {
+                Email = email,
+                Token = token
+            };
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// POST: /Account/ResetPassword
+        /// Resets the password using the Identity token.
+        /// </summary>
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    // Don't reveal whether email exists
+                    TempData["ErrorMessage"] = "Password reset failed. The link may have expired or is invalid.";
+                    return RedirectToAction("Login");
+                }
+
+                var token = Uri.UnescapeDataString(model.Token);
+                var result = await _userManager.ResetPasswordAsync(user, token, model.Password);
+
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("Password reset successful for {Email}.", model.Email);
+                    return RedirectToAction("ResetPasswordConfirmation");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resetting password for {Email}.", model.Email);
+                TempData["ErrorMessage"] = "An error occurred while resetting your password. Please try again.";
+                return RedirectToAction("Login");
+            }
+        }
+
+        /// <summary>
+        /// GET: /Account/ResetPasswordConfirmation
+        /// Shows success message and link to login.
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPasswordConfirmation()
+        {
+            TempData["SuccessMessage"] = "Your password has been reset. Please log in.";
             return View();
         }
 
