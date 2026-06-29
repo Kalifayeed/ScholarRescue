@@ -8,13 +8,17 @@
     var preselectedType = ViewData["PreselectedUserType"] as string;
 }
 
-<section class="py-5" style="background:var(--bg-main);">
+<section class="py-4 py-md-5" style="background:var(--bg-main);min-height:70vh;">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-9">
-                <div class="text-center mb-4">
-                    <h1 class="fw-bold">Create Your Account</h1>
-                    <p class="text-muted">Join ScholarRescue to access academic support services.</p>
+            <div class="col-lg-11 col-xl-10">
+                <!-- Header -->
+                <div class="text-center mb-4 mb-md-5">
+                    <h1 class="display-6 fw-bold mb-3">Create Your Account</h1>
+                    <p class="text-muted mx-auto" style="max-width:600px;line-height:1.7;">
+                        Choose the account type that matches your goals. Clients can request academic support,
+                        while specialists can apply to provide tutoring and guidance.
+                    </p>
                 </div>
 
                 @if (!string.IsNullOrEmpty(orderNowMessage))
@@ -24,179 +28,342 @@
                     </div>
                 }
 
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4 p-md-5">
-                        <form asp-action="Register" method="post" enctype="multipart/form-data" id="registerForm">
-                            @Html.AntiForgeryToken()
-                            <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+                <div class="row g-4 g-lg-5">
+                    <!-- Main Form Column -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body p-4 p-md-5">
+                                <form asp-action="Register" method="post" enctype="multipart/form-data" id="registerForm" novalidate>
+                                    @Html.AntiForgeryToken()
 
-                            <h5 class="fw-bold mb-3"><i class="bi bi-person-vcard text-primary me-2"></i>Personal Information</h5>
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-6">
-                                    <label asp-for="FirstName" class="form-label"></label>
-                                    <input asp-for="FirstName" class="form-control" placeholder="First name" />
-                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
-                                </div>
-                                <div class="col-md-6">
-                                    <label asp-for="LastName" class="form-label"></label>
-                                    <input asp-for="LastName" class="form-control" placeholder="Last name" />
-                                    <span asp-validation-for="LastName" class="text-danger small"></span>
-                                </div>
-                                <div class="col-12">
-                                    <label asp-for="Email" class="form-label"></label>
-                                    <input asp-for="Email" class="form-control" type="email" placeholder="you@example.com" />
-                                    <span asp-validation-for="Email" class="text-danger small"></span>
-                                </div>
-                            </div>
-
-                            <h5 class="fw-bold mb-3"><i class="bi bi-person-badge text-primary me-2"></i>I want to register as</h5>
-                            <p class="text-muted small mb-3">Choose the account type that best fits your goals.</p>
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-6">
-                                    <input type="radio" class="btn-check" name="UserType" id="accountClient" value="Client"
-                                           @(string.IsNullOrEmpty(preselectedType) || preselectedType == "Client" ? "checked" : "") />
-                                    <label class="btn btn-outline-primary w-100 p-4 text-start account-type-card" for="accountClient">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="bi bi-person-workspace fs-3 text-primary me-2"></i>
-                                            <strong class="fs-5">Client</strong>
+                                    <!-- Validation Summary - Conditional Bootstrap Alert -->
+                                    <div id="validationSummaryWrap" style="display:none;">
+                                        <div class="alert alert-danger d-flex align-items-start gap-3 rounded-3 border-0" role="alert">
+                                            <i class="bi bi-exclamation-triangle-fill fs-4 flex-shrink-0 mt-1"></i>
+                                            <div>
+                                                <strong class="d-block mb-1">Please review the following:</strong>
+                                                <div asp-validation-summary="All" class="mb-0" style="list-style:none;padding-left:0;"></div>
+                                            </div>
+                                            <button type="button" class="btn-close ms-auto flex-shrink-0" data-bs-dismiss="alert" aria-label="Close"></button>
                                         </div>
-                                        <p class="small text-muted mb-2">I am seeking:</p>
-                                        <ul class="small text-muted ps-3 mb-0">
-                                            <li>Tutoring</li>
-                                            <li>Research Guidance</li>
-                                            <li>Editing</li>
-                                            <li>Proofreading</li>
-                                            <li>Citation Assistance</li>
-                                            <li>Academic Coaching</li>
-                                        </ul>
-                                    </label>
-                                </div>
-                                <div class="col-md-6">
-                                    <input type="radio" class="btn-check" name="UserType" id="accountWriter" value="Writer"
-                                           @(preselectedType == "Writer" ? "checked" : "") />
-                                    <label class="btn btn-outline-success w-100 p-4 text-start account-type-card" for="accountWriter">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="bi bi-mortarboard fs-3 text-success me-2"></i>
-                                            <strong class="fs-5">Tutor / Academic Specialist</strong>
+                                    </div>
+
+                                    <!-- Personal Information -->
+                                    <div class="mb-4">
+                                        <div class="d-flex align-items-center gap-2 mb-3">
+                                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width:36px;height:36px;">
+                                                <i class="bi bi-person-vcard text-primary"></i>
+                                            </span>
+                                            <h5 class="fw-bold mb-0">Personal Information</h5>
                                         </div>
-                                        <p class="small text-muted mb-2">I want to provide:</p>
-                                        <ul class="small text-muted ps-3 mb-0">
-                                            <li>Tutoring</li>
-                                            <li>Research Guidance</li>
-                                            <li>Editing</li>
-                                            <li>Proofreading</li>
-                                            <li>Citation Assistance</li>
-                                            <li>Academic Coaching</li>
-                                        </ul>
-                                    </label>
-                                </div>
-                            </div>
-                            <input type="hidden" asp-for="UserType" id="UserTypeHidden" value="@(string.IsNullOrEmpty(preselectedType) ? "Client" : preselectedType)" />
-                            <span asp-validation-for="UserType" class="text-danger small"></span>
-
-                            <!-- Writer / Academic Specialist extended application -->
-                            <div id="writerApplicationSection" style="display:none;">
-                                <h5 class="fw-bold mb-3 mt-4"><i class="bi bi-mortarboard text-success me-2"></i>Professional Information</h5>
-                                <div class="row g-3 mb-4">
-                                    <div class="col-md-6">
-                                        <label asp-for="PhoneNumber" class="form-label"></label>
-                                        <input asp-for="PhoneNumber" class="form-control" placeholder="+1 555 123 4567" />
-                                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label asp-for="HighestQualification" class="form-label"></label>
-                                        <input asp-for="HighestQualification" class="form-control" placeholder="e.g. MSc, PhD, MBA" />
-                                        <span asp-validation-for="HighestQualification" class="text-danger small"></span>
-                                    </div>
-                                    <div class="col-12">
-                                        <label asp-for="Specialization" class="form-label"></label>
-                                        <input asp-for="Specialization" class="form-control" placeholder="e.g. Nursing, Computer Science, Marketing" />
-                                        <span asp-validation-for="Specialization" class="text-danger small"></span>
-                                    </div>
-                                </div>
-
-                                <h5 class="fw-bold mb-3"><i class="bi bi-cloud-upload text-success me-2"></i>Document Uploads</h5>
-                                <p class="text-muted small mb-3">Accepted formats: <strong>PDF, DOC, DOCX</strong>. Max size: 5 MB per file.</p>
-                                <div class="row g-3 mb-4">
-                                    <div class="col-md-4">
-                                        <label asp-for="CvFile" class="form-label"></label>
-                                        <input asp-for="CvFile" type="file" class="form-control" accept=".pdf,.doc,.docx" />
-                                        <span asp-validation-for="CvFile" class="text-danger small"></span>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label asp-for="DegreeFile" class="form-label"></label>
-                                        <input asp-for="DegreeFile" type="file" class="form-control" accept=".pdf,.doc,.docx" />
-                                        <span asp-validation-for="DegreeFile" class="text-danger small"></span>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label asp-for="WritingSampleFile" class="form-label"></label>
-                                        <input asp-for="WritingSampleFile" type="file" class="form-control" accept=".pdf,.doc,.docx" />
-                                        <span asp-validation-for="WritingSampleFile" class="text-danger small"></span>
-                                    </div>
-                                </div>
-
-                                <h5 class="fw-bold mb-3"><i class="bi bi-person-lines-fill text-success me-2"></i>Additional Information</h5>
-                                <div class="row g-3 mb-4">
-                                    <div class="col-12">
-                                        <label asp-for="Biography" class="form-label"></label>
-                                        <textarea asp-for="Biography" class="form-control" rows="6"
-                                                  placeholder="Tell us about your academic background, professional experience, and what makes you a great tutor. (150 - 500 words)"
-                                                  minlength="150" maxlength="4000"
-                                                  oninput="updateWordCount(this);"></textarea>
-                                        <div class="d-flex justify-content-between mt-1">
-                                            <span asp-validation-for="Biography" class="text-danger small"></span>
-                                            <small class="text-muted" id="biographyWordCount">0 / 500 words</small>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="FirstName" class="form-label fw-medium"></label>
+                                                <input asp-for="FirstName" class="form-control form-control-lg" placeholder="First name" />
+                                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label asp-for="LastName" class="form-label fw-medium"></label>
+                                                <input asp-for="LastName" class="form-control form-control-lg" placeholder="Last name" />
+                                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                                            </div>
+                                            <div class="col-12">
+                                                <label asp-for="Email" class="form-label fw-medium"></label>
+                                                <input asp-for="Email" class="form-control form-control-lg" type="email" placeholder="you@example.com" />
+                                                <span asp-validation-for="Email" class="text-danger small"></span>
+                                            </div>
                                         </div>
-                                        <small class="text-muted d-block mt-1">
-                                            <i class="bi bi-info-circle"></i> Minimum 150 words, maximum 500 words.
-                                        </small>
                                     </div>
-                                </div>
 
-                                <div class="alert alert-info">
-                                    <i class="bi bi-info-circle me-2"></i>
-                                    Your application will be reviewed by our admin team. You'll be notified once a decision is made.
-                                </div>
-                            </div>
+                                    <!-- Account Type Selection -->
+                                    <div class="mb-4">
+                                        <div class="d-flex align-items-center gap-2 mb-3">
+                                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width:36px;height:36px;">
+                                                <i class="bi bi-person-badge text-primary"></i>
+                                            </span>
+                                            <h5 class="fw-bold mb-0">I want to register as</h5>
+                                        </div>
+                                        <p class="text-muted small mb-3">Select one — you can only have one account type.</p>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <input type="radio" class="btn-check" name="UserType" id="accountClient" value="Client" autocomplete="off"
+                                                       @(string.IsNullOrEmpty(preselectedType) || preselectedType == "Client" ? "checked" : "") />
+                                                <label class="btn btn-outline-primary w-100 p-4 text-start account-type-card border-2" for="accountClient">
+                                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10" style="width:48px;height:48px;font-size:1.5rem;">
+                                                            <i class="bi bi-person-workspace text-primary"></i>
+                                                        </span>
+                                                        <div>
+                                                            <strong class="fs-5 d-block">Client</strong>
+                                                            <small class="text-muted">Request academic support</small>
+                                                        </div>
+                                                    </div>
+                                                    <p class="small text-muted mb-2">I am looking for:</p>
+                                                    <ul class="small text-muted ps-0 mb-0 registration-bullet-list">
+                                                        <li><i class="bi bi-check-circle-fill text-primary me-1" style="font-size:0.65rem;"></i> Tutoring</li>
+                                                        <li><i class="bi bi-check-circle-fill text-primary me-1" style="font-size:0.65rem;"></i> Research Guidance</li>
+                                                        <li><i class="bi bi-check-circle-fill text-primary me-1" style="font-size:0.65rem;"></i> Editing & Proofreading</li>
+                                                        <li><i class="bi bi-check-circle-fill text-primary me-1" style="font-size:0.65rem;"></i> Citation & Formatting Help</li>
+                                                    </ul>
+                                                </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input type="radio" class="btn-check" name="UserType" id="accountWriter" value="Writer" autocomplete="off"
+                                                       @(preselectedType == "Writer" ? "checked" : "") />
+                                                <label class="btn btn-outline-success w-100 p-4 text-start account-type-card border-2" for="accountWriter">
+                                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-success bg-opacity-10" style="width:48px;height:48px;font-size:1.5rem;">
+                                                            <i class="bi bi-mortarboard text-success"></i>
+                                                        </span>
+                                                        <div>
+                                                            <strong class="fs-5 d-block">Tutor / Academic Specialist</strong>
+                                                            <small class="text-muted">Apply to provide guidance</small>
+                                                        </div>
+                                                    </div>
+                                                    <p class="small text-muted mb-2">I want to help with:</p>
+                                                    <ul class="small text-muted ps-0 mb-0 registration-bullet-list">
+                                                        <li><i class="bi bi-check-circle-fill text-success me-1" style="font-size:0.65rem;"></i> Tutoring</li>
+                                                        <li><i class="bi bi-check-circle-fill text-success me-1" style="font-size:0.65rem;"></i> Research Guidance</li>
+                                                        <li><i class="bi bi-check-circle-fill text-success me-1" style="font-size:0.65rem;"></i> Editing & Proofreading</li>
+                                                        <li><i class="bi bi-check-circle-fill text-success me-1" style="font-size:0.65rem;"></i> Citation & Formatting Help</li>
+                                                    </ul>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" asp-for="UserType" id="UserTypeHidden" value="@(string.IsNullOrEmpty(preselectedType) ? "Client" : preselectedType)" />
+                                        <span asp-validation-for="UserType" class="text-danger small"></span>
+                                    </div>
 
-                            <h5 class="fw-bold mb-3"><i class="bi bi-shield-lock text-primary me-2"></i>Security</h5>
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-6">
-                                    <label asp-for="Password" class="form-label"></label>
-                                    <input asp-for="Password" class="form-control" placeholder="At least 8 characters" />
-                                    <span asp-validation-for="Password" class="text-danger small"></span>
-                                </div>
-                                <div class="col-md-6">
-                                    <label asp-for="ConfirmPassword" class="form-label"></label>
-                                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Re-enter password" />
-                                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-                                </div>
-                            </div>
+                                    <!-- Writer Application Section -->
+                                    <div id="writerApplicationSection" style="display:none;">
+                                        <div class="rounded-4 border border-success border-opacity-25 bg-success bg-opacity-5 p-4 p-md-5 mb-4">
+                                            <div class="d-flex align-items-center gap-2 mb-3">
+                                                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10" style="width:36px;height:36px;">
+                                                    <i class="bi bi-mortarboard text-success"></i>
+                                                </span>
+                                                <h5 class="fw-bold mb-0 text-success">Tutor Application Details</h5>
+                                            </div>
+                                            <p class="text-muted small mb-4">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                Complete the fields below so our admin team can review your application.
+                                            </p>
 
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg" id="registerSubmit">
-                                    <i class="bi bi-person-check me-2"></i>Create Account
-                                </button>
+                                            <!-- Contact & Education -->
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-6">
+                                                    <label asp-for="PhoneNumber" class="form-label fw-medium"></label>
+                                                    <input asp-for="PhoneNumber" class="form-control" placeholder="+1 555 123 4567" />
+                                                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label asp-for="EducationLevel" class="form-label fw-medium"></label>
+                                                    <select asp-for="EducationLevel" class="form-select">
+                                                        <option value="">-- Select your highest level --</option>
+                                                        <option value="High School">High School</option>
+                                                        <option value="Diploma">Diploma</option>
+                                                        <option value="Associate Degree">Associate Degree</option>
+                                                        <option value="Bachelor's Degree">Bachelor's Degree</option>
+                                                        <option value="Master's Degree">Master's Degree</option>
+                                                        <option value="PhD / Doctorate">PhD / Doctorate</option>
+                                                        <option value="Post-Doctorate">Post-Doctorate</option>
+                                                    </select>
+                                                    <span asp-validation-for="EducationLevel" class="text-danger small"></span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Specializations -->
+                                            <div class="mb-4">
+                                                <label asp-for="Specialization" class="form-label fw-medium"></label>
+                                                <input asp-for="Specialization" class="form-control" placeholder="e.g. Nursing, Computer Science, Business" />
+                                                <div class="d-flex align-items-center gap-2 mt-1">
+                                                    <span asp-validation-for="Specialization" class="text-danger small"></span>
+                                                    <small class="text-muted ms-auto">
+                                                        <i class="bi bi-info-circle"></i> Choose up to 5 subjects you can confidently support.
+                                                    </small>
+                                                </div>
+                                            </div>
+
+                                            <!-- Document Uploads -->
+                                            <div class="mb-3">
+                                                <div class="d-flex align-items-center gap-2 mb-2">
+                                                    <i class="bi bi-cloud-upload text-success"></i>
+                                                    <h6 class="fw-bold mb-0">Document Uploads</h6>
+                                                </div>
+                                                <p class="text-muted small mb-3">
+                                                    Accepted formats: <strong>PDF, DOC, DOCX, JPG, PNG</strong>. Max 5 MB per file.
+                                                </p>
+                                                <div class="row g-3">
+                                                    <div class="col-md-4">
+                                                        <label asp-for="NationalIdFile" class="form-label small fw-medium"></label>
+                                                        <div class="file-upload-wrapper">
+                                                            <input asp-for="NationalIdFile" type="file" class="form-control file-upload-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                                                            <small class="text-muted d-block mt-1">
+                                                                <i class="bi bi-shield-lock"></i> Upload National ID for verification. Only visible to administrators.
+                                                            </small>
+                                                        </div>
+                                                        <span asp-validation-for="NationalIdFile" class="text-danger small"></span>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label asp-for="DegreeFile" class="form-label small fw-medium"></label>
+                                                        <input asp-for="DegreeFile" type="file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                                                        <span asp-validation-for="DegreeFile" class="text-danger small"></span>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label asp-for="WritingSampleFile" class="form-label small fw-medium"></label>
+                                                        <input asp-for="WritingSampleFile" type="file" class="form-control" accept=".pdf,.doc,.docx" />
+                                                        <span asp-validation-for="WritingSampleFile" class="text-danger small"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Professional Biography -->
+                                            <div class="mb-3">
+                                                <label asp-for="Biography" class="form-label fw-medium"></label>
+                                                <textarea asp-for="Biography" class="form-control" rows="6"
+                                                          placeholder="Tell us about your academic background, professional experience, and what makes you a great tutor. (150–500 words)"
+                                                          minlength="150" maxlength="4000"
+                                                          oninput="updateWordCount(this);"></textarea>
+                                                <div class="d-flex justify-content-between mt-1">
+                                                    <span asp-validation-for="Biography" class="text-danger small"></span>
+                                                    <small class="text-muted" id="biographyWordCount">0 / 500 words</small>
+                                                </div>
+                                            </div>
+
+                                            <!-- Application Notice -->
+                                            <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-25 rounded-3 mb-0">
+                                                <div class="d-flex gap-2">
+                                                    <i class="bi bi-info-circle-fill text-success flex-shrink-0 mt-1"></i>
+                                                    <div>
+                                                        <strong class="d-block text-success">Application Review</strong>
+                                                        <p class="small text-muted mb-0">
+                                                            Your application will be reviewed by our admin team. You will be notified via email once a decision is made.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Security -->
+                                    <div class="mb-4">
+                                        <div class="d-flex align-items-center gap-2 mb-3">
+                                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width:36px;height:36px;">
+                                                <i class="bi bi-shield-lock text-primary"></i>
+                                            </span>
+                                            <h5 class="fw-bold mb-0">Security</h5>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="Password" class="form-label fw-medium"></label>
+                                                <input asp-for="Password" class="form-control form-control-lg" placeholder="Create a strong password (min. 8 characters)" />
+                                                <span asp-validation-for="Password" class="text-danger small"></span>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label asp-for="ConfirmPassword" class="form-label fw-medium"></label>
+                                                <input asp-for="ConfirmPassword" class="form-control form-control-lg" placeholder="Re-enter your password" />
+                                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit -->
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary btn-lg fw-semibold rounded-3 py-3" id="registerSubmit">
+                                            <i class="bi bi-person-check me-2"></i>Create Account
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                        </div>
+
+                        <!-- Login Link -->
+                        <div class="text-center mt-4">
+                            @if (showLoginLink)
+                            {
+                                <p class="mb-0">
+                                    Already have an account?
+                                    <a asp-action="Login" class="text-primary fw-bold text-decoration-none">Log In</a>
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="mb-0">
+                                    Already have an account?
+                                    <a asp-action="Login" class="text-primary fw-bold text-decoration-none">Log in</a>
+                                </p>
+                            }
+                        </div>
                     </div>
-                </div>
 
-                <div class="text-center mt-4">
-                    @if (showLoginLink)
-                    {
-                        <p class="mb-0">
-                            Already have an account?
-                            <a asp-action="Login" class="text-primary fw-bold">Log In</a>
-                        </p>
-                    }
-                    else
-                    {
-                        <p class="mb-0">
-                            Already have an account?
-                            <a asp-action="Login" class="text-primary fw-bold">Log in</a>
-                        </p>
-                    }
+                    <!-- Right Side: Trust Panel -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm rounded-4 bg-primary bg-opacity-5 position-sticky" style="top:2rem;">
+                            <div class="card-body p-4 p-md-5">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style="width:36px;height:36px;">
+                                        <i class="bi bi-shield-check text-primary"></i>
+                                    </span>
+                                    <h5 class="fw-bold mb-0">Why ScholarRescue?</h5>
+                                </div>
+                                <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                                    <li class="d-flex gap-3">
+                                        <span class="d-inline-flex align-items-center justify-content-center rounded-2 bg-primary bg-opacity-10 flex-shrink-0" style="width:32px;height:32px;">
+                                            <i class="bi bi-heart-pulse text-primary small"></i>
+                                        </span>
+                                        <div>
+                                            <strong class="d-block small">Healthcare & Nursing Focus</strong>
+                                            <small class="text-muted">Specialized support for medical and nursing programs.</small>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex gap-3">
+                                        <span class="d-inline-flex align-items-center justify-content-center rounded-2 bg-primary bg-opacity-10 flex-shrink-0" style="width:32px;height:32px;">
+                                            <i class="bi bi-incognito text-primary small"></i>
+                                        </span>
+                                        <div>
+                                            <strong class="d-block small">Privacy-First Setup</strong>
+                                            <small class="text-muted">Your data is encrypted and never shared.</small>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex gap-3">
+                                        <span class="d-inline-flex align-items-center justify-content-center rounded-2 bg-primary bg-opacity-10 flex-shrink-0" style="width:32px;height:32px;">
+                                            <i class="bi bi-kanban text-primary small"></i>
+                                        </span>
+                                        <div>
+                                            <strong class="d-block small">Secure Workspaces</strong>
+                                            <small class="text-muted">Manage orders and messages in a protected environment.</small>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex gap-3">
+                                        <span class="d-inline-flex align-items-center justify-content-center rounded-2 bg-primary bg-opacity-10 flex-shrink-0" style="width:32px;height:32px;">
+                                            <i class="bi bi-people text-primary small"></i>
+                                        </span>
+                                        <div>
+                                            <strong class="d-block small">Human Specialists</strong>
+                                            <small class="text-muted">Real academics, not AI-generated content.</small>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex gap-3">
+                                        <span class="d-inline-flex align-items-center justify-content-center rounded-2 bg-primary bg-opacity-10 flex-shrink-0" style="width:32px;height:32px;">
+                                            <i class="bi bi-clipboard-check text-primary small"></i>
+                                        </span>
+                                        <div>
+                                            <strong class="d-block small">Admin-Reviewed</strong>
+                                            <small class="text-muted">Every tutor application is manually verified.</small>
+                                        </div>
+                                    </li>
+                                </ul>
+
+                                <hr class="my-4" />
+
+                                <div class="text-center">
+                                    <i class="bi bi-question-circle text-primary d-block mb-2" style="font-size:1.5rem;"></i>
+                                    <p class="small text-muted mb-0">
+                                        Need help? <a asp-controller="Home" asp-action="Contact" class="text-primary text-decoration-none">Contact us</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -204,24 +371,134 @@
 </section>
 
 <style>
+    /* Account Type Cards */
     .account-type-card {
-        height: 100%;
-        border-width: 2px;
-        border-radius: 12px;
-        transition: all 0.2s ease;
+        border-radius: 14px;
+        transition: all 0.25s ease;
+        cursor: pointer;
+    }
+    .account-type-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     }
     .btn-check:checked + .account-type-card {
-        background: rgba(27, 54, 93, 0.05);
-        box-shadow: 0 0 0 0.25rem rgba(27, 54, 93, 0.15);
+        box-shadow: 0 0 0 3px rgba(27, 54, 93, 0.2);
         border-width: 2px;
     }
     .btn-check:checked + .btn-outline-primary.account-type-card {
-        background: rgba(27, 54, 93, 0.08);
-        color: var(--primary);
+        background: rgba(27, 54, 93, 0.06);
+        border-color: var(--primary);
     }
     .btn-check:checked + .btn-outline-success.account-type-card {
-        background: rgba(40, 167, 69, 0.08);
-        color: var(--success);
+        background: rgba(40, 167, 69, 0.06);
+        border-color: var(--success);
+    }
+    .registration-bullet-list {
+        list-style: none;
+    }
+    .registration-bullet-list li {
+        padding: 1px 0;
+        line-height: 1.6;
+    }
+
+    /* File Input Styling */
+    .file-upload-input {
+        cursor: pointer;
+    }
+
+    /* Form Controls */
+    #registerForm .form-control,
+    #registerForm .form-select {
+        border-radius: 10px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.6rem 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    #registerForm .form-control:focus,
+    #registerForm .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(27, 54, 93, 0.12);
+    }
+    #registerForm .form-control-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    #registerForm .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.35rem;
+        color: var(--text-dark);
+    }
+    #registerForm .text-danger.small {
+        font-size: 0.78rem;
+        margin-top: 0.15rem;
+        display: block;
+    }
+
+    /* Validation Alert */
+    #validationSummaryWrap .alert-danger {
+        background: #fef2f2;
+        border-left: 4px solid #dc3545;
+    }
+    #validationSummaryWrap .alert-danger ul {
+        margin-bottom: 0;
+    }
+    #validationSummaryWrap .alert-danger ul li {
+        font-size: 0.85rem;
+        margin-bottom: 0.2rem;
+    }
+    #validationSummaryWrap .alert-danger ul li:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Writer Section Panel */
+    #writerApplicationSection .form-control,
+    #writerApplicationSection .form-select {
+        border-radius: 10px;
+        border: 1.5px solid #dee2e6;
+        padding: 0.6rem 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    #writerApplicationSection .form-control:focus,
+    #writerApplicationSection .form-select:focus {
+        border-color: var(--success);
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.12);
+    }
+
+    /* Trust Panel */
+    .bg-primary.bg-opacity-5 {
+        background: rgba(27, 54, 93, 0.04);
+    }
+    .bg-success.bg-opacity-5 {
+        background: rgba(40, 167, 69, 0.04);
+    }
+
+    /* Submit Button */
+    #registerSubmit {
+        font-size: 1.05rem;
+        letter-spacing: 0.3px;
+        transition: all 0.2s ease;
+    }
+    #registerSubmit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(27, 54, 93, 0.2);
+    }
+
+    /* Responsive */
+    @@media (max-width: 991.98px) {
+        .position-sticky {
+            position: static !important;
+        }
+    }
+    @@media (max-width: 575.98px) {
+        .account-type-card {
+            padding: 1rem !important;
+        }
+        .account-type-card .fs-5 {
+            font-size: 1rem !important;
+        }
+        .card-body {
+            padding: 1.25rem !important;
+        }
     }
 </style>
 
@@ -274,5 +551,43 @@
                 }
             }
         }
+
+        // Show validation summary only when errors exist
+        (function () {
+            var summaryWrap = document.getElementById('validationSummaryWrap');
+            if (!summaryWrap) return;
+
+            function toggleValidationAlert() {
+                var hasErrors = false;
+                var items = summaryWrap.querySelectorAll('ul li');
+                items.forEach(function (li) {
+                    if (li.textContent.trim() !== '') hasErrors = true;
+                });
+                summaryWrap.style.display = hasErrors ? 'block' : 'none';
+            }
+
+            // Check on load (handles server-side model errors)
+            toggleValidationAlert();
+
+            // Re-check after validation events (client-side)
+            var form = document.getElementById('registerForm');
+            if (form) {
+                form.addEventListener('invalid', function () {
+                    setTimeout(toggleValidationAlert, 100);
+                }, true);
+                // For jQuery Validation
+                if (typeof $ !== 'undefined' && $.validator) {
+                    var $form = $(form);
+                    var validator = $form.data('validator');
+                    if (validator) {
+                        var origShowErrors = validator.showErrors;
+                        validator.showErrors = function (errors) {
+                            origShowErrors.call(this, errors);
+                            toggleValidationAlert();
+                        };
+                    }
+                }
+            }
+        })();
     </script>
 }
