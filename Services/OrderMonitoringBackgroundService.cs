@@ -21,29 +21,34 @@ namespace ScholarRescue.Services
         {
             _logger.LogInformation("Order Monitoring Background Service started.");
 
-            // Initial delay to let the app start up
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
+                    // Initial delay before first check, then periodic delay
+                    await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+
                     using var scope = _serviceProvider.CreateScope();
                     var monitoringService = scope.ServiceProvider
                         .GetRequiredService<IOrderMonitoringService>();
 
                     await monitoringService.RunMonitoringCheckAsync();
+
+                    // Wait 5 minutes between checks
+                    await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
+                    // Graceful shutdown - expected during service stop
                     break;
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
                 {
                     _logger.LogError(ex, "Error running order monitoring check.");
+                    // Wait before retrying after error
+                    try { await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); }
+                    catch (OperationCanceledException) { break; }
                 }
-
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
             }
 
             _logger.LogInformation("Order Monitoring Background Service stopped.");

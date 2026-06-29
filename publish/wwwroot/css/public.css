@@ -2,6 +2,17 @@
    ScholarRescue - Public Website Styles
    ============================================================ */
 
+/* When Bootstrap fails to load, provide critical nav fallbacks */
+.public-navbar ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.public-navbar .navbar-nav .nav-item {
+    list-style: none;
+}
+
 .public-body {
     display: flex;
     flex-direction: column;

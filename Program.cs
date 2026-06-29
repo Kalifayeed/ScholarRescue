@@ -103,6 +103,11 @@ startupLogger.LogInformation("========================================");
 // ============================================================
 
 // Add services to the container.
+builder.Services.Configure<HostOptions>(options =>
+{
+    // Don't kill the entire host if a background service throws
+    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+});
 builder.Services.AddControllersWithViews();
 
 // Response Compression (Brotli/Gzip) - reduces payload size by 60-80%

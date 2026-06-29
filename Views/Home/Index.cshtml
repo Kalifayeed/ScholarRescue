@@ -3,14 +3,40 @@
     Layout = "~/Views/Shared/_Layout.Public.cshtml";
 }
 
+<!-- Premium Announcement Ticker -->
+<div class="announcement-ticker-wrapper">
+    <div class="container-fluid px-0">
+        <div class="announcement-ticker">
+            <div class="announcement-ticker-icon">
+                <i class="bi bi-megaphone-fill"></i>
+                <span>Announcements</span>
+            </div>
+            <div class="announcement-ticker-track">
+                <!-- First set -->
+                <span class="announcement-ticker-item"><strong>Human Expert Academic Support</strong> Receive personalized academic guidance from experienced subject specialists, with professional review, individualized attention, and quality-focused academic support.</span>
+                <span class="announcement-ticker-item"><strong>Built for Healthcare and Nursing Students</strong> ScholarRescue specializes in supporting students in Nursing, Medicine, Public Health, Pharmacy, Healthcare Administration, and other allied health programs throughout their academic journey.</span>
+                <span class="announcement-ticker-item"><strong>Comprehensive Clinical and Academic Support</strong> Coursework, Nursing Care Plans, SOAP Notes, Clinical Reflection Papers, Evidence-Based Practice, Capstone Projects, Research Papers, Case Studies, Discussion Posts, Literature Reviews, Clinical Documentation, Practice Hour Documentation, DNP Projects, MSN Assignments, BSN Coursework, APA 7 Formatting, Editing, Proofreading, and Academic Tutoring.</span>
+                <span class="announcement-ticker-item"><strong>Quality, Confidentiality, and Academic Integrity</strong> We prioritize originality, confidentiality, professional standards, timely guidance, and personalized academic support that helps students learn and succeed responsibly.</span>
+                <span class="announcement-ticker-item"><strong>Supporting Students Worldwide</strong> Whether studying online or on campus, ScholarRescue connects students with experienced academic professionals who help them understand complex concepts and move confidently through their studies.</span>
+                <!-- Duplicate set for seamless loop -->
+                <span class="announcement-ticker-item"><strong>Human Expert Academic Support</strong> Receive personalized academic guidance from experienced subject specialists, with professional review, individualized attention, and quality-focused academic support.</span>
+                <span class="announcement-ticker-item"><strong>Built for Healthcare and Nursing Students</strong> ScholarRescue specializes in supporting students in Nursing, Medicine, Public Health, Pharmacy, Healthcare Administration, and other allied health programs throughout their academic journey.</span>
+                <span class="announcement-ticker-item"><strong>Comprehensive Clinical and Academic Support</strong> Coursework, Nursing Care Plans, SOAP Notes, Clinical Reflection Papers, Evidence-Based Practice, Capstone Projects, Research Papers, Case Studies, Discussion Posts, Literature Reviews, Clinical Documentation, Practice Hour Documentation, DNP Projects, MSN Assignments, BSN Coursework, APA 7 Formatting, Editing, Proofreading, and Academic Tutoring.</span>
+                <span class="announcement-ticker-item"><strong>Quality, Confidentiality, and Academic Integrity</strong> We prioritize originality, confidentiality, professional standards, timely guidance, and personalized academic support that helps students learn and succeed responsibly.</span>
+                <span class="announcement-ticker-item"><strong>Supporting Students Worldwide</strong> Whether studying online or on campus, ScholarRescue connects students with experienced academic professionals who help them understand complex concepts and move confidently through their studies.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container">
         <div class="row align-items-center min-vh-50">
-            <div class="col-lg-6">
-                <h1 class="display-5 fw-bold text-white mb-3">ScholarRescue Academic Support Platform</h1>
+            <div class="col-lg-7">
+                <h1 class="display-5 fw-bold text-white mb-3">Expert Academic Support for Healthcare, Nursing and University Students</h1>
                 <p class="lead text-white-50 mb-4">
-                    Connect with qualified tutors, research mentors, editors, proofreaders and academic support professionals.
+                    Connect with experienced academic professionals for personalized assistance with coursework, research, clinical documentation, evidence-based practice, tutoring, editing, proofreading, and academic success throughout your educational journey.
                 </p>
                 <div class="d-flex gap-3 flex-wrap">
                     <a asp-controller="Home" asp-action="OrderNow" class="btn btn-accent btn-lg px-4">
@@ -21,11 +47,154 @@
                     </a>
                 </div>
             </div>
-            <div class="col-lg-6 d-none d-lg-block text-center">
+            <div class="col-lg-5 d-none d-lg-block text-center">
                 <div class="hero-illustration">
-                    <i class="bi bi-mortarboard" style="font-size:8rem;color:rgba(255,255,255,0.15);"></i>
-                    <i class="bi bi-book" style="font-size:4rem;color:rgba(245,166,35,0.3);position:absolute;top:20%;right:20%;"></i>
-                    <i class="bi bi-pencil-square" style="font-size:3rem;color:rgba(255,255,255,0.2);position:absolute;bottom:20%;left:20%;"></i>
+                    <i class="bi bi-heart-pulse-fill" style="font-size:7rem;color:rgba(255,255,255,0.12);"></i>
+                    <i class="bi bi-mortarboard" style="font-size:5rem;color:rgba(245,166,35,0.3);position:absolute;top:15%;right:15%;"></i>
+                    <i class="bi bi-shield-fill" style="font-size:3rem;color:rgba(255,255,255,0.18);position:absolute;bottom:20%;left:15%;"></i>
+                    <i class="bi bi-book" style="font-size:2.5rem;color:rgba(245,166,35,0.25);position:absolute;bottom:30%;right:25%;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Healthcare and Nursing Specialists Section -->
+<section class="py-5 specialties-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Healthcare and Nursing Specialists</h2>
+            <p class="text-muted">Specialized academic support for healthcare education, clinical learning, research, and professional development.</p>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(27,54,93,0.08);color:var(--primary);">
+                        <i class="bi bi-heart-pulse-fill"></i>
+                    </div>
+                    <h6>Nursing</h6>
+                    <p>Expert guidance for BSN, MSN, DNP programs, care plans, clinical reasoning, and evidence-based practice.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(40,167,69,0.08);color:var(--success);">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <h6>Medicine</h6>
+                    <p>Academic support for medical students including research, clinical documentation, and coursework guidance.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(23,162,184,0.08);color:var(--info);">
+                        <i class="bi bi-globe-americas"></i>
+                    </div>
+                    <h6>Public Health</h6>
+                    <p>Support for epidemiology, biostatistics, health policy, community health, and global health research.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(245,166,35,0.12);color:#d4941e;">
+                        <i class="bi bi-capsule"></i>
+                    </div>
+                    <h6>Pharmacy</h6>
+                    <p>Academic assistance for pharmacology, therapeutics, drug development, and clinical pharmacy coursework.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(108,117,125,0.08);color:var(--text-muted);">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h6>Healthcare Admin</h6>
+                    <p>Guidance in healthcare management, policy, leadership, operations, and health informatics.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(111,66,193,0.08);color:#6f42c1;">
+                        <i class="bi bi-brain"></i>
+                    </div>
+                    <h6>Psychology</h6>
+                    <p>Academic support for clinical, cognitive, developmental psychology, and mental health research.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(220,53,69,0.08);color:var(--danger);">
+                        <i class="bi bi-apple"></i>
+                    </div>
+                    <h6>Nutrition</h6>
+                    <p>Expert guidance in dietetics, clinical nutrition, nutritional science, and dietary planning coursework.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(0,150,136,0.08);color:#009688;">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </div>
+                    <h6>Occupational Therapy</h6>
+                    <p>Support for OT coursework, fieldwork documentation, clinical reasoning, and therapeutic intervention plans.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(0,123,255,0.08);color:#007bff;">
+                        <i class="bi bi-person-arms-up"></i>
+                    </div>
+                    <h6>Physical Therapy</h6>
+                    <p>Academic guidance for PT programs, clinical documentation, rehabilitation science, and evidence-based practice.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(233,30,99,0.08);color:#e91e63;">
+                        <i class="bi bi-flower1"></i>
+                    </div>
+                    <h6>Midwifery</h6>
+                    <p>Support for midwifery coursework, clinical documentation, maternal health, and evidence-based perinatal care.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(255,87,34,0.08);color:#ff5722;">
+                        <i class="bi bi-microscope"></i>
+                    </div>
+                    <h6>Medical Lab Science</h6>
+                    <p>Academic support for clinical laboratory science, hematology, microbiology, immunology, and diagnostics.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(63,81,181,0.08);color:#3f51b5;">
+                        <i class="bi bi-x-ray"></i>
+                    </div>
+                    <h6>Radiography</h6>
+                    <p>Guidance for radiography and medical imaging coursework, clinical documentation, and patient care protocols.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-6 mx-auto">
+                <div class="specialty-card">
+                    <div class="specialty-icon" style="background:rgba(27,54,93,0.08);color:var(--primary);">
+                        <i class="bi bi-tooth"></i>
+                    </div>
+                    <h6>Dentistry</h6>
+                    <p>Academic assistance for dental students including clinical documentation, research, and evidence-based practice.</p>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-primary btn-sm">Learn More</a>
                 </div>
             </div>
         </div>
