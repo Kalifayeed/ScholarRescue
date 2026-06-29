@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using ScholarRescue.Data;
 using ScholarRescue.Data.Seed;
 using ScholarRescue.Hubs;
@@ -11,6 +12,12 @@ using ScholarRescue.Services.Matching;
 using ScholarRescue.Services.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Enable Npgsql legacy timestamp behavior to handle DateTime.Kind=Unspecified
+// This is required because some DateTime values come from model binding (form POST)
+// with Kind=Unspecified, and PostgreSQL's 'timestamp with time zone' column requires
+// DateTime.Kind=Utc. This switch tells Npgsql to treat unspecified timestamps as UTC.
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 // ============================================================
 // CONFIGURATION — deterministic loading order
@@ -179,7 +186,8 @@ builder.Services.AddScoped<IDeploymentValidator, DeploymentValidator>();
 
 // PostgreSQL Database Connection — single source of truth
 builder.Services.AddDbContext<ScholarRescueDbContext>(options =>
-    options.UseNpgsql(cs));
+    options.UseNpgsql(cs)
+           .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
 // ASP.NET Core Identity
 builder.Services
