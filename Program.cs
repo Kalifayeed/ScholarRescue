@@ -281,12 +281,6 @@ app.UseMaintenanceMode();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
-    name: "specialties",
-    pattern: "specialties/{slug}",
-    defaults: new { controller = "Home", action = "Specialty" })
-    .WithStaticAssets();
-
-app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();

@@ -26,6 +26,8 @@ namespace ScholarRescue.Controllers
             return View();
         }
 
+        [HttpGet("/specialties/{slug}")]
+        [HttpGet("/Home/Specialty/{slug}")]
         [ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)]
         public IActionResult Specialty(string slug)
         {

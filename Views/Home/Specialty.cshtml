@@ -122,7 +122,7 @@
                 @foreach (var related in Model.RelatedSpecialties)
                 {
                     <div class="col-lg-2 col-md-4 col-6">
-                        <a asp-route="specialties" asp-route-slug="@related.Slug" class="text-decoration-none">
+                        <a asp-controller="Home" asp-action="Specialty" asp-route-slug="@related.Slug" class="text-decoration-none">
                             <div class="specialty-card text-center p-3">
                                 <div class="specialty-icon mx-auto" style="background:@related.IconBgColor;color:@related.IconColor;width:48px;height:48px;font-size:1.3rem;">
                                     <i class="@related.IconClass"></i>
