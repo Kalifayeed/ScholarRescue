@@ -1,0 +1,165 @@
+@model ScholarRescue.ViewModels.Home.SpecialtyViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.Public.cshtml";
+    ViewData["Title"] = Model.SeoTitle;
+    ViewData["MetaDescription"] = Model.MetaDescription;
+}
+
+<!-- Breadcrumb -->
+<section style="background:var(--bg-main);padding:0.75rem 0;border-bottom:1px solid rgba(0,0,0,0.05);">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Heading</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- Hero Section -->
+<section class="py-5" style="background:linear-gradient(135deg, @Model.HeroColor 0%, #1a2a4a 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center" style="width:64px;height:64px;background:rgba(255,255,255,0.15);">
+                        <i class="@Model.IconClass fs-2 text-white"></i>
+                    </div>
+                    <h1 class="display-6 fw-bold text-white mb-0">@Model.Heading</h1>
+                </div>
+                <p class="lead text-white-50 mb-4">
+                    Experienced human academic professionals providing personalized, original, and confidential support tailored to your university standards.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a asp-controller="Home" asp-action="OrderNow" class="btn btn-accent btn-lg px-4">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>Place an Order
+                    </a>
+                    <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-chat-dots me-2"></i>Contact Support
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block text-center">
+                <div class="position-relative" style="height:200px;">
+                    <i class="@Model.IconClass" style="font-size:7rem;color:rgba(255,255,255,0.10);"></i>
+                    <i class="bi bi-shield-fill" style="font-size:3rem;color:rgba(245,166,35,0.2);position:absolute;bottom:10%;right:10%;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Content Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Trust badges -->
+                <div class="row g-3 mb-5">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background:rgba(27,54,93,0.04);border:1px solid rgba(27,54,93,0.08);">
+                            <i class="bi bi-person-check fs-4" style="color:var(--primary);"></i>
+                            <div>
+                                <strong class="small d-block">Human Experts</strong>
+                                <span class="text-muted" style="font-size:0.8rem;">Qualified professionals</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background:rgba(40,167,69,0.04);border:1px solid rgba(40,167,69,0.08);">
+                            <i class="bi bi-shield-check fs-4 text-success"></i>
+                            <div>
+                                <strong class="small d-block">Original Work</strong>
+                                <span class="text-muted" style="font-size:0.8rem;">Plagiarism-free guarantee</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background:rgba(245,166,35,0.06);border:1px solid rgba(245,166,35,0.12);">
+                            <i class="bi bi-lock fs-4" style="color:#d4941e;"></i>
+                            <div>
+                                <strong class="small d-block">Confidential</strong>
+                                <span class="text-muted" style="font-size:0.8rem;">Your privacy is protected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main content -->
+                <div class="specialty-content">
+                    @Html.Raw(Model.Body)
+                </div>
+
+                <!-- CTA Section -->
+                <div class="mt-5 p-4 rounded-4 text-center" style="background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);">
+                    <h3 class="fw-bold text-white mb-2">Ready to Get Started?</h3>
+                    <p class="text-white-50 mb-3">Submit your requirements and receive personalized academic guidance from experienced professionals.</p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a asp-controller="Home" asp-action="OrderNow" class="btn btn-accent btn-lg px-4">
+                            <i class="bi bi-lightning-charge-fill me-2"></i>Place an Order
+                        </a>
+                        <a asp-controller="Home" asp-action="Contact" class="btn btn-outline-light btn-lg px-4">
+                            <i class="bi bi-chat-dots me-2"></i>Talk to Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Specialties -->
+@if (Model.RelatedSpecialties.Any())
+{
+    <section class="py-5" style="background:var(--bg-main);">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Related Specialties</h2>
+                <p class="text-muted">Explore academic support for other healthcare and nursing disciplines</p>
+            </div>
+            <div class="row g-3 justify-content-center">
+                @foreach (var related in Model.RelatedSpecialties)
+                {
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <a asp-route="specialties" asp-route-slug="@related.Slug" class="text-decoration-none">
+                            <div class="specialty-card text-center p-3">
+                                <div class="specialty-icon mx-auto" style="background:@related.IconBgColor;color:@related.IconColor;width:48px;height:48px;font-size:1.3rem;">
+                                    <i class="@related.IconClass"></i>
+                                </div>
+                                <h6 class="small mt-2 mb-0">@related.Title.Replace(" Assignment Help", "")</h6>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<style>
+    .specialty-content p {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #444;
+        margin-bottom: 1.25rem;
+    }
+    .specialty-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 0.75rem;
+        padding: 1.25rem 0.75rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+    }
+    .specialty-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1);
+    }
+    .specialty-icon {
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>

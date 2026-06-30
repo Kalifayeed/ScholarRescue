@@ -27,6 +27,37 @@ namespace ScholarRescue.Controllers
         }
 
         [ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)]
+        public IActionResult Specialty(string slug)
+        {
+            var specialty = ScholarRescue.ViewModels.Home.SpecialtyViewModel.GetBySlug(slug);
+            if (specialty == null)
+            {
+                return NotFound();
+            }
+
+            // Build related specialties (exclude current)
+            var all = ScholarRescue.ViewModels.Home.SpecialtyViewModel.GetAll();
+            specialty.RelatedSpecialties = all
+                .Where(s => !s.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase))
+                .Take(6)
+                .Select(s => new ScholarRescue.ViewModels.Home.RelatedSpecialty
+                {
+                    Slug = s.Slug,
+                    Title = s.Title,
+                    IconClass = s.IconClass,
+                    IconBgColor = s.IconBgColor,
+                    IconColor = s.IconColor
+                })
+                .ToList();
+
+            ViewData["SeoTitle"] = specialty.SeoTitle;
+            ViewData["MetaDescription"] = specialty.MetaDescription;
+            ViewData["Title"] = specialty.Title;
+
+            return View(specialty);
+        }
+
+        [ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)]
         public IActionResult About()
         {
             return View();
