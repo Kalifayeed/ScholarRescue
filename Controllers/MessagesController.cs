@@ -7,6 +7,7 @@ using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
 using ScholarRescue.Services;
 using ScholarRescue.ViewModels.Messaging;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Controllers
 {
@@ -71,7 +72,7 @@ namespace ScholarRescue.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null) return Challenge();
 
-                bool isAdmin = User.IsInRole("Administrator");
+                bool isAdmin = User.IsInRole(RoleNames.Administrator);
 
                 var model = new MessagingCenterViewModel
                 {
@@ -306,7 +307,7 @@ namespace ScholarRescue.Controllers
                 var ticket = await _ticketService.GetByIdAsync(id);
                 if (ticket == null) return NotFound();
 
-                bool isAdmin = User.IsInRole("Administrator");
+                bool isAdmin = User.IsInRole(RoleNames.Administrator);
                 if (!isAdmin && ticket.CreatorId != currentUser.Id) return Forbid();
 
                 var notes = await _ticketService.GetNotesAsync(id);
@@ -347,7 +348,7 @@ namespace ScholarRescue.Controllers
                             : "Unknown",
                         AuthorId = n.AuthorId,
                         CreatedAt = n.CreatedAt,
-                        IsAdminNote = n.Author != null && n.Author.UserType == "Administrator",
+                        IsAdminNote = n.Author != null && n.Author.UserType == RoleNames.Administrator,
                         IsInternal = n.IsInternal
                     }).ToList(),
                     Attachments = attachments.Select(a => new TicketAttachmentViewModel
@@ -386,7 +387,7 @@ namespace ScholarRescue.Controllers
                 var ticket = await _context.SupportTickets.FindAsync(id);
                 if (ticket == null) return NotFound();
 
-                bool isAdmin = User.IsInRole("Administrator");
+                bool isAdmin = User.IsInRole(RoleNames.Administrator);
                 if (!isAdmin && ticket.CreatorId != currentUser.Id) return Forbid();
 
                 if (string.IsNullOrWhiteSpace(content))
@@ -460,7 +461,7 @@ namespace ScholarRescue.Controllers
                 var ticket = await _context.SupportTickets.FindAsync(id);
                 if (ticket == null) return NotFound();
 
-                bool isAdmin = User.IsInRole("Administrator");
+                bool isAdmin = User.IsInRole(RoleNames.Administrator);
                 if (!isAdmin && ticket.CreatorId != currentUser.Id) return Forbid();
 
                 if (ticket.Status != TicketStatus.Resolved && ticket.Status != TicketStatus.Closed)
@@ -497,7 +498,7 @@ namespace ScholarRescue.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null) return Unauthorized();
 
-                bool isAdmin = User.IsInRole("Administrator");
+                bool isAdmin = User.IsInRole(RoleNames.Administrator);
                 var tickets = string.IsNullOrWhiteSpace(q)
                     ? new List<SupportTicket>()
                     : await _ticketService.SearchTicketsAsync(q, isAdmin ? null : currentUser.Id);
@@ -716,7 +717,7 @@ namespace ScholarRescue.Controllers
                 IQueryable<Conversation> accessibleQuery = _context.Conversations
                     .Include(c => c.Order).Where(c => !c.IsArchived);
 
-                if (!User.IsInRole("Administrator"))
+                if (!User.IsInRole(RoleNames.Administrator))
                 {
                     var myConvIds = await _context.ConversationParticipants
                         .Where(p => p.UserId == currentUser.Id).Select(p => p.ConversationId).ToListAsync();
@@ -750,7 +751,7 @@ namespace ScholarRescue.Controllers
                     .Include(m => m.Sender).Include(m => m.Conversation).ThenInclude(c => c!.Order)
                     .Where(m => m.MessageText.ToLower().Contains(term));
 
-                if (!User.IsInRole("Administrator"))
+                if (!User.IsInRole(RoleNames.Administrator))
                     messagesQuery = messagesQuery.Where(m => myConvIdList.Contains(m.ConversationId));
 
                 var matchingMessages = await messagesQuery.OrderByDescending(m => m.CreatedDate).Take(50)
@@ -801,7 +802,7 @@ namespace ScholarRescue.Controllers
                 var order = await _context.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.Id == orderId);
                 if (order == null) return NotFound();
 
-                if (!User.IsInRole("Administrator") && order.ClientId != currentUser.Id && order.AssignedWriterId != currentUser.Id)
+                if (!User.IsInRole(RoleNames.Administrator) && order.ClientId != currentUser.Id && order.AssignedWriterId != currentUser.Id)
                     return Forbid();
 
                 var conv = await _messageService.GetOrCreateConversationAsync(orderId);
@@ -826,7 +827,7 @@ namespace ScholarRescue.Controllers
                 take = Math.Clamp(take, 1, 25);
                 var conversations = await _messageService.GetUserConversationsAsync(currentUser.Id);
 
-                if (User.IsInRole("Administrator"))
+                if (User.IsInRole(RoleNames.Administrator))
                 {
                     var allConvs = await _context.Conversations.Include(c => c.Order)
                         .Where(c => !c.IsArchived).OrderByDescending(c => c.LastMessageDate).ToListAsync();
@@ -848,7 +849,7 @@ namespace ScholarRescue.Controllers
                     var participants = await _context.ConversationParticipants.Include(p => p.User)
                         .Where(p => p.ConversationId == c.Id).ToListAsync();
                     var otherParty = participants.FirstOrDefault(p => p.UserId != currentUser.Id)?.User;
-                    if (otherParty == null && !User.IsInRole("Administrator")) continue;
+                    if (otherParty == null && !User.IsInRole(RoleNames.Administrator)) continue;
 
                     var unread = await _context.Messages.Where(m => m.ConversationId == c.Id && m.SenderId != currentUser.Id && !m.IsRead).CountAsync();
                     var displayName = otherParty != null ? $"{otherParty.FirstName} {otherParty.LastName}".Trim() : "Conversation";
@@ -897,7 +898,7 @@ namespace ScholarRescue.Controllers
 
         private async Task<ConversationListViewModel?> BuildConversationListItemAsync(Conversation conv, ApplicationUser currentUser)
         {
-            if (!User.IsInRole("Administrator"))
+            if (!User.IsInRole(RoleNames.Administrator))
             {
                 var isParticipant = await _context.ConversationParticipants
                     .AnyAsync(p => p.ConversationId == conv.Id && p.UserId == currentUser.Id);

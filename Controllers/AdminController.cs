@@ -17,7 +17,7 @@ namespace ScholarRescue.Controllers
     /// Provides user management, writer applications, audit logs, system oversight,
     /// and the order assignment workflow.
     /// </summary>
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = RoleNames.Administrator)]
     public class AdminController : Controller
     {
         private readonly ScholarRescueDbContext _context;
@@ -31,6 +31,7 @@ namespace ScholarRescue.Controllers
         private readonly IWorkDeliveryService _workDeliveryService;
         private readonly IWriterCapacityService _writerCapacityService;
         private readonly IWriterMatchingService _writerMatchingService;
+        private readonly IAdminDashboardService _adminDashboardService;
         private readonly ILogger<AdminController> _logger;
 
         public AdminController(
@@ -45,6 +46,7 @@ namespace ScholarRescue.Controllers
             IWorkDeliveryService workDeliveryService,
             IWriterCapacityService writerCapacityService,
             IWriterMatchingService writerMatchingService,
+            IAdminDashboardService adminDashboardService,
             ILogger<AdminController> logger)
         {
             _context = context;
@@ -58,6 +60,7 @@ namespace ScholarRescue.Controllers
             _workDeliveryService = workDeliveryService;
             _writerCapacityService = writerCapacityService;
             _writerMatchingService = writerMatchingService;
+            _adminDashboardService = adminDashboardService;
             _logger = logger;
         }
 
@@ -67,98 +70,14 @@ namespace ScholarRescue.Controllers
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
-            try
-            {
-                var currentUser = await _userManager.GetUserAsync(User);
-                if (currentUser == null) return Challenge();
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
 
-                var roles = await _userManager.GetRolesAsync(currentUser);
-                var now = DateTime.UtcNow;
-                var todayStart = now.Date;
-                var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var roles = await _userManager.GetRolesAsync(currentUser);
+            var dashboard = await _adminDashboardService.GetDashboardViewModelAsync();
+            dashboard.CurrentUserRole = roles.FirstOrDefault() ?? "None";
 
-                // ── Users ──
-                var totalUsers = await _userManager.Users.CountAsync();
-                var totalClients = (await _userManager.GetUsersInRoleAsync("Client")).Count;
-                var totalWriters = (await _userManager.GetUsersInRoleAsync("Writer")).Count;
-                var totalStaff = 0;
-                var activeWriters = await _context.Users
-                    .CountAsync(u => u.UserType == "Writer" && u.IsActive && u.IsAcceptingOrders);
-
-                // ── Orders ──
-                var totalOrders = await _context.Orders.CountAsync();
-                var ordersToday = await _context.Orders.CountAsync(o => o.CreatedAt >= todayStart);
-                var ordersThisMonth = await _context.Orders.CountAsync(o => o.CreatedAt >= monthStart);
-                var pendingOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Open || o.Status == OrderStatus.PendingReview);
-                var inProgressOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.InProgress || o.Status == OrderStatus.Assigned);
-                var awaitingAssignment = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Open && o.AssignedWriterId == null);
-
-                // ── Revenue ──
-                var totalRevenue = await _context.Orders
-                    .Where(o => o.Status == OrderStatus.Completed)
-                    .SumAsync(o => (decimal?)o.Budget) ?? 0;
-                var revenueToday = await _context.Orders
-                    .Where(o => o.Status == OrderStatus.Completed && (o.CompletedAt ?? o.UpdatedAt) >= todayStart)
-                    .SumAsync(o => (decimal?)o.Budget) ?? 0;
-                var revenueThisMonth = await _context.Orders
-                    .Where(o => o.Status == OrderStatus.Completed && (o.CompletedAt ?? o.UpdatedAt) >= monthStart)
-                    .SumAsync(o => (decimal?)o.Budget) ?? 0;
-                var escrowBalance = await _context.Set<EscrowAccount>()
-                    .Where(e => e.Status == EscrowStatus.Funded)
-                    .SumAsync(e => (decimal?)e.FundedAmount) ?? 0;
-
-                // ── Operations ──
-                var pendingApplications = await _context.WriterApplications.CountAsync(a => a.Status == WriterApplicationStatus.Pending);
-                var openDisputes = await _context.OrderDisputes.CountAsync(d => d.Status == "Open" || d.Status == "InReview");
-                var pendingRevisions = await _context.RevisionRequests.CountAsync(r => r.Status == RevisionRequestStatus.Pending);
-                var openFraudAlerts = await _context.Set<AccountFraudAlert>().CountAsync(a => a.Status == "Open");
-                var pendingQa = await _context.Orders.CountAsync(o => o.Status == OrderStatus.PendingQA);
-
-                // ── Support Tickets ──
-                var openTickets = await _context.SupportTickets.CountAsync(t => t.Status == TicketStatus.Open);
-                var pendingTickets = await _context.SupportTickets.CountAsync(t => t.Status == TicketStatus.PendingResponse || t.Status == TicketStatus.WaitingForUser);
-                var inProgressTickets = await _context.SupportTickets.CountAsync(t => t.Status == TicketStatus.InProgress);
-                var resolvedTickets = await _context.SupportTickets.CountAsync(t => t.Status == TicketStatus.Resolved);
-                var totalTickets = await _context.SupportTickets.CountAsync();
-
-                var dashboard = new AdminDashboardViewModel
-                {
-                    TotalUsers = totalUsers,
-                    TotalOrders = totalOrders,
-                    CurrentUserRole = roles.FirstOrDefault() ?? "None",
-                    TotalClients = totalClients,
-                    TotalStaff = totalStaff,
-                    TotalWriters = totalWriters,
-                    ActiveWriters = activeWriters,
-                    OrdersToday = ordersToday,
-                    OrdersThisMonth = ordersThisMonth,
-                    PendingOrders = pendingOrders,
-                    InProgressOrders = inProgressOrders,
-                    OrdersAwaitingAssignment = awaitingAssignment,
-                    TotalRevenue = totalRevenue,
-                    RevenueToday = revenueToday,
-                    RevenueThisMonth = revenueThisMonth,
-                    EscrowBalance = escrowBalance,
-                    PendingApplications = pendingApplications,
-                    OpenDisputes = openDisputes,
-                    PendingRevisions = pendingRevisions,
-                    OpenFraudAlerts = openFraudAlerts,
-                    PendingQaOrders = pendingQa,
-                    OpenTickets = openTickets,
-                    PendingTickets = pendingTickets,
-                    InProgressTickets = inProgressTickets,
-                    ResolvedTickets = resolvedTickets,
-                    TotalTickets = totalTickets
-                };
-
-                return View(dashboard);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading admin dashboard.");
-                TempData["ErrorMessage"] = "Error loading dashboard.";
-                return RedirectToAction("Index", "Home");
-            }
+            return View(dashboard);
         }
 
         // ════════════════════════════════════════════════
@@ -429,7 +348,7 @@ namespace ScholarRescue.Controllers
                 user.IsActive = false;
                 await _userManager.UpdateAsync(user);
 
-                if (await _userManager.IsInRoleAsync(user, "Writer"))
+                if (await _userManager.IsInRoleAsync(user, RoleNames.Writer))
                 {
                     var application = await _writerApplicationService.GetLatestApplicationAsync(user.Id);
                     if (application != null && application.Status == WriterApplicationStatus.Approved)
@@ -482,7 +401,7 @@ namespace ScholarRescue.Controllers
                 user.IsActive = true;
                 await _userManager.UpdateAsync(user);
 
-                if (await _userManager.IsInRoleAsync(user, "Writer"))
+                if (await _userManager.IsInRoleAsync(user, RoleNames.Writer))
                 {
                     var application = await _writerApplicationService.GetLatestApplicationAsync(user.Id);
                     if (application != null && application.Status == WriterApplicationStatus.Suspended)
@@ -752,8 +671,8 @@ namespace ScholarRescue.Controllers
                 {
                     await _userManager.RemoveFromRolesAsync(user, currentRoles);
                 }
-                await _userManager.AddToRoleAsync(user, "Writer");
-                user.UserType = "Writer";
+                await _userManager.AddToRoleAsync(user, RoleNames.Writer);
+                user.UserType = RoleNames.Writer;
                 user.IsActive = true;
                 await _userManager.UpdateAsync(user);
 
@@ -912,7 +831,7 @@ namespace ScholarRescue.Controllers
 
                 var orders = await query.ToListAsync();
 
-                var approvedWriters = await _userManager.GetUsersInRoleAsync("Writer");
+                var approvedWriters = await _userManager.GetUsersInRoleAsync(RoleNames.Writer);
                 ViewBag.ApprovedWriters = approvedWriters.Where(w => w.IsActive && !w.IsDeleted).ToList();
 
                 return View(orders);
@@ -1952,3 +1871,4 @@ namespace ScholarRescue.Controllers
         }
     }
 }
+

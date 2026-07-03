@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
 using ScholarRescue.Services;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Controllers
 {
@@ -11,7 +12,7 @@ namespace ScholarRescue.Controllers
     /// Writer Knowledge Center. Verified writers and admins can browse
     /// FAQ, writing guides, citation guides, checklists, and platform rules.
     /// </summary>
-    [Authorize(Roles = "Writer,Administrator")]
+    [Authorize(Roles = RoleNames.Writer + "," + RoleNames.Administrator)]
     public class WriterResourcesController : Controller
     {
         private readonly IWriterResourceService _resourceService;
@@ -40,7 +41,7 @@ namespace ScholarRescue.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            if (!User.IsInRole("Administrator") &&
+            if (!User.IsInRole(RoleNames.Administrator) &&
                 !await _writerApplicationService.IsWriterActiveAsync(currentUser.Id))
             {
                 TempData["ErrorMessage"] = "Your writer application must be approved to access the Knowledge Center.";
@@ -67,7 +68,7 @@ namespace ScholarRescue.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            if (!User.IsInRole("Administrator") &&
+            if (!User.IsInRole(RoleNames.Administrator) &&
                 !await _writerApplicationService.IsWriterActiveAsync(currentUser.Id))
             {
                 TempData["ErrorMessage"] = "Your writer application must be approved to access the Knowledge Center.";
@@ -107,7 +108,7 @@ namespace ScholarRescue.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            if (!User.IsInRole("Administrator") &&
+            if (!User.IsInRole(RoleNames.Administrator) &&
                 !await _writerApplicationService.IsWriterActiveAsync(currentUser.Id))
             {
                 TempData["ErrorMessage"] = "Your writer application must be approved to access the Knowledge Center.";
@@ -138,7 +139,7 @@ namespace ScholarRescue.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            if (!User.IsInRole("Administrator") &&
+            if (!User.IsInRole(RoleNames.Administrator) &&
                 !await _writerApplicationService.IsWriterActiveAsync(currentUser.Id))
             {
                 TempData["ErrorMessage"] = "Your writer application must be approved to access the Knowledge Center.";
@@ -211,3 +212,4 @@ namespace ScholarRescue.Controllers
         }
     }
 }
+

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using ScholarRescue.Data;
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Services
 {
@@ -307,7 +308,7 @@ namespace ScholarRescue.Services
         /// <summary>New order created - notifies admin.</summary>
         public async Task NotifyNewOrderCreatedAsync(int orderId, string orderNumber)
         {
-            var admins = await _userManager.GetUsersInRoleAsync("Administrator");
+            var admins = await _userManager.GetUsersInRoleAsync(RoleNames.Administrator);
             var title = "New Order Posted";
             var message = $"A new client order ({orderNumber}) has been submitted and requires review.";
 
@@ -321,7 +322,7 @@ namespace ScholarRescue.Services
         /// <summary>Writer applies for an order - notifies admin.</summary>
         public async Task NotifyWriterAppliedForOrderAsync(int orderId, string writerId, string orderNumber)
         {
-            var admins = await _userManager.GetUsersInRoleAsync("Administrator");
+            var admins = await _userManager.GetUsersInRoleAsync(RoleNames.Administrator);
 
             // Get writer name
             var writer = await _userManager.FindByIdAsync(writerId);
@@ -514,7 +515,7 @@ namespace ScholarRescue.Services
         /// </summary>
         public async Task<List<string>> GetAdminUserIdsAsync()
         {
-            var admins = await _userManager.GetUsersInRoleAsync("Administrator");
+            var admins = await _userManager.GetUsersInRoleAsync(RoleNames.Administrator);
             return admins.Select(a => a.Id).ToList();
         }
 
@@ -568,9 +569,9 @@ namespace ScholarRescue.Services
         {
             var users = targetAudience switch
             {
-                "Clients" => await _userManager.GetUsersInRoleAsync("Client"),
-                "Writers" => await _userManager.GetUsersInRoleAsync("Writer"),
-                "Admins" => await _userManager.GetUsersInRoleAsync("Administrator"),
+                "Clients" => await _userManager.GetUsersInRoleAsync(RoleNames.Client),
+                "Writers" => await _userManager.GetUsersInRoleAsync(RoleNames.Writer),
+                "Admins" => await _userManager.GetUsersInRoleAsync(RoleNames.Administrator),
                 _ => await _userManager.Users.Where(u => u.IsActive && !u.IsDeleted).ToListAsync()
             };
 
@@ -604,3 +605,4 @@ namespace ScholarRescue.Services
         }
     }
 }
+

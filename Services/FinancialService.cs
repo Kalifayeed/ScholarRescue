@@ -14,15 +14,18 @@ namespace ScholarRescue.Services
     {
         private readonly ScholarRescueDbContext _context;
         private readonly IPayoutWindowService _payoutWindowService;
+        private readonly IConfigurationService _configurationService;
         private readonly ILogger<FinancialService> _logger;
 
         public FinancialService(
             ScholarRescueDbContext context,
             IPayoutWindowService payoutWindowService,
+            IConfigurationService configurationService,
             ILogger<FinancialService> logger)
         {
             _context = context;
             _payoutWindowService = payoutWindowService;
+            _configurationService = configurationService;
             _logger = logger;
         }
 
@@ -134,9 +137,10 @@ namespace ScholarRescue.Services
             if (existingRecord != null)
                 throw new InvalidOperationException("Financial record already exists for this order.");
 
-            // Calculate commission: 10% platform fee
+            // Calculate commission from configuration
             var orderAmount = order.Budget;
-            var commissionAmount = Math.Round(orderAmount * 0.10m, 2);
+            var commissionRate = await _configurationService.GetCommissionRateAsync();
+            var commissionAmount = Math.Round(orderAmount * commissionRate, 2);
             var writerAmount = orderAmount - commissionAmount;
 
             // Create Order Financial Record
@@ -256,7 +260,7 @@ namespace ScholarRescue.Services
             _context.AuditLogs.Add(new AuditLog
             {
                 Action = "Milestone Earnings Recorded",
-                PerformedById = createdBy,
+                PerformedById = createdBy ?? "System",
                 TargetUserId = writerId,
                 Description = $"Recorded milestone earnings of ${amount:F2} for Order #{orderId} (Milestone #{milestoneId}). Txn: {txnNumber}",
                 CreatedDate = DateTime.UtcNow

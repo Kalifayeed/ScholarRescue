@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ScholarRescue.Data;
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Services
 {
@@ -102,7 +103,7 @@ namespace ScholarRescue.Services
             }
 
             // Get admin users
-            var admins = await userManager.GetUsersInRoleAsync("Administrator");
+            var admins = await userManager.GetUsersInRoleAsync(RoleNames.Administrator);
 
             foreach (var order in activeOrders)
             {

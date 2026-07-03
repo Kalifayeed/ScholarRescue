@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ScholarRescue.Data;
 using ScholarRescue.Models;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Services
 {
@@ -186,7 +187,7 @@ namespace ScholarRescue.Services
             _context.ConversationParticipants.AddRange(participants);
 
             // Always add all administrators so they can view all conversations.
-            var admins = await _userManager.GetUsersInRoleAsync("Administrator");
+            var admins = await _userManager.GetUsersInRoleAsync(RoleNames.Administrator);
             foreach (var admin in admins)
             {
                 _context.ConversationParticipants.Add(new ConversationParticipant
@@ -238,3 +239,4 @@ namespace ScholarRescue.Services
         }
     }
 }
+

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
 using ScholarRescue.Services;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Controllers
 {
@@ -26,7 +27,7 @@ namespace ScholarRescue.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
-            bool isAdmin = User.IsInRole("Administrator");
+            bool isAdmin = User.IsInRole(RoleNames.Administrator);
             var tickets = await _ticketService.GetTicketsAsync(isAdmin ? null : user.Id, department, status);
             ViewBag.DepartmentFilter = department;
             ViewBag.StatusFilter = status;
@@ -66,7 +67,7 @@ namespace ScholarRescue.Controllers
             if (ticket == null) return NotFound();
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
-            bool isAdmin = User.IsInRole("Administrator");
+            bool isAdmin = User.IsInRole(RoleNames.Administrator);
             if (!isAdmin && ticket.CreatorId != user.Id) return Forbid();
             var notes = await _ticketService.GetNotesAsync(id);
             var attachments = await _ticketService.GetAttachmentsAsync(id);
@@ -78,7 +79,7 @@ namespace ScholarRescue.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = RoleNames.Administrator)]
         public async Task<IActionResult> ChangeStatus(int id, TicketStatus newStatus)
         {
             var user = await _userManager.GetUserAsync(User);

@@ -6,6 +6,7 @@ using ScholarRescue.Data;
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
 using ScholarRescue.Services;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Controllers
 {
@@ -55,7 +56,7 @@ namespace ScholarRescue.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            bool isAdmin = User.IsInRole("Administrator");
+            bool isAdmin = User.IsInRole(RoleNames.Administrator);
             bool isClient = order.ClientId == currentUser.Id;
             bool isWriter = order.AssignedWriterId == currentUser.Id;
 
@@ -83,7 +84,7 @@ namespace ScholarRescue.Controllers
         // ──────────────────────────────────────────────
 
         [HttpGet]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = RoleNames.Administrator)]
         public async Task<IActionResult> Create(int orderId)
         {
             var order = await _context.Orders.FindAsync(orderId);
@@ -103,7 +104,7 @@ namespace ScholarRescue.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = RoleNames.Administrator)]
         public async Task<IActionResult> Create(OrderMilestone model)
         {
             if (!ModelState.IsValid)
@@ -129,7 +130,7 @@ namespace ScholarRescue.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = RoleNames.Administrator)]
         public async Task<IActionResult> Delete(int id)
         {
             var milestone = await _milestoneService.GetByIdAsync(id);
@@ -154,7 +155,7 @@ namespace ScholarRescue.Controllers
         // ──────────────────────────────────────────────
 
         [HttpGet]
-        [Authorize(Roles = "Writer,Administrator")]
+        [Authorize(Roles = RoleNames.Writer + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Submit(int id)
         {
             var milestone = await _milestoneService.GetByIdAsync(id);
@@ -164,7 +165,7 @@ namespace ScholarRescue.Controllers
             var order = await _context.Orders.FindAsync(milestone.OrderId);
 
             if (currentUser == null) return Challenge();
-            bool isAdmin = User.IsInRole("Administrator");
+            bool isAdmin = User.IsInRole(RoleNames.Administrator);
             if (!isAdmin && order?.AssignedWriterId != currentUser.Id)
                 return Forbid();
 
@@ -183,7 +184,7 @@ namespace ScholarRescue.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Writer,Administrator")]
+        [Authorize(Roles = RoleNames.Writer + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Submit(int id, string? notes, List<IFormFile>? files)
         {
             var milestone = await _milestoneService.GetByIdAsync(id);
@@ -243,7 +244,7 @@ namespace ScholarRescue.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Client,Administrator")]
+        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Approve(int id, string? notes)
         {
             var milestone = await _milestoneService.GetByIdAsync(id);
@@ -267,3 +268,4 @@ namespace ScholarRescue.Controllers
         }
     }
 }
+

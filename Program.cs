@@ -74,7 +74,7 @@ if (string.IsNullOrEmpty(cs))
 
 if (cs.Contains("${PROD_DB_PASSWORD}"))
 {
-    startupLogger.LogCritical("FATAL: Connection string contains unresolved placeholder '${PROD_DB_PASSWORD}'.");
+    startupLogger.LogCritical("FATAL: Connection string contains unresolved placeholder '${{PROD_DB_PASSWORD}}'.");
     throw new InvalidOperationException(
         "Connection string contains unresolved placeholder '${PROD_DB_PASSWORD}'. " +
         "Set environment variable ConnectionStrings__DefaultConnection with the actual password.");
@@ -109,6 +109,7 @@ builder.Services.Configure<HostOptions>(options =>
     options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
 });
 builder.Services.AddControllersWithViews();
+builder.Services.AddHealthChecks();
 
 // Response Compression (Brotli/Gzip) - reduces payload size by 60-80%
 builder.Services.AddResponseCompression(options =>
@@ -132,6 +133,10 @@ builder.Services.AddSignalR();
 builder.Services.Configure<MaintenanceModeSettings>(
     builder.Configuration.GetSection("MaintenanceMode"));
 
+// Financial settings
+builder.Services.Configure<FinancialSettings>(
+    builder.Configuration.GetSection("FinancialSettings"));
+
 // Paystack payment gateway
 builder.Services.Configure<PaystackSettings>(
     builder.Configuration.GetSection("Paystack"));
@@ -153,6 +158,7 @@ builder.Services.AddScoped<IWriterApplicationService, WriterApplicationService>(
 builder.Services.AddScoped<IOrderAssignmentService, OrderAssignmentService>();
 builder.Services.AddScoped<IWorkDeliveryService, WorkDeliveryService>();
 builder.Services.AddScoped<IWriterResourceService, WriterResourceService>();
+builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IWriterRankingService, WriterRankingService>();
 builder.Services.AddScoped<IOrderMilestoneService, OrderMilestoneService>();
 builder.Services.AddScoped<ISupportTicketService, SupportTicketService>();
@@ -226,6 +232,27 @@ var app = builder.Build();
 // may be far behind the code's migration history.
 // ============================================================
 
+// ── STEP 0: Create required upload directories ─────────────────
+startupLogger.LogInformation("Creating upload directories...");
+var uploadDirs = new[]
+{
+    Path.Combine(builder.Environment.WebRootPath, "uploads", "submissions"),
+    Path.Combine(builder.Environment.WebRootPath, "uploads", "writer-applications", "cv"),
+    Path.Combine(builder.Environment.WebRootPath, "uploads", "writer-applications", "degree"),
+    Path.Combine(builder.Environment.WebRootPath, "uploads", "writer-applications", "sample"),
+    Path.Combine(builder.Environment.WebRootPath, "uploads", "messages"),
+    Path.Combine(builder.Environment.WebRootPath, "uploads", "milestones"),
+};
+foreach (var dir in uploadDirs)
+{
+    if (!Directory.Exists(dir))
+    {
+        Directory.CreateDirectory(dir);
+        startupLogger.LogInformation("Created upload directory: {Dir}", dir);
+    }
+}
+startupLogger.LogInformation("Upload directories verified.");
+
 // ── STEP 1: Apply pending EF Core migrations ─────────────────
 using (var scope = app.Services.CreateScope())
 {
@@ -268,6 +295,8 @@ app.UseResponseCompression();
 
 app.UseHttpsRedirection();
 
+app.UseGlobalExceptionHandling();
+
 app.UseRouting();
 
 // Authentication must come before Authorization
@@ -279,6 +308,27 @@ app.UseAuthorization();
 app.UseMaintenanceMode();
 
 app.MapStaticAssets();
+
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var json = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            status = report.Status.ToString(),
+            timestamp = DateTime.UtcNow,
+            results = report.Entries.Select(e => new
+            {
+                key = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.ToString()
+            })
+        });
+        await context.Response.WriteAsync(json);
+    }
+});
 
 app.MapControllerRoute(
     name: "default",

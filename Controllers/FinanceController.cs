@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScholarRescue.Models;
 using ScholarRescue.Services;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Controllers
 {
@@ -10,7 +11,7 @@ namespace ScholarRescue.Controllers
     /// Controller for financial management (admin only).
     /// Provides financial dashboard, payout management, reports, and transaction history.
     /// </summary>
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = RoleNames.Administrator)]
     public class FinanceController : Controller
     {
         private readonly IFinancialService _financialService;

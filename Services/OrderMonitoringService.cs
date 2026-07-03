@@ -131,7 +131,7 @@ namespace ScholarRescue.Services
             var now = DateTime.UtcNow;
             var overdueMilestones = await _context.OrderMilestones
                 .Include(m => m.Order)
-                .ThenInclude(o => o.AssignedWriter)
+                .ThenInclude(o => o!.AssignedWriter)
                 .Where(m => m.Status == MilestoneStatus.Pending
                     && m.Deadline <= now)
                 .ToListAsync();
@@ -139,6 +139,8 @@ namespace ScholarRescue.Services
             foreach (var milestone in overdueMilestones)
             {
                 var order = milestone.Order;
+                if (order == null) continue;
+
                 await CreateAlertIfNotDuplicateAsync(
                     MonitoringAlertType.MilestoneOverdue,
                     order.Id,

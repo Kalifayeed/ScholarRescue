@@ -8,6 +8,7 @@ using ScholarRescue.Models;
 using Microsoft.Extensions.Options;
 using ScholarRescue.Models.Configuration;
 using ScholarRescue.Models.Enums;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Services.Payments
 {
@@ -74,7 +75,8 @@ namespace ScholarRescue.Services.Payments
             try
             {
                 var amountInKobo = (long)(order.Budget * 100); // Paystack uses kobo (cents)
-                var callbackUrl = $"{_httpClient.BaseAddress.AbsoluteUri.Replace(PaystackApiBase, "")}/Payments/PaystackCallback?reference={reference}&orderId={orderId}";
+                var baseAddress = _httpClient.BaseAddress?.AbsoluteUri ?? throw new InvalidOperationException("Paystack HttpClient BaseAddress is not configured.");
+                var callbackUrl = $"{baseAddress.Replace(PaystackApiBase, string.Empty)}/Payments/PaystackCallback?reference={reference}&orderId={orderId}";
 
                 var payload = new
                 {
@@ -310,7 +312,7 @@ namespace ScholarRescue.Services.Payments
                     $"Your payment of ${amount:F2} for Order #{order.OrderNumber} has been received. Funds are held securely in escrow.",
                     NotificationType.OrderFunded, order.Id.ToString(), "Order");
 
-                var admins = await _userManager.GetUsersInRoleAsync("Administrator");
+                var admins = await _userManager.GetUsersInRoleAsync(RoleNames.Administrator);
                 foreach (var admin in admins)
                 {
                     await _notificationService.CreateNotificationAsync(

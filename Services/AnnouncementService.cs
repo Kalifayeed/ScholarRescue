@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using ScholarRescue.Data;
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Services
 {
@@ -245,9 +246,9 @@ namespace ScholarRescue.Services
             {
                 TargetAudience.AllUsers => await _userManager.Users
                     .Where(u => u.IsActive && !u.IsDeleted).ToListAsync(),
-                TargetAudience.Clients => (await _userManager.GetUsersInRoleAsync("Client")).ToList(),
-                TargetAudience.Writers => (await _userManager.GetUsersInRoleAsync("Writer")).ToList(),
-                TargetAudience.Admins => (await _userManager.GetUsersInRoleAsync("Administrator")).ToList(),
+                TargetAudience.Clients => (await _userManager.GetUsersInRoleAsync(RoleNames.Client)).ToList(),
+                TargetAudience.Writers => (await _userManager.GetUsersInRoleAsync(RoleNames.Writer)).ToList(),
+                TargetAudience.Admins => (await _userManager.GetUsersInRoleAsync(RoleNames.Administrator)).ToList(),
                 _ => await _userManager.Users.Where(u => u.IsActive && !u.IsDeleted).ToListAsync()
             };
         }

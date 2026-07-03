@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ScholarRescue.Data;
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
+using ScholarRescue.Models.Security;
 using ScholarRescue.Services;
 using ScholarRescue.Services.Payments;
 
@@ -22,6 +23,7 @@ namespace ScholarRescue.Controllers
         private readonly ScholarRescueDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IPaystackPaymentService _paystackService;
+        private readonly IConfigurationService _configurationService;
         private readonly INotificationService _notificationService;
         private readonly ILogger<PaymentsController> _logger;
 
@@ -29,12 +31,14 @@ namespace ScholarRescue.Controllers
             ScholarRescueDbContext context,
             UserManager<ApplicationUser> userManager,
             IPaystackPaymentService paystackService,
+            IConfigurationService configurationService,
             INotificationService notificationService,
             ILogger<PaymentsController> logger)
         {
             _context = context;
             _userManager = userManager;
             _paystackService = paystackService;
+            _configurationService = configurationService;
             _notificationService = notificationService;
             _logger = logger;
         }
@@ -167,8 +171,8 @@ namespace ScholarRescue.Controllers
                     return RedirectToAction("Details", "Orders", new { id = orderId });
                 }
 
-                // Calculate commission (10%) and writer earnings (90%)
-                var commission = amount * 0.10m;
+                var commissionRate = await _configurationService.GetCommissionRateAsync();
+                var commission = Math.Round(amount * commissionRate, 2);
                 var writerEarnings = amount - commission;
 
                 // Mark payment as paid
@@ -251,7 +255,7 @@ namespace ScholarRescue.Controllers
                     $"Your payment of ${amount:F2} for Order #{order.OrderNumber} has been received successfully. Your funds are securely held in escrow until the assigned tutor successfully completes your work.",
                     NotificationType.OrderFunded, order.Id.ToString(), "Order");
 
-                var admins = await _userManager.GetUsersInRoleAsync("Administrator");
+                var admins = await _userManager.GetUsersInRoleAsync(RoleNames.Administrator);
                 foreach (var admin in admins)
                 {
                     await _notificationService.CreateNotificationAsync(

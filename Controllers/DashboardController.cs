@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ScholarRescue.Data;
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
+using ScholarRescue.Models.Security;
 using ScholarRescue.ViewModels.Order;
 
 namespace ScholarRescue.Controllers
@@ -36,7 +37,7 @@ namespace ScholarRescue.Controllers
         /// Route: GET /Dashboard
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = "Client,Administrator")]
+        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Index()
         {
             try

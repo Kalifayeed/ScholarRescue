@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.Extensions.Options;
 using ScholarRescue.Models.Configuration;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Middleware
 {
@@ -54,7 +55,7 @@ namespace ScholarRescue.Middleware
             // Check if the user is an authenticated admin
             if (_settings.AllowAdminAccess && context.User?.Identity?.IsAuthenticated == true)
             {
-                if (context.User.IsInRole("Administrator"))
+                if (context.User.IsInRole(RoleNames.Administrator))
                 {
                     await _next(context);
                     return;

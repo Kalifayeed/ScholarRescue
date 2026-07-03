@@ -165,7 +165,7 @@
                                         {
                                             <form asp-action="AssignWriterToOrder" method="post" style="display:inline;">
                                                 @Html.AntiForgeryToken()
-                                                <input type="hidden" name="orderId" value="@order.Id" />
+                                                <input type="hidden" name="orderId" value="@(order?.Id ?? 0)" />
                                                 <input type="hidden" name="writerId" value="@rec.WriterId" />
                                                 <button type="submit" class="btn btn-sm btn-outline-primary"
                                                         onclick="return confirm('Assign @rec.WriterName to this order?');"

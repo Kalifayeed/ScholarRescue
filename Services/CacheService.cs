@@ -49,7 +49,7 @@ namespace ScholarRescue.Services
             if (value != null)
                 await SetAsync(key, value, expiration);
 
-            return value;
+            return value!;
         }
 
         public Task RemoveAsync(string key)

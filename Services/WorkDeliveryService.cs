@@ -15,6 +15,7 @@ namespace ScholarRescue.Services
         private readonly ScholarRescueDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IFinancialService _financialService;
+        private readonly IConfigurationService _configurationService;
         private readonly INotificationService _notificationService;
         private readonly IWriterRankingService _rankingService;
         private readonly ILogger<WorkDeliveryService> _logger;
@@ -26,6 +27,7 @@ namespace ScholarRescue.Services
             ScholarRescueDbContext context,
             UserManager<ApplicationUser> userManager,
             IFinancialService financialService,
+            IConfigurationService configurationService,
             INotificationService notificationService,
             IWriterRankingService rankingService,
             ILogger<WorkDeliveryService> logger)
@@ -33,6 +35,7 @@ namespace ScholarRescue.Services
             _context = context;
             _userManager = userManager;
             _financialService = financialService;
+            _configurationService = configurationService;
             _notificationService = notificationService;
             _rankingService = rankingService;
             _logger = logger;
@@ -250,8 +253,9 @@ namespace ScholarRescue.Services
                 rev.Status = RevisionRequestStatus.Completed;
 
             // Accounting: calculate earnings and commission
-            var writerEarnings = order.Budget * 0.90m; // 90% after 10% commission
-            var commissionAmount = order.Budget * 0.10m;
+            var commissionRate = await _configurationService.GetCommissionRateAsync();
+            var writerEarnings = order.Budget * (1 - commissionRate);
+            var commissionAmount = order.Budget * commissionRate;
 
             order.WriterEarnings = writerEarnings;
             order.CommissionAmount = commissionAmount;
@@ -298,8 +302,9 @@ namespace ScholarRescue.Services
             order.CompletedAt = DateTime.UtcNow;
             order.IsMarketplaceOpen = false;
 
-            order.WriterEarnings = order.Budget * 0.90m;
-            order.CommissionAmount = order.Budget * 0.10m;
+            var commissionRate = await _configurationService.GetCommissionRateAsync();
+            order.WriterEarnings = order.Budget * (1 - commissionRate);
+            order.CommissionAmount = order.Budget * commissionRate;
 
             await _financialService.ProcessOrderCompletionAsync(orderId, adminId);
 

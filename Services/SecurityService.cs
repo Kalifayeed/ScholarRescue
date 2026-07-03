@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ScholarRescue.Data;
 using ScholarRescue.Models;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Services
 {
@@ -237,7 +238,7 @@ namespace ScholarRescue.Services
             {
                 Action = action,
                 PerformedById = userId,
-                PerformedBy = await _context.Users.FindAsync(userId),
+                PerformedBy = await _context.Users.FindAsync(userId) ?? null!,
                 TargetUserId = userId,
                 Description = details != null ? $"{action}: {details}" : action,
                 CreatedDate = DateTime.UtcNow
@@ -290,6 +291,8 @@ namespace ScholarRescue.Services
         public async Task<byte[]> ExportUserDataAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return Array.Empty<byte>();
+
             var devices = await GetUserDevicesAsync(userId);
             var roles = await _userManager.GetRolesAsync(user);
 
@@ -371,7 +374,7 @@ namespace ScholarRescue.Services
 
             // Authorization Score (15 pts)
             report.AuthorizationScore = 15;
-            var adminCount = (await _userManager.GetUsersInRoleAsync("Administrator")).Count;
+            var adminCount = (await _userManager.GetUsersInRoleAsync(RoleNames.Administrator)).Count;
             if (adminCount > 5) report.AuthorizationScore -= 3;
             if (adminCount > 10) report.AuthorizationScore -= 3;
 

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using ScholarRescue.Hubs;
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
+using ScholarRescue.Models.Security;
 using ScholarRescue.Services;
 using ScholarRescue.ViewModels.Communication;
 using ScholarRescue.ViewModels.Notification;
@@ -97,7 +98,7 @@ namespace ScholarRescue.Controllers
                 if (currentUser == null) return Unauthorized();
 
                 var roles = await _userManager.GetRolesAsync(currentUser);
-                var role = roles.FirstOrDefault() ?? "Client";
+                var role = roles.FirstOrDefault() ?? RoleNames.Client;
 
                 var announcements = await _announcementService.GetActiveAnnouncementsForUserAsync(currentUser.Id, role);
 
@@ -159,7 +160,7 @@ namespace ScholarRescue.Controllers
                 if (currentUser == null) return Unauthorized();
 
                 var roles = await _userManager.GetRolesAsync(currentUser);
-                var role = roles.FirstOrDefault() ?? "Client";
+                var role = roles.FirstOrDefault() ?? RoleNames.Client;
 
                 var unreadMessages = await _messageService.GetUnreadConversationCountAsync(currentUser.Id);
                 var unreadNotifications = await _notificationService.GetUnreadCountAsync(currentUser.Id);

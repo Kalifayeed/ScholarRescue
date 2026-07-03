@@ -6,6 +6,7 @@ using ScholarRescue.Data;
 using ScholarRescue.Models;
 using ScholarRescue.Services;
 using ScholarRescue.ViewModels.Account;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Controllers
 {
@@ -80,8 +81,8 @@ namespace ScholarRescue.Controllers
             try
             {
                 // Honor the user-selected account type. Fall back to Client if invalid.
-                string requestedType = (viewModel.UserType ?? "Client").Trim();
-                string roleToAssign = requestedType == "Writer" ? "Writer" : "Client";
+                string requestedType = (viewModel.UserType ?? RoleNames.Client).Trim();
+                string roleToAssign = requestedType == RoleNames.Writer ? RoleNames.Writer : RoleNames.Client;
 
                 // Check if the email is already taken — prevents cross-role duplicate registration
                 var existingUser = await _userManager.FindByEmailAsync(viewModel.Email);
@@ -116,7 +117,7 @@ namespace ScholarRescue.Controllers
 
                     // For writer registrations, create the application and DO NOT auto-assign full
                     // writer privileges - the user must be approved by an administrator.
-                    bool isWriter = roleToAssign == "Writer";
+                    bool isWriter = roleToAssign == RoleNames.Writer;
                     if (isWriter)
                     {
                         // Server-side validation: max 5 specializations
@@ -311,11 +312,11 @@ namespace ScholarRescue.Controllers
         [HttpGet]
         public IActionResult RedirectToDashboard()
         {
-            if (User.IsInRole("Administrator"))
+            if (User.IsInRole(RoleNames.Administrator))
             {
                 return RedirectToAction("Dashboard", "Admin");
             }
-            if (User.IsInRole("Writer"))
+            if (User.IsInRole(RoleNames.Writer))
             {
                 return RedirectToAction("Dashboard", "Writers");
             }
@@ -548,3 +549,4 @@ namespace ScholarRescue.Controllers
         }
     }
 }
+

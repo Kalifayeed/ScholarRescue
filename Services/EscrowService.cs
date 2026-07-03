@@ -15,21 +15,22 @@ namespace ScholarRescue.Services
         private readonly IWalletService _walletService;
         private readonly INotificationService _notificationService;
         private readonly IOrderTimelineService _timelineService;
+        private readonly IConfigurationService _configurationService;
         private readonly ILogger<EscrowService> _logger;
-
-        private const decimal CommissionRate = 0.10m;
 
         public EscrowService(
             ScholarRescueDbContext context,
             IWalletService walletService,
             INotificationService notificationService,
             IOrderTimelineService timelineService,
+            IConfigurationService configurationService,
             ILogger<EscrowService> logger)
         {
             _context = context;
             _walletService = walletService;
             _notificationService = notificationService;
             _timelineService = timelineService;
+            _configurationService = configurationService;
             _logger = logger;
         }
 
@@ -38,7 +39,8 @@ namespace ScholarRescue.Services
             var order = await _context.Orders.FindAsync(orderId);
             if (order == null) throw new InvalidOperationException("Order not found.");
 
-            var commission = order.Budget * CommissionRate;
+            var commissionRate = await _configurationService.GetCommissionRateAsync();
+            var commission = order.Budget * commissionRate;
             var writerAmount = order.Budget - commission;
 
             var escrow = new EscrowAccount

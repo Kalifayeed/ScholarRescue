@@ -128,8 +128,13 @@ namespace ScholarRescue.Services
                 }
 
                 // Update risk profile
+                var uploadedByUser = await _userManager.FindByIdAsync(record.UploadedById);
+                var uploadedByRole = uploadedByUser != null
+                    ? (await _userManager.GetRolesAsync(uploadedByUser)).FirstOrDefault()
+                    : null;
+
                 await _riskDetection.UpdateRiskProfileAsync(record.UploadedById, scanResult.RiskScore,
-                    (await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(record.UploadedById))).FirstOrDefault() ?? "Client");
+                    uploadedByRole ?? "Client");
             }
 
             await _context.SaveChangesAsync();

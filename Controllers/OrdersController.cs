@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ScholarRescue.Data;
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
+using ScholarRescue.Models.Security;
 using ScholarRescue.Services;
 using ScholarRescue.ViewModels.Order;
 
@@ -24,6 +25,7 @@ namespace ScholarRescue.Controllers
         private readonly IPricingService _pricingService;
         private readonly IWalletService _walletService;
         private readonly IVerificationService _verificationService;
+        private readonly IConfigurationService _configurationService;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IWorkDeliveryService _workDeliveryService;
         private readonly INotificationService _notificationService;
@@ -35,6 +37,7 @@ namespace ScholarRescue.Controllers
             IPricingService pricingService,
             IWalletService walletService,
             IVerificationService verificationService,
+            IConfigurationService configurationService,
             SignInManager<ApplicationUser> signInManager,
             IWorkDeliveryService workDeliveryService,
             INotificationService notificationService)
@@ -45,6 +48,7 @@ namespace ScholarRescue.Controllers
             _pricingService = pricingService;
             _walletService = walletService;
             _verificationService = verificationService;
+            _configurationService = configurationService;
             _signInManager = signInManager;
             _workDeliveryService = workDeliveryService;
             _notificationService = notificationService;
@@ -63,15 +67,15 @@ namespace ScholarRescue.Controllers
                     .Include(o => o.AssignedWriter)
                     .AsNoTracking();
 
-                if (User.IsInRole("Administrator"))
+                if (User.IsInRole(RoleNames.Administrator))
                 {
                     // Admins see all orders
                 }
-                else if (User.IsInRole("Client"))
+                else if (User.IsInRole(RoleNames.Client))
                 {
                     ordersQuery = ordersQuery.Where(o => o.ClientId == currentUser.Id);
                 }
-                else if (User.IsInRole("Writer"))
+                else if (User.IsInRole(RoleNames.Writer))
                 {
                     ordersQuery = ordersQuery.Where(o => o.AssignedWriterId == currentUser.Id);
                 }
@@ -121,7 +125,7 @@ namespace ScholarRescue.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null) return Challenge();
 
-                if (!User.IsInRole("Administrator") &&
+                if (!User.IsInRole(RoleNames.Administrator) &&
                     order.ClientId != currentUser.Id &&
                     order.AssignedWriterId != currentUser.Id)
                 {
@@ -180,7 +184,7 @@ namespace ScholarRescue.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Client,Administrator")]
+        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public IActionResult Create()
         {
             return View(new CreateOrderViewModel());
@@ -188,7 +192,7 @@ namespace ScholarRescue.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Client,Administrator")]
+        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Create(CreateOrderViewModel viewModel)
         {
             if (!ModelState.IsValid)
@@ -220,7 +224,8 @@ namespace ScholarRescue.Controllers
                 var wordCount = _pricingService.CalculateWordCount(viewModel.Pages);
                 var budget = _pricingService.CalculatePrice(
                     viewModel.AcademicLevel, viewModel.Pages, viewModel.Deadline);
-                var commission = budget * 0.10m;
+                var commissionRate = await _configurationService.GetCommissionRateAsync();
+                var commission = Math.Round(budget * commissionRate, 2);
                 var writerEarnings = budget - commission;
 
                 var order = new Order
@@ -285,7 +290,7 @@ namespace ScholarRescue.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Client,Administrator")]
+        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -298,7 +303,7 @@ namespace ScholarRescue.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null) return Challenge();
 
-                if (!User.IsInRole("Administrator") && order.ClientId != currentUser.Id)
+                if (!User.IsInRole(RoleNames.Administrator) && order.ClientId != currentUser.Id)
                     return Forbid();
 
                 var viewModel = new EditOrderViewModel
@@ -332,7 +337,7 @@ namespace ScholarRescue.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Client,Administrator")]
+        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Edit(int id, EditOrderViewModel viewModel)
         {
             if (id != viewModel.Id) return NotFound();
@@ -346,7 +351,7 @@ namespace ScholarRescue.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null) return Challenge();
 
-                if (!User.IsInRole("Administrator") && order.ClientId != currentUser.Id)
+                if (!User.IsInRole(RoleNames.Administrator) && order.ClientId != currentUser.Id)
                     return Forbid();
 
                 order.Title = viewModel.Title;
@@ -359,11 +364,12 @@ namespace ScholarRescue.Controllers
                 order.NumberOfSources = viewModel.NumberOfSources;
                 order.WordCount = _pricingService.CalculateWordCount(viewModel.Pages);
                 order.Budget = _pricingService.CalculatePrice(viewModel.AcademicLevel, viewModel.Pages, viewModel.Deadline);
-                order.CommissionAmount = order.Budget * 0.10m;
+                var commissionRateForEdit = await _configurationService.GetCommissionRateAsync();
+                order.CommissionAmount = Math.Round(order.Budget * commissionRateForEdit, 2);
                 order.WriterEarnings = order.Budget - order.CommissionAmount;
                 order.UpdatedAt = DateTime.UtcNow;
 
-                if (User.IsInRole("Administrator"))
+                if (User.IsInRole(RoleNames.Administrator))
                 {
                     order.Status = viewModel.Status;
                 }
@@ -383,7 +389,7 @@ namespace ScholarRescue.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Client,Administrator")]
+        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -400,7 +406,7 @@ namespace ScholarRescue.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null) return Challenge();
 
-                if (!User.IsInRole("Administrator") && order.ClientId != currentUser.Id)
+                if (!User.IsInRole(RoleNames.Administrator) && order.ClientId != currentUser.Id)
                     return Forbid();
 
                 if (order.Status != OrderStatus.Draft && order.Status != OrderStatus.PendingReview)
@@ -441,7 +447,7 @@ namespace ScholarRescue.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Client,Administrator")]
+        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             try
@@ -452,7 +458,7 @@ namespace ScholarRescue.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null) return Challenge();
 
-                if (!User.IsInRole("Administrator") && order.ClientId != currentUser.Id)
+                if (!User.IsInRole(RoleNames.Administrator) && order.ClientId != currentUser.Id)
                     return Forbid();
 
                 if (order.Status != OrderStatus.Draft && order.Status != OrderStatus.PendingReview)
@@ -523,7 +529,7 @@ namespace ScholarRescue.Controllers
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     PhoneNumber = model.PhoneNumber,
-                    UserType = "Client",
+                    UserType = RoleNames.Client,
                     IsActive = true,
                     RegistrationCompleted = true,
                     RegistrationSource = "OrderFlow",
@@ -539,7 +545,7 @@ namespace ScholarRescue.Controllers
                 }
 
                 // Assign Client role
-                await _userManager.AddToRoleAsync(user, "Client");
+                await _userManager.AddToRoleAsync(user, RoleNames.Client);
 
                 // 2. Create the order
                 var lastOrder = await _context.Orders
@@ -549,7 +555,8 @@ namespace ScholarRescue.Controllers
                 string orderNumber = $"SR-{DateTime.UtcNow.Year}-{nextNumber:D6}";
                 var wordCount = _pricingService.CalculateWordCount(model.Pages);
                 var budget = _pricingService.CalculatePrice(model.AcademicLevel, model.Pages, model.Deadline);
-                var commission = budget * 0.10m;
+                var commissionRate = await _configurationService.GetCommissionRateAsync();
+                var commission = Math.Round(budget * commissionRate, 2);
                 var writerEarnings = budget - commission;
 
                 var order = new Order
@@ -633,7 +640,7 @@ namespace ScholarRescue.Controllers
         /// Only the order owner (client) and administrators can view bids.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = "Client,Administrator")]
+        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Bids(int? id)
         {
             if (id == null) return NotFound();
@@ -650,10 +657,10 @@ namespace ScholarRescue.Controllers
                 if (order == null) return NotFound();
 
                 // Ownership check: only the client who owns the order or admin can view bids
-                if (!User.IsInRole("Administrator") && order.ClientId != currentUser.Id)
+                if (!User.IsInRole(RoleNames.Administrator) && order.ClientId != currentUser.Id)
                     return Forbid();
 
-                bool isAdmin = User.IsInRole("Administrator");
+                bool isAdmin = User.IsInRole(RoleNames.Administrator);
 
                 var rawBids = await _context.OrderBids
                     .Include(b => b.Writer)
@@ -742,7 +749,7 @@ namespace ScholarRescue.Controllers
                 if (order == null) return NotFound();
 
                 // Access control: Client (owner), Assigned Writer, or Admin
-                bool isAdmin = User.IsInRole("Administrator");
+                bool isAdmin = User.IsInRole(RoleNames.Administrator);
                 bool isClient = order.ClientId == currentUser.Id;
                 bool isAssignedWriter = order.AssignedWriterId == currentUser.Id;
 
@@ -774,7 +781,7 @@ namespace ScholarRescue.Controllers
                 {
                     otherPartyLabel = "Client / Assigned Writer";
                     otherPartyName = $"{order.Client.FirstName} {order.Client.LastName} / {(order.AssignedWriter != null ? $"{order.AssignedWriter.FirstName} {order.AssignedWriter.LastName}" : "Unassigned")}";
-                    myRole = "Administrator";
+                    myRole = RoleNames.Administrator;
                 }
                 else if (isClient)
                 {
@@ -782,13 +789,13 @@ namespace ScholarRescue.Controllers
                     otherPartyName = order.AssignedWriter != null
                         ? $"{order.AssignedWriter.FirstName} {order.AssignedWriter.LastName}"
                         : "Awaiting assignment";
-                    myRole = "Client";
+                    myRole = RoleNames.Client;
                 }
                 else // Assigned Writer
                 {
                     otherPartyLabel = "Client";
                     otherPartyName = $"{order.Client.FirstName} {order.Client.LastName}";
-                    myRole = "Writer";
+                    myRole = RoleNames.Writer;
                 }
 
                 // Load submissions and revision requests
@@ -875,7 +882,7 @@ namespace ScholarRescue.Controllers
                 var order = await _context.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.Id == id);
                 if (order == null) return NotFound();
 
-                if (order.AssignedWriterId != currentUser.Id && !User.IsInRole("Administrator"))
+                if (order.AssignedWriterId != currentUser.Id && !User.IsInRole(RoleNames.Administrator))
                     return Forbid();
 
                 await _workDeliveryService.SubmitWorkAsync(id, currentUser.Id, file, comments ?? string.Empty, submissionType);
@@ -913,10 +920,10 @@ namespace ScholarRescue.Controllers
                 var order = await _context.Orders.AsNoTracking().FirstOrDefaultAsync(o => o.Id == id);
                 if (order == null) return NotFound();
 
-                if (order.ClientId != currentUser.Id && !User.IsInRole("Administrator"))
+                if (order.ClientId != currentUser.Id && !User.IsInRole(RoleNames.Administrator))
                     return Forbid();
 
-                if (User.IsInRole("Administrator"))
+                if (User.IsInRole(RoleNames.Administrator))
                 {
                     await _workDeliveryService.AdminForceRevisionAsync(id, currentUser.Id, comments);
                     TempData["SuccessMessage"] = "Revision requested by admin.";
@@ -952,7 +959,7 @@ namespace ScholarRescue.Controllers
                 var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id);
                 if (order == null) return NotFound();
 
-                if (order.ClientId != currentUser.Id && !User.IsInRole("Administrator"))
+                if (order.ClientId != currentUser.Id && !User.IsInRole(RoleNames.Administrator))
                     return Forbid();
 
                 // Simple acceptance: update status to Completed, no payment release
@@ -1010,7 +1017,7 @@ namespace ScholarRescue.Controllers
                 if (submission == null) return NotFound();
 
                 var order = submission.Order;
-                bool isAdmin = User.IsInRole("Administrator");
+                bool isAdmin = User.IsInRole(RoleNames.Administrator);
                 bool isClient = order.ClientId == currentUser.Id;
                 bool isAssignedWriter = order.AssignedWriterId == currentUser.Id;
 
@@ -1067,3 +1074,4 @@ namespace ScholarRescue.Controllers
         }
     }
 }
+

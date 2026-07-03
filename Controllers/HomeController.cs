@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ScholarRescue.Data;
 using ScholarRescue.Models;
 using ScholarRescue.Services;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Controllers
 {
@@ -153,12 +154,12 @@ namespace ScholarRescue.Controllers
                 return RedirectToAction("Register", "Account");
             }
 
-            if (User.IsInRole("Client"))
+            if (User.IsInRole(RoleNames.Client))
             {
                 return RedirectToAction("Create", "Orders");
             }
 
-            if (User.IsInRole("Writer") || User.IsInRole("Administrator"))
+            if (User.IsInRole(RoleNames.Writer) || User.IsInRole(RoleNames.Administrator))
             {
                 TempData["OrderNowMessage"] = "Only client accounts can submit requests.";
                 TempData["OrderNowIsError"] = "true";

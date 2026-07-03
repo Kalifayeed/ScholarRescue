@@ -7,6 +7,7 @@ using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
 using ScholarRescue.Services;
 using ScholarRescue.ViewModels.Order;
+using ScholarRescue.Models.Security;
 
 namespace ScholarRescue.Controllers
 {
@@ -15,7 +16,7 @@ namespace ScholarRescue.Controllers
     /// updating order status, uploading completed work, internal notes, financial management,
     /// the Available Orders marketplace, and the writer application status workflow.
     /// </summary>
-    [Authorize(Roles = "Writer,Administrator")]
+    [Authorize(Roles = RoleNames.Writer + "," + RoleNames.Administrator)]
     public class WritersController : Controller
     {
         private readonly ScholarRescueDbContext _context;
@@ -51,13 +52,13 @@ namespace ScholarRescue.Controllers
         /// Writer Performance Analytics dashboard.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = "Writer,Administrator")]
+        [Authorize(Roles = RoleNames.Writer + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Analytics()
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            if (!User.IsInRole("Administrator") &&
+            if (!User.IsInRole(RoleNames.Administrator) &&
                 !await _writerApplicationService.IsWriterActiveAsync(currentUser.Id))
             {
                 return RedirectToAction("Dashboard");
@@ -72,7 +73,7 @@ namespace ScholarRescue.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Writer,Administrator")]
+        [Authorize(Roles = RoleNames.Writer + "," + RoleNames.Administrator)]
         public async Task<IActionResult> UpdateAvailability(WriterAvailabilityStatus status)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -108,7 +109,7 @@ namespace ScholarRescue.Controllers
                 if (currentUser == null) return Challenge();
 
                 // Admin users see writer's view for testing
-                bool isAdmin = User.IsInRole("Administrator");
+                bool isAdmin = User.IsInRole(RoleNames.Administrator);
 
                 var access = await _writerApplicationService.GetAccessStateAsync(currentUser.Id);
 
@@ -260,7 +261,7 @@ namespace ScholarRescue.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            if (!User.IsInRole("Administrator") &&
+            if (!User.IsInRole(RoleNames.Administrator) &&
                 !await _writerApplicationService.IsWriterActiveAsync(currentUser.Id))
             {
                 TempData["ErrorMessage"] =
@@ -317,7 +318,7 @@ namespace ScholarRescue.Controllers
             // OR the writer is already the assigned writer, OR admin.
             bool isApprovedWriter = await _writerApplicationService.IsWriterActiveAsync(currentUser.Id);
             bool isAssignedWriter = order.AssignedWriterId == currentUser.Id;
-            bool isAdmin = User.IsInRole("Administrator");
+            bool isAdmin = User.IsInRole(RoleNames.Administrator);
 
             if (!isAdmin && !isAssignedWriter &&
                 (!isApprovedWriter || order.Status != OrderStatus.Open || !order.IsMarketplaceOpen))
@@ -346,7 +347,7 @@ namespace ScholarRescue.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            if (!User.IsInRole("Administrator") &&
+            if (!User.IsInRole(RoleNames.Administrator) &&
                 !await _writerApplicationService.IsWriterActiveAsync(currentUser.Id))
             {
                 TempData["ErrorMessage"] =
@@ -376,13 +377,13 @@ namespace ScholarRescue.Controllers
         /// Shows the bid form for a writer to place a bid on an available order.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = "Writer,Administrator")]
+        [Authorize(Roles = RoleNames.Writer + "," + RoleNames.Administrator)]
         public async Task<IActionResult> PlaceBid(int orderId)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
 
-            if (!User.IsInRole("Administrator") &&
+            if (!User.IsInRole(RoleNames.Administrator) &&
                 !await _writerApplicationService.IsWriterActiveAsync(currentUser.Id))
             {
                 TempData["ErrorMessage"] = "Your writer application must be approved before you can place bids.";
@@ -431,7 +432,7 @@ namespace ScholarRescue.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Writer,Administrator")]
+        [Authorize(Roles = RoleNames.Writer + "," + RoleNames.Administrator)]
         public async Task<IActionResult> PlaceBid(ViewModels.Writer.PlaceBidViewModel viewModel)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -556,7 +557,7 @@ namespace ScholarRescue.Controllers
 
                 if (order == null) return NotFound();
 
-                if (order.AssignedWriterId != currentUser.Id && !User.IsInRole("Administrator"))
+                if (order.AssignedWriterId != currentUser.Id && !User.IsInRole(RoleNames.Administrator))
                     return Forbid();
 
                 // Validate status transitions for writers
@@ -604,7 +605,7 @@ namespace ScholarRescue.Controllers
                 if (currentUser == null) return Challenge();
 
                 if (!await _writerApplicationService.IsWriterActiveAsync(currentUser.Id) &&
-                    !User.IsInRole("Administrator"))
+                    !User.IsInRole(RoleNames.Administrator))
                 {
                     TempData["ErrorMessage"] =
                         "Your writer application must be approved before you can access earnings.";
@@ -634,7 +635,7 @@ namespace ScholarRescue.Controllers
                 if (currentUser == null) return Challenge();
 
                 if (!await _writerApplicationService.IsWriterActiveAsync(currentUser.Id) &&
-                    !User.IsInRole("Administrator"))
+                    !User.IsInRole(RoleNames.Administrator))
                 {
                     return RedirectToAction("Dashboard");
                 }
@@ -663,7 +664,7 @@ namespace ScholarRescue.Controllers
                 if (currentUser == null) return Challenge();
 
                 if (!await _writerApplicationService.IsWriterActiveAsync(currentUser.Id) &&
-                    !User.IsInRole("Administrator"))
+                    !User.IsInRole(RoleNames.Administrator))
                 {
                     return RedirectToAction("Dashboard");
                 }
@@ -695,7 +696,7 @@ namespace ScholarRescue.Controllers
                 if (currentUser == null) return Challenge();
 
                 if (!await _writerApplicationService.IsWriterActiveAsync(currentUser.Id) &&
-                    !User.IsInRole("Administrator"))
+                    !User.IsInRole(RoleNames.Administrator))
                 {
                     return RedirectToAction("Dashboard");
                 }
@@ -774,3 +775,4 @@ namespace ScholarRescue.Controllers
         }
     }
 }
+
