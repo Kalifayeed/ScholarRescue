@@ -5,30 +5,42 @@
 }
 
 <style>
+    /* Dashboard Header */
     .dashboard-header {
-        background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+        background: linear-gradient(135deg, #1B365D 0%, #2E5A88 100%);
         color: white;
         padding: 2rem;
-        border-radius: 8px;
+        border-radius: 12px;
         margin-bottom: 2rem;
     }
 
+    /* Stat Cards - Enhanced */
     .stat-card {
         border: none;
-        border-radius: 8px;
+        border-radius: 12px;
         transition: transform 0.2s, box-shadow 0.2s;
         background: white;
+        position: relative;
+        overflow: hidden;
     }
 
     .stat-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important;
     }
 
-    .stat-card.primary { border-left: 4px solid #0d47a1; }
-    .stat-card.info { border-left: 4px solid #1976d2; }
-    .stat-card.warning { border-left: 4px solid #f57c00; }
-    .stat-card.success { border-left: 4px solid #388e3c; }
+    .stat-card.primary { 
+        border-left: 4px solid #1B365D; 
+    }
+    .stat-card.info { 
+        border-left: 4px solid #17A2B8; 
+    }
+    .stat-card.warning { 
+        border-left: 4px solid #FFC107; 
+    }
+    .stat-card.success { 
+        border-left: 4px solid #28A745; 
+    }
 
     .stat-value {
         font-size: 2.5rem;
@@ -42,51 +54,177 @@
         letter-spacing: 0.5px;
     }
 
-    .card-header-custom {
-        background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+    .stat-trend {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .stat-trend.up {
+        color: #28A745;
+    }
+
+    .stat-trend.down {
+        color: #DC3545;
+    }
+
+    /* Card Headers - Unified Color */
+    .card-header-unified {
+        background: #1B365D;
         color: white;
         border: none;
+        padding: 1rem 1.25rem;
     }
 
-    .table-striped-custom tbody tr:nth-child(odd) {
-        background-color: #f8f9fa;
+    .card-header-unified.success {
+        background: linear-gradient(135deg, #28A745 0%, #2E8B57 100%);
     }
 
-    .table-striped-custom tbody tr:hover {
-        background-color: #e8f0fe;
+    /* Table Improvements */
+    .table-zebra tbody tr:nth-child(odd) {
+        background-color: rgba(27, 54, 93, 0.02);
     }
 
+    .table-zebra tbody tr:nth-child(even) {
+        background-color: rgba(27, 54, 93, 0.01);
+    }
+
+    .table-zebra tbody tr:hover {
+        background-color: rgba(46, 90, 136, 0.08);
+    }
+
+    .sticky-header th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #1B365D;
+        color: white;
+    }
+
+    /* Quick Action Buttons */
     .quick-action-btn {
-        border-radius: 8px;
-        padding: 1rem;
+        border-radius: 12px;
+        padding: 1.25rem 0.75rem;
         text-align: center;
         transition: all 0.2s;
         background: white;
-        border: 1px solid #e0e0e0;
+        border: 1px solid #E2E8F0;
+        height: 100%;
     }
 
     .quick-action-btn:hover {
-        border-color: #0d47a1;
-        box-shadow: 0 4px 12px rgba(13, 71, 161, 0.15);
-        transform: translateY(-2px);
+        border-color: #1B365D;
+        box-shadow: 0 6px 16px rgba(27, 54, 93, 0.15);
+        transform: translateY(-3px);
     }
 
+    .quick-action-btn .action-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Section Titles */
     .section-title {
-        font-size: 1.3rem;
+        font-size: 1.35rem;
         font-weight: 600;
-        color: #1a1a1a;
+        color: #1B365D;
         margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
+    .section-title i {
+        font-size: 1.15rem;
+    }
+
+    /* Empty States */
     .empty-state {
-        padding: 3rem 1rem;
+        padding: 2.5rem 1rem;
         text-align: center;
     }
 
     .empty-state-icon {
-        font-size: 4rem;
-        color: #ccc;
+        font-size: 3.5rem;
+        color: #CBD5E0;
         margin-bottom: 1rem;
+    }
+
+    .empty-state-compact {
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    /* Timeline/Activity Feed */
+    .timeline-feed {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #E2E8F0;
+    }
+
+    .timeline-item:last-child {
+        border-bottom: none;
+    }
+
+    .timeline-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .timeline-icon.completed {
+        background: rgba(40, 167, 69, 0.15);
+        color: #28A745;
+    }
+
+    .timeline-icon.in-progress {
+        background: rgba(23, 162, 184, 0.15);
+        color: #17A2B8;
+    }
+
+    .timeline-icon.assigned {
+        background: rgba(255, 193, 7, 0.15);
+        color: #FFC107;
+    }
+
+    .timeline-content {
+        flex: 1;
+    }
+
+    .timeline-time {
+        font-size: 0.75rem;
+        color: #6C757D;
+    }
+
+    /* Spacing improvements */
+    .dashboard-section {
+        margin-bottom: 2.5rem;
+    }
+
+    /* New Order Button - Prominent */
+    .btn-new-order {
+        background: #F5A623;
+        border: none;
+        color: #1B365D;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-new-order:hover {
+        background: #FFD180;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 166, 35, 0.3);
     }
 </style>
 
@@ -97,9 +235,9 @@
             <h1 class="display-5 mb-1">
                 <i class="bi bi-speedometer2"></i> My Dashboard
             </h1>
-            <p class="mb-0 opacity-90">Welcome back! Here's your order overview.</p>
+            <p class="mb-0 opacity-90">Welcome back! Here's your order overview and quick actions.</p>
         </div>
-        <a asp-action="Create" class="btn btn-light btn-lg">
+        <a asp-action="Create" class="btn btn-new-order btn-lg">
             <i class="bi bi-plus-circle"></i> New Order
         </a>
     </div>
@@ -120,56 +258,63 @@
         </div>
     }
 
-    <!-- Statistics Cards - Enhanced Grid -->
-    <div class="row g-4 mb-5">
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card stat-card primary shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <p class="stat-label text-muted mb-2">Total Orders</p>
-                            <div class="stat-value text-primary">@Model.TotalOrders</div>
+    <!-- Statistics Cards - Grouped Layout -->
+    <div class="dashboard-section">
+        <h3 class="section-title"><i class="bi bi-bar-chart"></i> Order Statistics</h3>
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card stat-card primary shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <p class="stat-label text-muted mb-1">Total Orders</p>
+                                <div class="stat-value text-primary">@Model.TotalOrders</div>
+                                <small class="stat-trend text-muted">All time</small>
+                            </div>
+                            <i class="bi bi-file-text" style="font-size: 2.5rem; color: #1B365D; opacity: 0.2;"></i>
                         </div>
-                        <i class="bi bi-file-text" style="font-size: 2rem; color: #0d47a1; opacity: 0.3;"></i>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card stat-card info shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <p class="stat-label text-muted mb-2">Open</p>
-                            <div class="stat-value text-info">@Model.OpenOrders</div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card stat-card info shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <p class="stat-label text-muted mb-1">Open Orders</p>
+                                <div class="stat-value text-info">@Model.OpenOrders</div>
+                                <small class="stat-trend text-muted">Awaiting assignment</small>
+                            </div>
+                            <i class="bi bi-folder" style="font-size: 2.5rem; color: #17A2B8; opacity: 0.2;"></i>
                         </div>
-                        <i class="bi bi-folder" style="font-size: 2rem; color: #1976d2; opacity: 0.3;"></i>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card stat-card warning shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <p class="stat-label text-muted mb-2">In Progress</p>
-                            <div class="stat-value text-warning">@Model.InProgressOrders</div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card stat-card warning shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <p class="stat-label text-muted mb-1">In Progress</p>
+                                <div class="stat-value text-warning">@Model.InProgressOrders</div>
+                                <small class="stat-trend text-muted">Active work</small>
+                            </div>
+                            <i class="bi bi-arrow-repeat" style="font-size: 2.5rem; color: #FFC107; opacity: 0.2;"></i>
                         </div>
-                        <i class="bi bi-arrow-repeat" style="font-size: 2rem; color: #f57c00; opacity: 0.3;"></i>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card stat-card success shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <p class="stat-label text-muted mb-2">Completed</p>
-                            <div class="stat-value text-success">@Model.CompletedOrders</div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card stat-card success shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <p class="stat-label text-muted mb-1">Completed</p>
+                                <div class="stat-value text-success">@Model.CompletedOrders</div>
+                                <small class="stat-trend text-muted">Finished work</small>
+                            </div>
+                            <i class="bi bi-check-circle" style="font-size: 2.5rem; color: #28A745; opacity: 0.2;"></i>
                         </div>
-                        <i class="bi bi-check-circle" style="font-size: 2rem; color: #388e3c; opacity: 0.3;"></i>
                     </div>
                 </div>
             </div>
@@ -177,167 +322,165 @@
     </div>
 
     <!-- Quick Actions Section -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <h3 class="section-title">Quick Actions</h3>
-            <div class="row g-3">
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <a asp-action="Create" class="quick-action-btn text-decoration-none text-dark">
-                        <i class="bi bi-plus-circle-fill" style="font-size: 1.8rem; color: #0d47a1; display: block; margin-bottom: 0.5rem;"></i>
-                        <strong class="d-block">New Order</strong>
-                        <small class="text-muted">Create a new assignment</small>
-                    </a>
-                </div>
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <a asp-controller="Messages" asp-action="Index" class="quick-action-btn text-decoration-none text-dark">
-                        <i class="bi bi-chat-dots-fill" style="font-size: 1.8rem; color: #388e3c; display: block; margin-bottom: 0.5rem;"></i>
-                        <strong class="d-block">Messages</strong>
-                        <small class="text-muted">Chat with writers</small>
-                    </a>
-                </div>
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <a asp-action="Index" class="quick-action-btn text-decoration-none text-dark">
-                        <i class="bi bi-file-earmark-text-fill" style="font-size: 1.8rem; color: #f57c00; display: block; margin-bottom: 0.5rem;"></i>
-                        <strong class="d-block">My Orders</strong>
-                        <small class="text-muted">View all orders</small>
-                    </a>
-                </div>
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <a asp-controller="Notifications" asp-action="Index" class="quick-action-btn text-decoration-none text-dark">
-                        <i class="bi bi-bell-fill" style="font-size: 1.8rem; color: #1976d2; display: block; margin-bottom: 0.5rem;"></i>
-                        <strong class="d-block">Notifications</strong>
-                        <small class="text-muted">Check updates</small>
-                    </a>
-                </div>
+    <div class="dashboard-section">
+        <h3 class="section-title"><i class="bi bi-lightning"></i> Quick Actions</h3>
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a asp-action="Create" class="quick-action-btn text-decoration-none text-dark d-flex flex-column align-items-center">
+                    <i class="bi bi-plus-circle-fill action-icon" style="color: #1B365D;"></i>
+                    <strong class="d-block mb-1">New Order</strong>
+                    <small class="text-muted">Create a new assignment</small>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a asp-controller="Messages" asp-action="Index" class="quick-action-btn text-decoration-none text-dark d-flex flex-items-center">
+                    <i class="bi bi-chat-dots-fill action-icon" style="color: #28A745;"></i>
+                    <strong class="d-block mb-1">Messages</strong>
+                    <small class="text-muted">Chat with writers</small>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a asp-action="Index" class="quick-action-btn text-decoration-none text-dark d-flex flex-column align-items-center">
+                    <i class="bi bi-file-earmark-text-fill action-icon" style="color: #F5A623;"></i>
+                    <strong class="d-block mb-1">My Orders</strong>
+                    <small class="text-muted">View all orders</small>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a asp-controller="Notifications" asp-action="Index" class="quick-action-btn text-decoration-none text-dark d-flex flex-column align-items-center">
+                    <i class="bi bi-bell-fill action-icon" style="color: #17A2B8;"></i>
+                    <strong class="d-block mb-1">Notifications</strong>
+                    <small class="text-muted">Check updates</small>
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Main Content: Two-Column Layout -->
     <div class="row g-4 mb-5">
-        <!-- Left Column: Recent Orders -->
+        <!-- Left Column: Recent Orders (8/12 width) -->
         <div class="col-lg-8">
             <h3 class="section-title"><i class="bi bi-clock-history"></i> Recent Orders</h3>
             <div class="card shadow-sm">
-                <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                <div class="card-header card-header-unified d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Latest Updates</h5>
                     <a asp-action="Index" class="btn btn-light btn-sm">
                         <i class="bi bi-arrow-right"></i> View All
                     </a>
                 </div>
                 <div class="card-body p-0">
-            @if (!Model.RecentOrders.Any())
-            {
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="bi bi-inbox"></i>
-                    </div>
-                    <h6 class="text-muted">No orders yet</h6>
-                    <p class="text-muted small mb-3">Get started by creating your first order</p>
-                    <a asp-action="Create" class="btn btn-primary">Create Your First Order</a>
+                    @if (!Model.RecentOrders.Any())
+                    {
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="bi bi-inbox"></i>
+                            </div>
+                            <h6 class="text-muted">No orders yet</h6>
+                            <p class="text-muted small mb-3">Get started by creating your first order</p>
+                            <a asp-action="Create" class="btn btn-primary">Create Your First Order</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-zebra align-middle mb-0">
+                                <thead class="sticky-header">
+                                    <tr>
+                                        <th style="width: 10%;">Order #</th>
+                                        <th style="width: 25%;">Title</th>
+                                        <th style="width: 15%;">Writer</th>
+                                        <th style="width: 12%;">Status</th>
+                                        <th style="width: 8%;">Pages</th>
+                                        <th style="width: 10%;">Budget</th>
+                                        <th style="width: 12%;">Deadline</th>
+                                        <th class="text-center" style="width: 13%;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td><strong>@order.OrderNumber</strong></td>
+                                            <td>
+                                                <span title="@order.Title">
+                                                    @(order.Title.Length > 35 ? order.Title[..35] + "..." : order.Title)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(order.WriterName))
+                                                {
+                                                    @order.WriterName
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted fst-italic">Not assigned</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @{
+                                                    string badgeClass = order.Status switch
+                                                    {
+                                                        ScholarRescue.Models.Enums.OrderStatus.Draft => "bg-secondary",
+                                                        ScholarRescue.Models.Enums.OrderStatus.PendingReview => "bg-info text-dark",
+                                                        ScholarRescue.Models.Enums.OrderStatus.Open => "bg-primary",
+                                                        ScholarRescue.Models.Enums.OrderStatus.Assigned => "bg-primary",
+                                                        ScholarRescue.Models.Enums.OrderStatus.InProgress => "bg-warning text-dark",
+                                                        ScholarRescue.Models.Enums.OrderStatus.DraftSubmitted => "bg-info",
+                                                        ScholarRescue.Models.Enums.OrderStatus.RevisionRequested => "bg-warning text-dark",
+                                                        ScholarRescue.Models.Enums.OrderStatus.Completed => "bg-success",
+                                                        ScholarRescue.Models.Enums.OrderStatus.Cancelled => "bg-danger",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">@order.Status</span>
+                                            </td>
+                                            <td>@order.Pages</td>
+                                            <td>@order.Budget.ToString("C")</td>
+                                            <td>
+                                                <span title="@order.Deadline.ToString("g")">
+                                                    @order.Deadline.ToString("MMM dd")
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a asp-action="Details" asp-route-id="@order.Id"
+                                                       class="btn btn-outline-info" title="View Details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    @if (order.Status == OrderStatus.Assigned ||
+                                                         order.Status == OrderStatus.InProgress ||
+                                                         order.Status == OrderStatus.DraftSubmitted ||
+                                                         order.Status == OrderStatus.RevisionRequested)
+                                                    {
+                                                        <a asp-action="Workspace" asp-route-id="@order.Id"
+                                                           class="btn btn-outline-success" title="Open Workspace">
+                                                            <i class="bi bi-layout-sidebar"></i>
+                                                        </a>
+                                                    }
+                                                    @if (order.Status != OrderStatus.Completed)
+                                                    {
+                                                        <a asp-action="Edit" asp-route-id="@order.Id"
+                                                           class="btn btn-outline-primary" title="Edit">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-striped-custom align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 10%;">Order #</th>
-                                <th style="width: 25%;">Title</th>
-                                <th style="width: 18%;">Writer</th>
-                                <th style="width: 12%;">Status</th>
-                                <th style="width: 8%;">Pages</th>
-                                <th style="width: 10%;">Budget</th>
-                                <th style="width: 12%;">Deadline</th>
-                                <th class="text-center" style="width: 5%;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var order in Model.RecentOrders)
-                            {
-                                <tr>
-                                    <td><strong>@order.OrderNumber</strong></td>
-                                    <td>
-                                        <span title="@order.Title">
-                                            @(order.Title.Length > 35 ? order.Title[..35] + "..." : order.Title)
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(order.WriterName))
-                                        {
-                                            @order.WriterName
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted fst-italic">Not assigned</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @{
-                                            string badgeClass = order.Status switch
-                                            {
-                                                ScholarRescue.Models.Enums.OrderStatus.Draft => "bg-secondary",
-                                                ScholarRescue.Models.Enums.OrderStatus.PendingReview => "bg-info text-dark",
-                                                ScholarRescue.Models.Enums.OrderStatus.Open => "bg-primary",
-                                                ScholarRescue.Models.Enums.OrderStatus.Assigned => "bg-primary",
-                                                ScholarRescue.Models.Enums.OrderStatus.InProgress => "bg-warning text-dark",
-                                        ScholarRescue.Models.Enums.OrderStatus.DraftSubmitted => "bg-info",
-                                                ScholarRescue.Models.Enums.OrderStatus.RevisionRequested => "bg-warning text-dark",
-                                                ScholarRescue.Models.Enums.OrderStatus.Completed => "bg-success",
-                                                ScholarRescue.Models.Enums.OrderStatus.Cancelled => "bg-danger",
-                                                _ => "bg-secondary"
-                                            };
-                                        }
-                                        <span class="badge @badgeClass">@order.Status</span>
-                                    </td>
-                                    <td>@order.Pages</td>
-                                    <td>@order.Budget.ToString("C")</td>
-                                    <td>
-                                        <span title="@order.Deadline.ToString("g")">
-                                            @order.Deadline.ToString("MMM dd")
-                                        </span>
-                                    </td>
-                                                    <td class="text-center">
-                                                        <div class="btn-group btn-group-sm" role="group">
-                                                            <a asp-action="Details" asp-route-id="@order.Id"
-                                                               class="btn btn-outline-info" title="View Details">
-                                                                <i class="bi bi-eye"></i>
-                                                            </a>
-                                                            @if (order.Status == OrderStatus.Assigned ||
-                                                                 order.Status == OrderStatus.InProgress ||
-                                                                 order.Status == OrderStatus.DraftSubmitted ||
-                                                                 order.Status == OrderStatus.RevisionRequested)
-                                                            {
-                                                                <a asp-action="Workspace" asp-route-id="@order.Id"
-                                                                   class="btn btn-outline-success" title="Open Workspace">
-                                                                    <i class="bi bi-layout-sidebar"></i>
-                                                                </a>
-                                                            }
-                                                            @if (order.Status != OrderStatus.Completed)
-                                                            {
-                                                                <a asp-action="Edit" asp-route-id="@order.Id"
-                                                                   class="btn btn-outline-primary" title="Edit">
-                                                                    <i class="bi bi-pencil"></i>
-                                                                </a>
-                                                            }
-                                                        </div>
-                                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-        </div>
-    </div>
+            </div>
         </div>
 
-        <!-- Right Column: Recent Messages -->
+        <!-- Right Column: Recent Messages (4/12 width) -->
         <div class="col-lg-4">
             <h3 class="section-title"><i class="bi bi-chat-dots"></i> Recent Messages</h3>
             <div class="card shadow-sm">
-                <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                <div class="card-header card-header-unified success d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Conversations</h5>
                     <a asp-controller="Messages" asp-action="Index" class="btn btn-light btn-sm">
                         <i class="bi bi-arrow-right"></i>
@@ -373,11 +516,11 @@
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     if (!data || !data.success) {
-                        widget.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-exclamation-circle"></i></div><p class="text-muted small mb-0">Could not load messages.</p></div>';
+                        widget.innerHTML = '<div class="empty-state-compact"><i class="bi bi-exclamation-circle empty-state-icon" style="font-size:2rem;"></i><p class="text-muted small mb-0">Could not load messages.</p></div>';
                         return;
                     }
                     if (!data.conversations || data.conversations.length === 0) {
-                        widget.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-inbox"></i></div><p class="text-muted small mb-0">No recent messages</p><p class="text-muted" style="font-size:0.85rem;">Start a conversation with your assigned writer</p></div>';
+                        widget.innerHTML = '<div class="empty-state-compact"><i class="bi bi-chat-dots text-muted mb-2" style="font-size:2.5rem;"></i><p class="text-muted small mb-2">No recent messages</p><a href="/Messages/Index" class="btn btn-sm btn-outline-primary">Send a message to your writer</a></div>';
                         return;
                     }
                     var html = '<div class="list-group list-group-flush">';
@@ -410,7 +553,7 @@
                     widget.innerHTML = html;
                 })
                 .catch(function () {
-                    widget.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><i class="bi bi-exclamation-circle"></i></div><p class="text-muted small mb-0">Error loading messages.</p></div>';
+                    widget.innerHTML = '<div class="empty-state-compact"><i class="bi bi-exclamation-circle empty-state-icon" style="font-size:2rem;"></i><p class="text-muted small mb-0">Error loading messages.</p></div>';
                 });
         }
 

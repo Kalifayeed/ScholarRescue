@@ -90,52 +90,168 @@ a:hover {
 .stat-card {
     border-left: 4px solid var(--primary);
     transition: var(--transition);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-lg);
 }
 
-.stat-card.bg-primary {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    border-left-color: var(--accent);
-    color: white;
-}
-
-.stat-card.bg-success {
-    background: linear-gradient(135deg, #1e7e34, var(--success));
-    border-left-color: var(--accent-light);
-    color: white;
-}
-
-.stat-card.bg-warning {
-    background: linear-gradient(135deg, #e0a800, var(--warning));
+.stat-card.primary {
     border-left-color: var(--primary);
-    color: var(--text-dark);
 }
 
-.stat-card.bg-info {
-    background: linear-gradient(135deg, #117a8b, var(--info));
-    border-left-color: var(--accent-light);
-    color: white;
+.stat-card.info {
+    border-left-color: var(--info);
+}
+
+.stat-card.warning {
+    border-left-color: var(--warning);
+}
+
+.stat-card.success {
+    border-left-color: var(--success);
 }
 
 .stat-card .stat-icon {
     font-size: 2.5rem;
-    opacity: 0.3;
+    opacity: 0.2;
 }
 
 .stat-card .stat-value {
-    font-size: 1.75rem;
+    font-size: 2.5rem;
     font-weight: 700;
 }
 
 .stat-card .stat-label {
-    font-size: 0.85rem;
-    opacity: 0.85;
+    font-size: 0.95rem;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.stat-trend {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.stat-trend.up {
+    color: var(--success);
+}
+
+.stat-trend.down {
+    color: var(--danger);
+}
+
+/* Card Headers - Unified Color */
+.card-header-unified {
+    background: var(--primary);
+    color: var(--text-light);
+    border: none;
+    padding: 1rem 1.25rem;
+}
+
+.card-header-unified.success {
+    background: linear-gradient(135deg, var(--success), #2E8B57);
+}
+
+/* Table Improvements */
+.table-zebra tbody tr:nth-child(odd) {
+    background-color: rgba(27, 54, 93, 0.02);
+}
+
+.table-zebra tbody tr:nth-child(even) {
+    background-color: rgba(27, 54, 93, 0.01);
+}
+
+.table-zebra tbody tr:hover {
+    background-color: rgba(46, 90, 136, 0.08);
+}
+
+.sticky-header th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--primary);
+    color: var(--text-light);
+}
+
+/* Quick Action Buttons */
+.quick-action-btn {
+    border-radius: var(--radius-md);
+    padding: 1.25rem 0.75rem;
+    text-align: center;
+    transition: all 0.2s;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    height: 100%;
+}
+
+.quick-action-btn:hover {
+    border-color: var(--primary);
+    box-shadow: 0 6px 16px rgba(27, 54, 93, 0.15);
+    transform: translateY(-3px);
+}
+
+.quick-action-btn .action-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title i {
+    font-size: 1.15rem;
+}
+
+/* Empty States */
+.empty-state {
+    padding: 2.5rem 1rem;
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 3.5rem;
+    color: #CBD5E0;
+    margin-bottom: 1rem;
+}
+
+.empty-state-compact {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+/* Dashboard Section Spacing */
+.dashboard-section {
+    margin-bottom: 2.5rem;
+}
+
+/* New Order Button - Prominent */
+.btn-new-order {
+    background: var(--accent);
+    border: none;
+    color: var(--primary-dark);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.btn-new-order:hover {
+    background: var(--accent-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 166, 35, 0.3);
 }
 
 /* ── Buttons ── */
