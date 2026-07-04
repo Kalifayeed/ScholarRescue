@@ -133,7 +133,7 @@ namespace ScholarRescue.Controllers
                 }
 
                 var breakdown = _pricingService.GetPriceBreakdown(
-                    order.AcademicLevel, order.Pages, order.Deadline);
+                    order.AcademicLevel, order.Pages ?? 1, order.Deadline);
 
                 var viewModel = new OrderDetailsViewModel
                 {
@@ -183,73 +183,87 @@ namespace ScholarRescue.Controllers
             }
         }
 
-        [HttpGet]
-        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
-        public IActionResult Create()
+    [HttpGet]
+    [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
+    public IActionResult Create()
+    {
+        return View(new CreateOrderViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
+    public async Task<IActionResult> Create(CreateOrderViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
         {
-            return View(new CreateOrderViewModel());
+            return View(viewModel);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
-        public async Task<IActionResult> Create(CreateOrderViewModel viewModel)
+        // Server-side validation: ensure draft attachment exists for types that require it
+        if (viewModel.RequestType == RequestType.DraftFeedback ||
+            viewModel.RequestType == RequestType.ProofreadingOwnWork)
         {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(viewModel.UploadedFiles))
             {
+                ModelState.AddModelError(nameof(viewModel.UploadedFiles),
+                    "Please upload the work you'd like feedback on before submitting this request.");
                 return View(viewModel);
             }
+        }
 
-            try
+        try
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            // Generate order number
+            var lastOrder = await _context.Orders
+                .OrderByDescending(o => o.Id)
+                .FirstOrDefaultAsync();
+
+            int nextNumber = (lastOrder?.Id ?? 0) + 1;
+            string orderNumber = $"SR-{DateTime.UtcNow.Year}-{nextNumber:D6}";
+
+            // Handle subject: if "Other", use OtherSubject
+            string subject = viewModel.Subject;
+            if (subject == "Other" && !string.IsNullOrWhiteSpace(viewModel.OtherSubject))
             {
-                var currentUser = await _userManager.GetUserAsync(User);
-                if (currentUser == null) return Challenge();
+                subject = viewModel.OtherSubject;
+            }
 
-                // Generate order number
-                var lastOrder = await _context.Orders
-                    .OrderByDescending(o => o.Id)
-                    .FirstOrDefaultAsync();
+            // Auto pricing
+            int effectivePages = viewModel.Pages ?? 1;
+            var wordCount = _pricingService.CalculateWordCount(effectivePages);
+            var budget = _pricingService.CalculatePrice(
+                viewModel.AcademicLevel, effectivePages, viewModel.Deadline);
+            var commissionRate = await _configurationService.GetCommissionRateAsync();
+            var commission = Math.Round(budget * commissionRate, 2);
+            var writerEarnings = budget - commission;
 
-                int nextNumber = (lastOrder?.Id ?? 0) + 1;
-                string orderNumber = $"SR-{DateTime.UtcNow.Year}-{nextNumber:D6}";
-
-                // Handle subject: if "Other", use OtherSubject
-                string subject = viewModel.Subject;
-                if (subject == "Other" && !string.IsNullOrWhiteSpace(viewModel.OtherSubject))
-                {
-                    subject = viewModel.OtherSubject;
-                }
-
-                // Auto pricing
-                var wordCount = _pricingService.CalculateWordCount(viewModel.Pages);
-                var budget = _pricingService.CalculatePrice(
-                    viewModel.AcademicLevel, viewModel.Pages, viewModel.Deadline);
-                var commissionRate = await _configurationService.GetCommissionRateAsync();
-                var commission = Math.Round(budget * commissionRate, 2);
-                var writerEarnings = budget - commission;
-
-                var order = new Order
-                {
-                    OrderNumber = orderNumber,
-                    Title = viewModel.Title,
-                    Description = viewModel.Description,
-                    Subject = subject,
-                    AcademicLevel = viewModel.AcademicLevel,
-                    CitationFormat = viewModel.CitationFormat,
-                    Deadline = viewModel.Deadline,
-                    Pages = viewModel.Pages,
-                    WordCount = wordCount,
-                    Budget = budget,
-                    CommissionAmount = commission,
-                    WriterEarnings = writerEarnings,
-                    NumberOfSources = viewModel.NumberOfSources,
-                    Priority = PriorityLevel.Normal,
-                    Status = OrderStatus.PendingPayment,
-                    ClientId = currentUser.Id,
-                    IsMarketplaceOpen = false,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
+            var order = new Order
+            {
+                OrderNumber = orderNumber,
+                RequestType = viewModel.RequestType,
+                Title = viewModel.Title,
+                Description = viewModel.Description,
+                Subject = subject,
+                AcademicLevel = viewModel.AcademicLevel,
+                CitationFormat = viewModel.CitationFormat,
+                Deadline = viewModel.Deadline,
+                Pages = viewModel.Pages,
+                WordCount = viewModel.Pages.HasValue ? wordCount : null,
+                Budget = budget,
+                CommissionAmount = commission,
+                WriterEarnings = writerEarnings,
+                NumberOfSources = viewModel.NumberOfSources,
+                Priority = PriorityLevel.Normal,
+                Status = OrderStatus.PendingPayment,
+                ClientId = currentUser.Id,
+                IsMarketplaceOpen = false,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
@@ -362,8 +376,9 @@ namespace ScholarRescue.Controllers
                 order.Deadline = viewModel.Deadline;
                 order.Pages = viewModel.Pages;
                 order.NumberOfSources = viewModel.NumberOfSources;
-                order.WordCount = _pricingService.CalculateWordCount(viewModel.Pages);
-                order.Budget = _pricingService.CalculatePrice(viewModel.AcademicLevel, viewModel.Pages, viewModel.Deadline);
+                int editPages = viewModel.Pages ?? 1;
+                order.WordCount = _pricingService.CalculateWordCount(editPages);
+                order.Budget = _pricingService.CalculatePrice(viewModel.AcademicLevel, editPages, viewModel.Deadline);
                 var commissionRateForEdit = await _configurationService.GetCommissionRateAsync();
                 order.CommissionAmount = Math.Round(order.Budget * commissionRateForEdit, 2);
                 order.WriterEarnings = order.Budget - order.CommissionAmount;
@@ -553,8 +568,9 @@ namespace ScholarRescue.Controllers
                     .FirstOrDefaultAsync();
                 int nextNumber = (lastOrder?.Id ?? 0) + 1;
                 string orderNumber = $"SR-{DateTime.UtcNow.Year}-{nextNumber:D6}";
-                var wordCount = _pricingService.CalculateWordCount(model.Pages);
-                var budget = _pricingService.CalculatePrice(model.AcademicLevel, model.Pages, model.Deadline);
+                int guestPages = model.Pages ?? 1;
+                var wordCount = _pricingService.CalculateWordCount(guestPages);
+                var budget = _pricingService.CalculatePrice(model.AcademicLevel, guestPages, model.Deadline);
                 var commissionRate = await _configurationService.GetCommissionRateAsync();
                 var commission = Math.Round(budget * commissionRate, 2);
                 var writerEarnings = budget - commission;
@@ -562,6 +578,7 @@ namespace ScholarRescue.Controllers
                 var order = new Order
                 {
                     OrderNumber = orderNumber,
+                    RequestType = model.RequestType,
                     Title = model.Title,
                     Description = model.Description,
                     Subject = model.Subject,
@@ -569,7 +586,7 @@ namespace ScholarRescue.Controllers
                     CitationFormat = model.CitationFormat,
                     Deadline = model.Deadline,
                     Pages = model.Pages,
-                    WordCount = wordCount,
+                    WordCount = model.Pages.HasValue ? wordCount : null,
                     Budget = budget,
                     CommissionAmount = commission,
                     WriterEarnings = writerEarnings,
@@ -770,7 +787,7 @@ namespace ScholarRescue.Controllers
 
                 // Build price breakdown for display labels
                 var breakdown = _pricingService.GetPriceBreakdown(
-                    order.AcademicLevel, order.Pages, order.Deadline);
+                    order.AcademicLevel, order.Pages ?? 1, order.Deadline);
 
                 // Determine privacy-safe labels
                 string otherPartyLabel;

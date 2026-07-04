@@ -44,9 +44,9 @@ namespace ScholarRescue.ViewModels.Order
         public DateTime Deadline { get; set; }
 
         /// <summary>
-        /// Number of pages required.
+        /// Number of pages in the client's existing draft (informational).
         /// </summary>
-        public int Pages { get; set; }
+        public int? Pages { get; set; }
 
         /// <summary>
         /// The total budget for the order.

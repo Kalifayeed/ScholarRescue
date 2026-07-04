@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ScholarRescue.Models.Enums;
 
 namespace ScholarRescue.Models
 {
@@ -49,5 +50,13 @@ namespace ScholarRescue.Models
 
         [ForeignKey(nameof(UploadedById))]
         public virtual ApplicationUser UploadedBy { get; set; } = null!;
+
+        /// <summary>
+        /// The purpose/category of this attachment.
+        /// Determines whether it qualifies as a student draft for validation purposes.
+        /// </summary>
+        [Required]
+        [Display(Name = "Attachment Purpose")]
+        public AttachmentPurpose AttachmentPurpose { get; set; } = AttachmentPurpose.SupportingMaterial;
     }
 }

@@ -64,9 +64,10 @@ namespace ScholarRescue.Controllers
                 return Forbid();
 
             var timeline = await _milestoneService.GetTimelineAsync(orderId);
-            var requiredRule = _milestoneService.IsProgressiveDeliveryRequired(order.Pages)
+            int milestonePages = order.Pages ?? 0;
+            var requiredRule = _milestoneService.IsProgressiveDeliveryRequired(milestonePages)
                 ? "Mandatory"
-                : _milestoneService.IsProgressiveDeliveryOptional(order.Pages)
+                : _milestoneService.IsProgressiveDeliveryOptional(milestonePages)
                     ? "Optional"
                     : "Not used";
 

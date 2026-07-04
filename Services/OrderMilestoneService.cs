@@ -230,9 +230,10 @@ namespace ScholarRescue.Services
                 throw new InvalidOperationException("Only submitted milestones can be approved.");
 
             // Compute earnings: 90% of (Pages/TotalPages * Budget)
-            var writerShare = order.Budget <= 0 || order.Pages <= 0
+            int totalPages = order.Pages ?? 1;
+            var writerShare = order.Budget <= 0 || totalPages <= 0
                 ? 0m
-                : Math.Round((decimal)milestone.Pages / order.Pages * order.Budget * 0.90m, 2, MidpointRounding.AwayFromZero);
+                : Math.Round((decimal)milestone.Pages / totalPages * order.Budget * 0.90m, 2, MidpointRounding.AwayFromZero);
 
             // Record the milestone earnings in the financial ledger
             var txnNumber = await _financialService.RecordMilestoneEarningsAsync(

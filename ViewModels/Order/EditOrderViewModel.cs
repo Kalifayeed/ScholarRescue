@@ -14,6 +14,13 @@ namespace ScholarRescue.ViewModels.Order
         [Display(Name = "Order Number")]
         public string OrderNumber { get; set; } = string.Empty;
 
+        /// <summary>
+        /// The type of academic support requested. Read-only once order leaves Draft status.
+        /// </summary>
+        [Required(ErrorMessage = "Request type is required.")]
+        [Display(Name = "Request Type")]
+        public RequestType RequestType { get; set; }
+
         [Required(ErrorMessage = "Title is required.")]
         [MaxLength(500, ErrorMessage = "Title cannot exceed 500 characters.")]
         [Display(Name = "Title")]
@@ -42,14 +49,16 @@ namespace ScholarRescue.ViewModels.Order
         [DataType(DataType.DateTime)]
         public DateTime Deadline { get; set; }
 
-        [Required(ErrorMessage = "Number of pages is required.")]
+        /// <summary>
+        /// Number of pages in the client's existing draft (informational, not a spec).
+        /// </summary>
         [Range(1, 1000, ErrorMessage = "Pages must be between 1 and 1000.")]
-        [Display(Name = "Number of Pages")]
-        public int Pages { get; set; }
+        [Display(Name = "Number of Pages (your draft)")]
+        public int? Pages { get; set; }
 
         /// <summary>Auto-calculated as Pages × 300. Read-only display.</summary>
         [Display(Name = "Word Count (auto)")]
-        public int WordCount { get; set; }
+        public int? WordCount { get; set; }
 
         /// <summary>Auto-calculated price. Read-only display.</summary>
         [DataType(DataType.Currency)]
@@ -74,5 +83,8 @@ namespace ScholarRescue.ViewModels.Order
         [Required]
         [Display(Name = "Status")]
         public OrderStatus Status { get; set; }
+
+        /// <summary>Whether the request type is locked (order has left Draft status).</summary>
+        public bool IsRequestTypeLocked { get; set; }
     }
 }

@@ -168,7 +168,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -176,7 +176,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ReviewedByAdminId")
                         .HasMaxLength(450)
@@ -221,7 +221,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("ReadAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -256,7 +256,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("CurrentActiveOrders")
                         .HasColumnType("integer");
@@ -269,7 +269,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("EmailVerifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -285,24 +285,24 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastActivityDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("LastKnownIPAddress")
                         .HasMaxLength(45)
                         .HasColumnType("character varying(45)");
 
                     b.Property<DateTime?>("LastLoginDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("LastOrderCompletedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("LastScreenNameChangeDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -412,7 +412,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
@@ -450,7 +450,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -472,7 +472,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastRestoreTestAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
@@ -487,7 +487,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<DateTime?>("VerifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -516,7 +516,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("RiskLevel")
                         .HasColumnType("integer");
@@ -564,7 +564,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime?>("RespondedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Subject")
                         .IsRequired()
@@ -572,7 +572,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -588,13 +588,13 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsArchived")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("LastMessageDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
@@ -624,10 +624,10 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("JoinedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("LastReadDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -658,7 +658,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("SentAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -684,7 +684,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
@@ -740,7 +740,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(1000)");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ResolvedById")
                         .HasMaxLength(450)
@@ -751,7 +751,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(8000)");
 
                     b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Url")
                         .HasMaxLength(500)
@@ -785,7 +785,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("FundedAmount")
                         .HasColumnType("decimal(18,2)");
@@ -806,7 +806,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("WriterAmount")
                         .HasColumnType("decimal(18,2)");
@@ -846,7 +846,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UpdatedById")
                         .HasMaxLength(100)
@@ -869,7 +869,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FileExtension")
                         .HasMaxLength(20)
@@ -906,7 +906,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(1000)");
 
                     b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ReviewedById")
                         .HasMaxLength(100)
@@ -916,7 +916,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("ScanDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ScanSummary")
                         .HasMaxLength(2000)
@@ -960,7 +960,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(450)");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("CreditAmount")
                         .HasColumnType("decimal(18,2)");
@@ -1024,7 +1024,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -1039,7 +1039,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("LastVerifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
@@ -1049,7 +1049,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("VerifiedById")
                         .HasMaxLength(450)
@@ -1079,10 +1079,10 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("double precision");
 
                     b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("HadDispute")
                         .HasColumnType("boolean");
@@ -1130,7 +1130,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("double precision");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<double>("DeadlineScore")
                         .HasColumnType("double precision");
@@ -1193,10 +1193,10 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("EditedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsEdited")
                         .HasColumnType("boolean");
@@ -1240,7 +1240,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -1274,7 +1274,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
@@ -1313,7 +1313,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("AcknowledgedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("AcknowledgedById")
                         .HasMaxLength(450)
@@ -1323,7 +1323,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -1340,7 +1340,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("WriterId")
                         .HasMaxLength(450)
@@ -1372,13 +1372,13 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("EmailSent")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("EmailSentAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsArchived")
                         .HasColumnType("boolean");
@@ -1398,7 +1398,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("RelatedEntityId")
                         .HasMaxLength(500)
@@ -1444,10 +1444,10 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("DeliveredAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("DeliveryMethod")
                         .IsRequired()
@@ -1468,7 +1468,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("RetryCount")
                         .HasColumnType("integer");
@@ -1542,7 +1542,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("AssignedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("AssignedByAdminId")
                         .HasColumnType("text");
@@ -1564,23 +1564,23 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("Deadline")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("DraftSavedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("EscrowFundedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsDisputed")
                         .HasColumnType("boolean");
@@ -1599,11 +1599,11 @@ namespace ScholarRescue.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
-                    b.Property<int>("Pages")
+                    b.Property<int?>("Pages")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("PaymentDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("integer");
@@ -1620,9 +1620,12 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("RatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RequestType")
                         .HasColumnType("integer");
 
                     b.Property<int>("Status")
@@ -1639,9 +1642,9 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("WordCount")
+                    b.Property<int?>("WordCount")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("WriterEarnings")
@@ -1680,7 +1683,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AppliedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Message")
                         .HasMaxLength(1000)
@@ -1696,7 +1699,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("WriterId")
                         .IsRequired()
@@ -1729,6 +1732,9 @@ namespace ScholarRescue.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AttachmentPurpose")
+                        .HasColumnType("integer");
+
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -1751,7 +1757,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UploadedById")
                         .IsRequired()
@@ -1778,10 +1784,10 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("EstimatedDeliveryDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Message")
                         .HasMaxLength(1000)
@@ -1794,7 +1800,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("WriterId")
                         .IsRequired()
@@ -1838,7 +1844,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("OpenedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
@@ -1848,7 +1854,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(2000)");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ResolvedByAdminId")
                         .HasColumnType("text");
@@ -1917,7 +1923,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UploadedById")
                         .IsRequired()
@@ -1944,7 +1950,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("OrderAmount")
                         .HasColumnType("decimal(18,2)");
@@ -1953,7 +1959,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("ReleasedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("WriterAmount")
                         .HasColumnType("decimal(18,2)");
@@ -1979,7 +1985,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("NewStatus")
                         .HasColumnType("integer");
@@ -2018,7 +2024,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(1000)");
 
                     b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ApprovedById")
                         .HasMaxLength(450)
@@ -2028,10 +2034,10 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("Deadline")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("LedgerTransactionNumber")
                         .HasMaxLength(50)
@@ -2054,7 +2060,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(1000)");
 
                     b.Property<DateTime?>("SubmittedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -2062,7 +2068,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -2106,7 +2112,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -2128,7 +2134,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedById")
                         .IsRequired()
@@ -2178,7 +2184,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("VersionNumber")
                         .HasColumnType("integer");
@@ -2238,7 +2244,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -2268,10 +2274,10 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
@@ -2313,16 +2319,16 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("ApprovedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("PayoutDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ProcessedById")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("RequestedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -2379,7 +2385,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UpdatedById")
                         .HasMaxLength(100)
@@ -2414,7 +2420,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("LifetimeCommission")
                         .HasColumnType("decimal(18,2)");
@@ -2442,7 +2448,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("FilesPassed")
                         .HasColumnType("boolean");
@@ -2496,7 +2502,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -2541,7 +2547,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("RequestedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -2570,7 +2576,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DetectedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("DetectedContent")
                         .HasMaxLength(500)
@@ -2601,7 +2607,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(1000)");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ResolvedById")
                         .HasMaxLength(100)
@@ -2656,7 +2662,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("IPAddress")
                         .HasMaxLength(50)
@@ -2709,7 +2715,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("DetectedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("DetectionType")
                         .IsRequired()
@@ -2724,7 +2730,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(1000)");
 
                     b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ReviewedById")
                         .HasMaxLength(450)
@@ -2785,7 +2791,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("LoginAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("OperatingSystem")
                         .HasMaxLength(100)
@@ -2813,10 +2819,10 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsUsed")
                         .HasColumnType("boolean");
@@ -2837,7 +2843,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(450)");
 
                     b.Property<DateTime?>("VerifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -2853,7 +2859,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CalculatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<double>("ClientRatingScore")
                         .HasColumnType("double precision");
@@ -2904,7 +2910,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("CompletedOrders")
                         .HasColumnType("integer");
@@ -2913,10 +2919,10 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastDemotedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("LastPromotedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("MaxOrderValue")
                         .HasColumnType("numeric");
@@ -2960,7 +2966,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -2972,7 +2978,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Severity")
                         .IsRequired()
@@ -3007,7 +3013,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(450)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatorId")
                         .IsRequired()
@@ -3025,7 +3031,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastReplyDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("OrderId")
                         .HasColumnType("integer");
@@ -3038,7 +3044,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -3057,7 +3063,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -3108,7 +3114,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UploadedById")
                         .HasMaxLength(450)
@@ -3139,7 +3145,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsInternal")
                         .HasColumnType("boolean");
@@ -3174,14 +3180,14 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(5000)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedById")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -3221,7 +3227,7 @@ namespace ScholarRescue.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CheckedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Component")
                         .IsRequired()
@@ -3229,7 +3235,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsOperational")
                         .HasColumnType("boolean");
@@ -3273,7 +3279,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("FirstSeen")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("IPAddress")
                         .HasMaxLength(50)
@@ -3286,7 +3292,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("LastSeen")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("OperatingSystem")
                         .HasMaxLength(100)
@@ -3363,7 +3369,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ReviewedByAdminId")
                         .HasColumnType("text");
@@ -3372,7 +3378,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("ReviewedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Specialization")
                         .IsRequired()
@@ -3383,10 +3389,10 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("SubmittedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -3430,7 +3436,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("PayPalEmail")
                         .HasMaxLength(200)
@@ -3471,7 +3477,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(450)
@@ -3527,7 +3533,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("OverriddenAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("OverrideAdminId")
                         .HasColumnType("text");
@@ -3542,7 +3548,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("WriterId")
                         .IsRequired()
@@ -3576,7 +3582,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("DeadlineRating")
                         .HasColumnType("integer");
@@ -3634,7 +3640,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("LateOrders")
                         .HasColumnType("integer");
@@ -3649,7 +3655,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Warnings")
                         .HasColumnType("integer");
@@ -3686,7 +3692,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -3712,7 +3718,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -3745,7 +3751,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("RiskLevel")
                         .HasColumnType("integer");
@@ -3818,7 +3824,7 @@ namespace ScholarRescue.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("LifetimeCommissionPaid")
                         .HasColumnType("decimal(18,2)");

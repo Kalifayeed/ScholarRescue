@@ -6,13 +6,13 @@
 
 #### `Orders`
 - **Primary Key:** `Id` (int)
-- **Key Fields:** `OrderNumber` (unique), `Title`, `Description`, `Subject`, `AcademicLevel`, `CitationFormat`, `Deadline`, `Pages`, `WordCount`, `Budget`, `Priority`, `Status`
+- **Key Fields:** `OrderNumber` (unique), `RequestType` (enum: DraftFeedback/ConceptExplanation/ProofreadingOwnWork/LiveTutoringSession), `Title`, `Description`, `Subject`, `AcademicLevel`, `CitationFormat`, `Deadline`, `Pages` (nullable), `WordCount` (nullable), `Budget`, `Priority`, `Status`
 - **Financial Fields:** `CommissionAmount`, `WriterEarnings`
 - **Assignment Fields:** `AssignedWriterId` (FK→User), `AssignedAt`, `AssignedByAdminId` (FK→User)
 - **Client:** `ClientId` (FK→User)
 - **Status Field:** `IsMarketplaceOpen`
 - **Timestamps:** `CreatedAt`, `UpdatedAt`, `CompletedAt`
-- **Navigation:** `Documents`, `Notes`, `History`, `Applications`
+- **Navigation:** `Documents`, `Notes`, `History`, `Applications`, `Attachments`
 
 #### `WriterApplications`
 - **Primary Key:** `Id` (int)
@@ -94,7 +94,9 @@
 | `OrderApplicationStatus` | Pending, Selected, Declined, Withdrawed |
 | `SubmissionType` | Draft, Revision, Final |
 | `RevisionRequestStatus` | Pending, Completed |
-| `AcademicLevel` | HighSchool, College, Undergraduate, Masters, PhD |
-| `PriorityLevel` | Low, Normal, High, Urgent |
-| `CitationFormat` | APA_7th, MLA, Chicago, Harvard, IEEE, OSCOLA, etc. |
-| `NotificationType` | OrderAssigned, NewMessage, RevisionRequested, OrderSubmitted, OrderCompleted, WriterApproved, SystemAlert, WriterApplied, WriterAssigned, WriterRejected, OrderReassigned, WriterApplicationRejected |
+        | `AcademicLevel` | HighSchool, College, Undergraduate, Masters, PhD |
+        | `PriorityLevel` | Low, Normal, High, Urgent |
+        | `CitationFormat` | APA_7th, MLA, Chicago, Harvard, IEEE, OSCOLA, etc. |
+        | `RequestType` | DraftFeedback, ConceptExplanation, ProofreadingOwnWork, LiveTutoringSession |
+        | `AttachmentPurpose` | StudentDraft, AssignmentInstructions, SupportingMaterial |
+        | `NotificationType` | OrderAssigned, NewMessage, RevisionRequested, OrderSubmitted, OrderCompleted, WriterApproved, SystemAlert, WriterApplied, WriterAssigned, WriterRejected, OrderReassigned, WriterApplicationRejected |

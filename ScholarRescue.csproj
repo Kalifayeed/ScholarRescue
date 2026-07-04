@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin\**;obj\**;publish\**;publish-linux\**;tests\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>

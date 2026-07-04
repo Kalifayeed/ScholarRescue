@@ -43,6 +43,13 @@ namespace ScholarRescue.ViewModels.Order
         // ═══════════════════════════════════════════
         // PART 2 – Order Fields
         // ═══════════════════════════════════════════
+        /// <summary>
+        /// The type of academic support requested.
+        /// </summary>
+        [Required(ErrorMessage = "Please select a request type.")]
+        [Display(Name = "Request Type")]
+        public RequestType RequestType { get; set; }
+
         [Required(ErrorMessage = "Assignment title is required.")]
         [MaxLength(500)]
         public string Title { get; set; } = string.Empty;
@@ -60,9 +67,11 @@ namespace ScholarRescue.ViewModels.Order
         [Required(ErrorMessage = "Citation format is required.")]
         public CitationFormat CitationFormat { get; set; } = CitationFormat.APA_7th;
 
-        [Required(ErrorMessage = "Number of pages is required.")]
+        /// <summary>
+        /// Number of pages in your existing draft (informational).
+        /// </summary>
         [Range(1, 1000, ErrorMessage = "Pages must be between 1 and 1000.")]
-        public int Pages { get; set; } = 1;
+        public int? Pages { get; set; }
 
         [Range(0, 100, ErrorMessage = "Sources must be between 0 and 100.")]
         public int NumberOfSources { get; set; }

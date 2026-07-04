@@ -19,8 +19,10 @@ namespace ScholarRescue.ViewModels.Order
         public string AcademicLevelName { get; set; } = string.Empty;
         public string CitationFormatName { get; set; } = string.Empty;
         public DateTime Deadline { get; set; }
-        public int Pages { get; set; }
-        public int WordCount { get; set; }
+        /// <summary>Number of pages in the client's existing draft (informational).</summary>
+        public int? Pages { get; set; }
+        /// <summary>Word count of the client's existing draft (informational).</summary>
+        public int? WordCount { get; set; }
         public decimal Budget { get; set; }
         public OrderStatus Status { get; set; }
         public bool IsAssigned { get; set; }

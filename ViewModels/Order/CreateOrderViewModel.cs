@@ -10,6 +10,14 @@ namespace ScholarRescue.ViewModels.Order
     /// </summary>
     public class CreateOrderViewModel
     {
+        /// <summary>
+        /// The type of academic support requested.
+        /// Determines whether a client draft upload is required.
+        /// </summary>
+        [Required(ErrorMessage = "Please select a request type.")]
+        [Display(Name = "Request Type")]
+        public RequestType RequestType { get; set; }
+
         [Required(ErrorMessage = "Title is required.")]
         [MaxLength(500, ErrorMessage = "Title cannot exceed 500 characters.")]
         [Display(Name = "Title")]
@@ -44,10 +52,12 @@ namespace ScholarRescue.ViewModels.Order
         [FutureDate(ErrorMessage = "Deadline must be a future date.")]
         public DateTime Deadline { get; set; } = DateTime.UtcNow.AddDays(3);
 
-        [Required(ErrorMessage = "Number of pages is required.")]
+        /// <summary>
+        /// Number of pages in your existing draft (informational, not a specification).
+        /// </summary>
         [Range(1, 1000, ErrorMessage = "Pages must be between 1 and 1000.")]
-        [Display(Name = "Number of Pages")]
-        public int Pages { get; set; } = 1;
+        [Display(Name = "Number of Pages (your existing draft)")]
+        public int? Pages { get; set; }
 
         [Range(0, 100)]
         [Display(Name = "Number of Sources")]

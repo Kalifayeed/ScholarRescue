@@ -1,5 +1,6 @@
 @model ScholarRescue.ViewModels.Order.CreateOrderViewModel
 @using ScholarRescue.ViewModels.Order
+@using ScholarRescue.Models.Enums
 
 @{
     ViewData["Title"] = "Create Order";
@@ -11,7 +12,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h3 mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Order</h1>
+        <h1 class="h3 mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Request</h1>
         <small class="text-muted">Submit a new academic support request</small>
     </div>
     <a asp-action="Index" class="btn btn-outline-secondary">
@@ -25,6 +26,27 @@
 
     <div class="row g-4">
         <div class="col-lg-8">
+            <!-- Request Type Selection -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-question-circle text-primary me-2"></i>What type of support do you need?</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-0">
+                        <label asp-for="RequestType" class="form-label fw-semibold"></label>
+                        <select asp-for="RequestType" class="form-select" id="requestTypeSelect"
+                                asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.RequestType>()">
+                            <option value="">-- Select Request Type --</option>
+                        </select>
+                        <span asp-validation-for="RequestType" class="text-danger small"></span>
+                        <div id="requestTypeHelp" class="form-text mt-2">
+                            <i class="bi bi-info-circle"></i>
+                            <span id="requestTypeHelpText">Select the type of support you need. For draft feedback or proofreading, you'll need to upload your work.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white">
                     <h5 class="mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Assignment Information</h5>
@@ -37,11 +59,11 @@
                     </div>
                     <div class="mb-3">
                         <label asp-for="Description" class="form-label fw-semibold"></label>
-                        <textarea asp-for="Description" class="form-control" rows="6" placeholder="Provide detailed instructions, requirements, and any specific notes for your order"></textarea>
+                        <textarea asp-for="Description" class="form-control" rows="6" placeholder="Provide detailed instructions, requirements, and any specific notes for your request"></textarea>
                         <span asp-validation-for="Description" class="text-danger small"></span>
                     </div>
                     <div class="mb-0">
-                        <label class="form-label fw-semibold">Order Attachments</label>
+                        <label class="form-label fw-semibold">Upload Your Work <span id="uploadRequiredIndicator" class="text-danger d-none">(required)</span></label>
                         <div class="upload-area border rounded-3 p-3 text-center" id="uploadArea" style="border:2px dashed #ccc;cursor:pointer;">
                             <i class="bi bi-cloud-upload fs-1 text-muted"></i>
                             <p class="mb-1 mt-2 fw-medium">Drag & drop files here or click to browse</p>
@@ -50,7 +72,7 @@
                         </div>
                         <div id="fileList" class="mt-2"></div>
                         <input type="hidden" asp-for="UploadedFiles" id="uploadedFilesInput" />
-                        <small class="text-muted">Files will be uploaded after order creation</small>
+                        <small id="uploadHelpText" class="text-muted">Upload your assignment instructions, rubric, or any reference materials</small>
                     </div>
                 </div>
             </div>
@@ -102,10 +124,11 @@
                                    placeholder="DD/MM/YYYY HH:mm" />
                             <span asp-validation-for="Deadline" class="text-danger small"></span>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="pagesFieldGroup">
                             <label asp-for="Pages" class="form-label fw-semibold"></label>
                             <input asp-for="Pages" class="form-control" id="pages" type="number" min="1" value="1" />
                             <span asp-validation-for="Pages" class="text-danger small"></span>
+                            <small id="pagesHelpText" class="text-muted">Number of pages in your existing draft</small>
                         </div>
                         <div class="col-md-3">
                             <label asp-for="NumberOfSources" class="form-label fw-semibold"></label>
@@ -123,6 +146,10 @@
                     <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Pricing Summary</h5>
                 </div>
                 <div class="card-body">
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Request Type</span>
+                        <strong id="requestTypeDisplay" class="small text-end">--</strong>
+                    </div>
                     <div class="d-flex justify-content-between py-2 border-bottom">
                         <span class="text-muted small">Academic Level</span>
                         <strong id="academicLevelDisplay" class="small text-end">--</strong>
@@ -171,7 +198,7 @@
             <i class="bi bi-arrow-left me-1"></i>Cancel
         </a>
         <button type="button" class="btn btn-primary btn-lg" id="reviewOrderBtn">
-            <i class="bi bi-eye me-1"></i>Review Order
+            <i class="bi bi-eye me-1"></i>Review Request
         </button>
     </div>
 </form>
@@ -181,14 +208,15 @@
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="bi bi-file-text me-2"></i>Order Review Summary</h5>
+                <h5 class="modal-title"><i class="bi bi-file-text me-2"></i>Request Review Summary</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <h6 class="fw-bold border-bottom pb-2">Order Details</h6>
+                        <h6 class="fw-bold border-bottom pb-2">Request Details</h6>
                         <table class="table table-sm table-borderless">
+                            <tr><td class="text-muted">Type:</td><td id="reviewRequestType" class="fw-medium"></td></tr>
                             <tr><td class="text-muted">Title:</td><td id="reviewTitle" class="fw-medium"></td></tr>
                             <tr><td class="text-muted">Subject:</td><td id="reviewSubject"></td></tr>
                             <tr><td class="text-muted">Academic Level:</td><td id="reviewAcademic"></td></tr>
@@ -251,14 +279,71 @@
             PhD: 'PhD'
         };
 
+        var REQUEST_TYPE_NAMES = {
+            'DraftFeedback': 'Draft Feedback',
+            'ConceptExplanation': 'Concept Explanation',
+            'ProofreadingOwnWork': 'Proofreading (Own Work)',
+            'LiveTutoringSession': 'Live Tutoring Session'
+        };
+
         var WORDS_PER_PAGE = 300;
         var uploadedFiles = [];
+
+        // ---- Check if request type requires a draft upload ----
+        function requiresDraftAttachment() {
+            var rt = document.getElementById('requestTypeSelect').value;
+            return rt === 'DraftFeedback' || rt === 'ProofreadingOwnWork';
+        }
+
+        // ---- Check if request type is concept/tutoring (no draft needed) ----
+        function isNoDraftType() {
+            var rt = document.getElementById('requestTypeSelect').value;
+            return rt === 'ConceptExplanation' || rt === 'LiveTutoringSession';
+        }
+
+        // ---- Update form visibility based on RequestType ----
+        function updateRequestTypeUI() {
+            var rt = document.getElementById('requestTypeSelect').value;
+            var needsDraft = requiresDraftAttachment();
+            var noDraftNeeded = isNoDraftType();
+
+            // Update help text
+            var helpTexts = {
+                'DraftFeedback': 'You will upload a draft you have written and receive expert feedback on it.',
+                'ConceptExplanation': 'Get a clear explanation of a concept or topic. No draft required.',
+                'ProofreadingOwnWork': 'You will upload a completed piece you wrote for proofreading and polishing.',
+                'LiveTutoringSession': 'Schedule a live session with a tutor. No files needed.'
+            };
+            document.getElementById('requestTypeHelpText').textContent = helpTexts[rt] || 'Select the type of support you need. For draft feedback or proofreading, you will need to upload your work.';
+
+            // Show/hide the draft upload required indicator
+            var uploadIndicator = document.getElementById('uploadRequiredIndicator');
+            if (needsDraft) {
+                uploadIndicator.classList.remove('d-none');
+                document.getElementById('uploadHelpText').textContent = 'Upload your draft or work (required for this request type)';
+            } else {
+                uploadIndicator.classList.add('d-none');
+                document.getElementById('uploadHelpText').textContent = noDraftNeeded ? 'Upload any reference materials (optional)' : 'Upload your assignment instructions, rubric, or any reference materials';
+            }
+
+            // Show/hide pages field
+            var pagesGroup = document.getElementById('pagesFieldGroup');
+            if (noDraftNeeded) {
+                pagesGroup.style.display = 'none';
+            } else {
+                pagesGroup.style.display = 'block';
+            }
+
+            // Update request type display in pricing sidebar
+            document.getElementById('requestTypeDisplay').textContent = REQUEST_TYPE_NAMES[rt] || '--';
+        }
 
         // ---- CENTRAL PRICE CALCULATION ----
         function calculateOrderPrice() {
             // Read values from the DOM
             var level = document.getElementById('academicLevel').value;
-            var pages = parseInt(document.getElementById('pages').value) || 0;
+            var pagesInput = document.getElementById('pages').value;
+            var pages = parseInt(pagesInput) || 0;
             var deadlineStr = document.getElementById('deadlinePicker').value;
 
             // Lookup rate using string key
@@ -322,6 +407,8 @@
         function updateReviewModal() {
             var p = calculateOrderPrice();
 
+            var rt = document.getElementById('requestTypeSelect').value;
+            document.getElementById('reviewRequestType').textContent = REQUEST_TYPE_NAMES[rt] || '-';
             document.getElementById('reviewTitle').textContent = document.getElementById('Title').value || '-';
             var se = document.getElementById('subjectSelect');
             var sv = se.value === 'Other'
@@ -387,6 +474,7 @@
             }
 
             updatePricingSummary();
+            updateRequestTypeUI();
         }
 
         // ---- FILE UPLOAD ----
@@ -444,6 +532,12 @@
                 ss.addEventListener('change', function () {
                     document.getElementById('otherSubjectGroup').style.display = this.value === 'Other' ? 'block' : 'none';
                 });
+            }
+
+            // Request Type change
+            var rt = document.getElementById('requestTypeSelect');
+            if (rt) {
+                rt.addEventListener('change', refreshAllDisplays);
             }
 
             // Event binding

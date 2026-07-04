@@ -341,3 +341,6 @@ app.MapHub<NotificationHub>("/notificationHub");
 app.MapHub<CommunicationHub>("/communicationHub");
 
 app.Run();
+
+// Exposed for integration testing via WebApplicationFactory<Program>
+public partial class Program { }

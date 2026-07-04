@@ -1,4 +1,5 @@
 @model ScholarRescue.ViewModels.Order.EditOrderViewModel
+@using ScholarRescue.Models.Enums
 
 @{
     ViewData["Title"] = "Edit Order";
@@ -35,6 +36,23 @@
                                 <select asp-for="Status" class="form-select"
                                         asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.OrderStatus>()">
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="RequestType" class="form-label fw-bold"></label>
+                                @if (Model.IsRequestTypeLocked)
+                                {
+                                    <input asp-for="RequestType" class="form-control" readonly disabled />
+                                }
+                                else
+                                {
+                                    <select asp-for="RequestType" class="form-select"
+                                            asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.RequestType>()">
+                                    </select>
+                                }
+                                <span asp-validation-for="RequestType" class="text-danger"></span>
                             </div>
                         </div>
 
@@ -83,9 +101,12 @@
                                 <span asp-validation-for="Deadline" class="text-danger"></span>
                             </div>
                             <div class="col-md-4">
-                                <label asp-for="Pages" class="form-label fw-bold"></label>
+                                <label asp-for="Pages" class="form-label fw-bold">
+                                    @(ViewData["ShowPagesLabel"] as string ?? "Number of Pages (your draft)")
+                                </label>
                                 <input asp-for="Pages" class="form-control" id="pages" type="number" min="1" />
                                 <span asp-validation-for="Pages" class="text-danger"></span>
+                                <small class="text-muted">Pages in your existing draft (informational)</small>
                             </div>
                             <div class="col-md-4">
                                 <label asp-for="NumberOfSources" class="form-label fw-bold"></label>

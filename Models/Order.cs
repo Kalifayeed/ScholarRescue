@@ -24,6 +24,13 @@ namespace ScholarRescue.Models
         public string OrderNumber { get; set; } = string.Empty;
 
         /// <summary>
+        /// The type of academic support requested. Determines whether a client draft is required.
+        /// </summary>
+        [Required]
+        [Display(Name = "Request Type")]
+        public RequestType RequestType { get; set; }
+
+        /// <summary>
         /// The title of the academic paper/assignment.
         /// </summary>
         [Required]
@@ -65,19 +72,19 @@ namespace ScholarRescue.Models
         public DateTime Deadline { get; set; }
 
         /// <summary>
-        /// Number of pages required for the order.
+        /// Number of pages in the client's existing draft (informational, not a spec).
+        /// Optional — only relevant when the client has an existing document.
         /// </summary>
-        [Required]
         [Range(1, 1000)]
-        public int Pages { get; set; }
+        public int? Pages { get; set; }
 
         /// <summary>
-        /// Word count for the order.
+        /// Word count of the client's existing draft (informational, not a spec).
+        /// Optional — only relevant when the client has an existing document.
         /// </summary>
-        [Required]
         [Range(1, 100000)]
         [Display(Name = "Word Count")]
-        public int WordCount { get; set; }
+        public int? WordCount { get; set; }
 
         /// <summary>
         /// The total budget/price for the order.
@@ -256,5 +263,29 @@ namespace ScholarRescue.Models
         /// <summary>When the draft was last saved.</summary>
         [Display(Name = "Draft Saved At")]
         public DateTime? DraftSavedAt { get; set; }
+
+        // ═══════════════════════════════════════════
+        // Domain Logic
+        // ═══════════════════════════════════════════
+
+        /// <summary>
+        /// Determines whether this order has at least one attachment tagged as StudentDraft,
+        /// which is required for DraftFeedback and ProofreadingOwnWork request types.
+        /// Returns true if the request type does not require a draft, or if a qualifying attachment exists.
+        /// </summary>
+        public bool HasRequiredDraftAttachment()
+        {
+            if (RequestType != RequestType.DraftFeedback &&
+                RequestType != RequestType.ProofreadingOwnWork)
+            {
+                return true; // No draft required for these types
+            }
+
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (Attachments == null)
+                return false;
+
+            return Attachments.Any(a => a.AttachmentPurpose == AttachmentPurpose.StudentDraft);
+        }
     }
 }

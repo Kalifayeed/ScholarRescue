@@ -249,7 +249,9 @@ namespace ScholarRescue.Services
 
         public async Task AssignWriterAsync(int orderId, string writerId, string adminId)
         {
-            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
+            var order = await _context.Orders
+                .Include(o => o.Attachments)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
             if (order == null)
                 throw new InvalidOperationException("Order not found.");
 
@@ -265,6 +267,16 @@ namespace ScholarRescue.Services
             {
                 throw new InvalidOperationException(
                     "This order must be paid before assigning a writer.");
+            }
+
+            // Guard: enforce required draft attachment for applicable request types
+            if (!order.HasRequiredDraftAttachment())
+            {
+                _logger.LogWarning("Attempted to assign order {OrderNumber} of type {RequestType} without required StudentDraft attachment.",
+                    order.OrderNumber, order.RequestType);
+                throw new InvalidOperationException(
+                    "This order requires the client to upload their own work before a writer can be assigned. " +
+                    "Please ensure the client has uploaded a draft.");
             }
 
             // Make sure the writer is approved
