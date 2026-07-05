@@ -919,6 +919,7 @@ namespace ScholarRescue.Controllers
                 {
                     Id = order.Id,
                     OrderNumber = order.OrderNumber,
+                    RequestType = order.RequestType,
                     Title = order.Title,
                     Description = order.Description,
                     Subject = order.Subject,
@@ -960,7 +961,7 @@ namespace ScholarRescue.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitWork(int id, IFormFile file, string? comments, SubmissionType submissionType = SubmissionType.Draft)
+        public async Task<IActionResult> SubmitWork(int id, IFormFile file, string? comments, int? reviewedAttachmentId, SubmissionType submissionType = SubmissionType.Draft)
         {
             try
             {
@@ -973,7 +974,7 @@ namespace ScholarRescue.Controllers
                 if (order.AssignedWriterId != currentUser.Id && !User.IsInRole(RoleNames.Administrator))
                     return Forbid();
 
-                await _workDeliveryService.SubmitWorkAsync(id, currentUser.Id, file, comments ?? string.Empty, submissionType);
+                await _workDeliveryService.SubmitWorkAsync(id, currentUser.Id, file, comments ?? string.Empty, submissionType, reviewedAttachmentId);
 
                 TempData["SuccessMessage"] = $"{submissionType} submitted successfully.";
             }

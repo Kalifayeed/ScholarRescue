@@ -20,7 +20,6 @@ namespace ScholarRescue.Models
         public virtual Order Order { get; set; } = null!;
 
         [Required]
-        [Display(Name = "Writer")]
         public string WriterId { get; set; } = string.Empty;
 
         [ForeignKey(nameof(WriterId))]
@@ -30,7 +29,6 @@ namespace ScholarRescue.Models
         /// Version number of this submission (1, 2, 3...).
         /// </summary>
         [Required]
-        [Display(Name = "Version Number")]
         public int VersionNumber { get; set; } = 1;
 
         /// <summary>
@@ -44,7 +42,6 @@ namespace ScholarRescue.Models
         /// </summary>
         [Required]
         [MaxLength(1000)]
-        [Display(Name = "File Path")]
         public string FilePath { get; set; } = string.Empty;
 
         /// <summary>
@@ -52,7 +49,6 @@ namespace ScholarRescue.Models
         /// </summary>
         [Required]
         [MaxLength(500)]
-        [Display(Name = "File Name")]
         public string FileName { get; set; } = string.Empty;
 
         /// <summary>
@@ -62,10 +58,21 @@ namespace ScholarRescue.Models
         public string? Comments { get; set; }
 
         /// <summary>
+        /// Optional reference to the client's StudentDraft attachment that this submission reviews.
+        /// Required for DraftFeedback and ProofreadingOwnWork request types.
+        /// </summary>
+        public int? ReviewedAttachmentId { get; set; }
+
+        /// <summary>
+        /// The attachment being reviewed (if any).
+        /// </summary>
+        [ForeignKey(nameof(ReviewedAttachmentId))]
+        public virtual OrderAttachment? ReviewedAttachment { get; set; }
+
+        /// <summary>
         /// When the submission was uploaded.
         /// </summary>
         [Required]
-        [Display(Name = "Submitted At")]
         public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
     }
 }

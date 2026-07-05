@@ -25,9 +25,10 @@
 - **Key Fields:** `OrderId` (FK→Order), `WriterId` (FK→User), `AppliedAt`, `Status`, `Message`
 - **Unique Index:** `(OrderId, WriterId)`
 
-#### `OrderSubmissions` *(NEW - Phase 5B)*
+#### `OrderSubmissions` *(Phase 5B, extended Phase 2)*
 - **Primary Key:** `Id` (int)
-- **Key Fields:** `OrderId` (FK→Order), `WriterId` (FK→User), `VersionNumber`, `SubmissionType` (Draft/Revision/Final), `FilePath`, `FileName`, `Comments`, `SubmittedAt`
+- **Key Fields:** `OrderId` (FK→Order), `WriterId` (FK→User), `VersionNumber`, `SubmissionType` (Draft/Revision/Final), `FilePath`, `FileName`, `Comments`, `ReviewedAttachmentId` (nullable FK→OrderAttachments.Id), `SubmittedAt`
+- **Phase 2:** `ReviewedAttachmentId` links to the `StudentDraft`-tagged `OrderAttachment` that the submission reviews (required for DraftFeedback/ProofreadingOwnWork).
 
 #### `RevisionRequests` *(NEW - Phase 5B)*
 - **Primary Key:** `Id` (int)

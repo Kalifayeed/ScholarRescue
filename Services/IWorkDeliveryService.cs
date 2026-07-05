@@ -12,7 +12,7 @@ namespace ScholarRescue.Services
         /// <summary>
         /// Writer uploads a work submission (draft/revision/final) for an order.
         /// </summary>
-        Task<OrderSubmission> SubmitWorkAsync(int orderId, string writerId, IFormFile file, string comments, SubmissionType submissionType);
+        Task<OrderSubmission> SubmitWorkAsync(int orderId, string writerId, IFormFile file, string comments, SubmissionType submissionType, int? reviewedAttachmentId = null);
 
         /// <summary>
         /// Gets all submissions for a specific order.

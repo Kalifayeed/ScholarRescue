@@ -11,6 +11,7 @@ namespace ScholarRescue.ViewModels.Order
     {
         public int Id { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
+        public RequestType RequestType { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string Subject { get; set; } = string.Empty;

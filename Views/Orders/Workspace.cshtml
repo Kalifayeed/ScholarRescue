@@ -286,6 +286,14 @@
                                                 </td>
                                             </tr>
                                         }
+                                        @if (sub.ReviewedAttachment != null)
+                                        {
+                                            <tr class="table-light">
+                                                <td colspan="6" class="py-1 ps-5 text-muted">
+                                                    <small><i class="bi bi-paperclip me-1"></i>Feedback on: @sub.ReviewedAttachment.FileName</small>
+                                                </td>
+                                            </tr>
+                                        }
                                     }
                                 </tbody>
                             </table>
@@ -303,6 +311,9 @@
                     @* Writer: Upload Draft Form *@
                     @if (Model.CanSubmitWork)
                     {
+                        var requiresDraftRef = Model.RequestType == RequestType.DraftFeedback || Model.RequestType == RequestType.ProofreadingOwnWork;
+                        var draftAttachments = Model.Attachments.Where(a => a.AttachmentPurpose == AttachmentPurpose.StudentDraft).ToList();
+
                         <hr />
                         <h6 class="fw-semibold"><i class="bi bi-upload me-1"></i> Submit Work</h6>
                         <form asp-action="SubmitWork" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" class="mt-2">
@@ -312,10 +323,46 @@
                                     <label class="form-label small">File (PDF, DOC, DOCX, ZIP - max 25MB)</label>
                                     <input type="file" name="file" class="form-control form-control-sm" required accept=".pdf,.doc,.docx,.zip" />
                                 </div>
+
+                                @if (requiresDraftRef && draftAttachments.Count > 0)
+                                {
+                                    <div class="col-12">
+                                        <label for="reviewedAttachmentId" class="form-label small">Which draft are you providing feedback on? <span class="text-danger">*</span></label>
+                                        <select name="reviewedAttachmentId" id="reviewedAttachmentId" class="form-select form-select-sm" required>
+                                            <option value="">-- Select a draft --</option>
+                                            @foreach (var att in draftAttachments)
+                                            {
+                                                <option value="@att.Id">@att.FileName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                }
+
                                 <div class="col-12">
-                                    <label class="form-label small">Notes / Comments (optional)</label>
-                                    <textarea name="comments" class="form-control form-control-sm" rows="2" maxlength="2000" placeholder="Add a note about this submission..."></textarea>
+                                    @if (requiresDraftRef)
+                                    {
+                                        <label for="comments" class="form-label small">Feedback Notes <span class="text-danger">*</span></label>
+                                        <textarea name="comments" id="comments" class="form-control form-control-sm" rows="3" maxlength="2000" minlength="20" required placeholder="Provide detailed feedback (minimum 20 characters)..."></textarea>
+                                        <div class="form-text">Detailed feedback notes are required (minimum 20 characters).</div>
+                                    }
+                                    else
+                                    {
+                                        <label for="comments" class="form-label small">Notes / Comments (optional)</label>
+                                        <textarea name="comments" id="comments" class="form-control form-control-sm" rows="2" maxlength="2000" placeholder="Add a note about this submission..."></textarea>
+                                    }
                                 </div>
+
+                                @if (requiresDraftRef && draftAttachments.Count == 0)
+                                {
+                                    <div class="col-12">
+                                        <div class="alert alert-warning py-2 small mb-0">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                            This order requires feedback on a client draft, but no Student Draft attachments are available.
+                                            Contact support if you believe this is an error.
+                                        </div>
+                                    </div>
+                                }
+
                                 <div class="col-12">
                                     <div class="d-flex gap-2">
                                         <button type="submit" name="submissionType" value="Draft" class="btn btn-primary btn-sm">

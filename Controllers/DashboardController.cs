@@ -91,5 +91,16 @@ namespace ScholarRescue.Controllers
                 return RedirectToAction("Index", "Orders");
             }
         }
+
+        /// <summary>
+        /// Compatibility redirect for dashboard links that resolve to /Dashboard/Create.
+        /// The order form is owned by OrdersController.
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
+        public IActionResult Create()
+        {
+            return RedirectToAction("Create", "Orders", new { area = "" });
+        }
     }
 }

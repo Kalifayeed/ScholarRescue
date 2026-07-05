@@ -49,7 +49,7 @@ namespace ScholarRescue.Services
             return AllowedExtensions.Contains(ext);
         }
 
-        public async Task<OrderSubmission> SubmitWorkAsync(int orderId, string writerId, IFormFile file, string comments, SubmissionType submissionType)
+        public async Task<OrderSubmission> SubmitWorkAsync(int orderId, string writerId, IFormFile file, string comments, SubmissionType submissionType, int? reviewedAttachmentId = null)
         {
             var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == orderId)
                 ?? throw new InvalidOperationException("Order not found.");
@@ -59,6 +59,29 @@ namespace ScholarRescue.Services
 
             if (!IsValidFileType(file))
                 throw new InvalidOperationException("Invalid file type. Accepted: PDF, DOC, DOCX, ZIP (max 25MB).");
+
+            // Phase 2: For DraftFeedback/ProofreadingOwnWork, validate reviewed attachment and comment length.
+            bool requiresDraftReference = order.RequestType == RequestType.DraftFeedback ||
+                                          order.RequestType == RequestType.ProofreadingOwnWork;
+
+            if (requiresDraftReference)
+            {
+                if (!reviewedAttachmentId.HasValue)
+                    throw new InvalidOperationException("You must select which client draft you are providing feedback on.");
+
+                var attachment = await _context.OrderAttachments
+                    .FirstOrDefaultAsync(a => a.Id == reviewedAttachmentId.Value)
+                    ?? throw new InvalidOperationException("The selected attachment was not found.");
+
+                if (attachment.OrderId != orderId)
+                    throw new InvalidOperationException("The selected attachment does not belong to this order.");
+
+                if (attachment.AttachmentPurpose != AttachmentPurpose.StudentDraft)
+                    throw new InvalidOperationException("The selected attachment is not a student draft. Only files uploaded as Student Draft can be referenced as the original work being reviewed.");
+
+                if (string.IsNullOrWhiteSpace(comments) || comments.Length < 20)
+                    throw new InvalidOperationException("Please provide detailed feedback notes (minimum 20 characters).");
+            }
 
             var allowedStatuses = submissionType switch
             {
@@ -94,6 +117,7 @@ namespace ScholarRescue.Services
                 FilePath = $"/uploads/submissions/{orderId}/{safeName}",
                 FileName = file.FileName,
                 Comments = comments,
+                ReviewedAttachmentId = requiresDraftReference ? reviewedAttachmentId : null,
                 SubmittedAt = DateTime.UtcNow
             };
 
@@ -126,8 +150,9 @@ namespace ScholarRescue.Services
                 NotificationType.OrderSubmitted,
                 order.Id.ToString());
 
-            _logger.LogInformation("Writer {WriterId} submitted {Type} v{Version} for order {OrderId}.",
-                writerId, submissionType, submission.VersionNumber, orderId);
+            _logger.LogInformation("Writer {WriterId} submitted {Type} v{Version} for order {OrderId}{Reviewed}.", 
+                writerId, submissionType, submission.VersionNumber, orderId,
+                reviewedAttachmentId.HasValue ? $", reviewed attachment {reviewedAttachmentId}" : "");
 
             return submission;
         }
@@ -136,6 +161,7 @@ namespace ScholarRescue.Services
         {
             return await _context.Set<OrderSubmission>()
                 .Include(s => s.Writer)
+                .Include(s => s.ReviewedAttachment)
                 .Where(s => s.OrderId == orderId)
                 .OrderByDescending(s => s.VersionNumber)
                 .AsNoTracking()
@@ -146,6 +172,7 @@ namespace ScholarRescue.Services
         {
             return await _context.Set<OrderSubmission>()
                 .Include(s => s.Writer)
+                .Include(s => s.ReviewedAttachment)
                 .Where(s => s.OrderId == orderId)
                 .OrderBy(s => s.VersionNumber)
                 .AsNoTracking()
