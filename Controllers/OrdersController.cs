@@ -17,6 +17,7 @@ namespace ScholarRescue.Controllers
     /// Pricing is automatic; clients never enter budgets.
     /// </summary>
     [Authorize]
+    [Route("Orders")]
     public class OrdersController : Controller
     {
         private readonly ScholarRescueDbContext _context;
@@ -58,6 +59,7 @@ namespace ScholarRescue.Controllers
         }
 
         [HttpGet]
+        [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
             try
@@ -186,7 +188,7 @@ namespace ScholarRescue.Controllers
             }
         }
 
-    [HttpGet]
+    [HttpGet("Create")]
     [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
     public IActionResult Create()
     {
