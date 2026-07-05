@@ -326,7 +326,7 @@
         <h3 class="section-title"><i class="bi bi-lightning"></i> Quick Actions</h3>
         <div class="row g-3">
             <div class="col-12 col-sm-6 col-lg-3">
-                <a href="@Url.Action("Create", "Orders")" class="quick-action-btn text-decoration-none text-dark d-flex flex-column align-items-center">
+                <a asp-controller="Orders" asp-action="Create" class="quick-action-btn text-decoration-none text-dark d-flex flex-column align-items-center">
                     <i class="bi bi-plus-circle-fill action-icon" style="color: #1B365D;"></i>
                     <strong class="d-block mb-1">New Order</strong>
                     <small class="text-muted">Create a new assignment</small>
