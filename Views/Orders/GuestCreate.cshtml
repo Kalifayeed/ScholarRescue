@@ -188,7 +188,7 @@
             'LiveTutoringSession': 'Live Tutoring Session'
         };
 
-        var uploadedFiles = [];
+        var uploadedFiles = []; // Stores real File objects
 
         // ---- Check if request type requires a draft upload ----
         function requiresDraftAttachment() {
@@ -259,11 +259,21 @@
                 if (allowed.indexOf(ext) === -1) { alert('File type ' + ext + ' not supported.'); continue; }
                 if (f.size > maxSize) { alert('File "' + f.name + '" exceeds 25MB.'); continue; }
                 if (uploadedFiles.length >= 10) { alert('Max 10 files.'); break; }
-                uploadedFiles.push({ name: f.name, size: f.size });
+                uploadedFiles.push(f); // Store the real File object
             }
+            syncFileInput();
             renderFileList();
         }
-        function removeFile(i) { uploadedFiles.splice(i,1); renderFileList(); }
+        function removeFile(i) {
+            uploadedFiles.splice(i, 1);
+            syncFileInput();
+            renderFileList();
+        }
+        function syncFileInput() {
+            var dt = new DataTransfer();
+            uploadedFiles.forEach(function (f) { dt.items.add(f); });
+            document.getElementById('fileInput').files = dt.files;
+        }
         function renderFileList() {
             var c = document.getElementById('fileList');
             if (!uploadedFiles.length) { c.innerHTML = ''; return; }
@@ -299,7 +309,7 @@
                 ua.addEventListener('dragover', function (e) { e.preventDefault(); ua.style.borderColor = '#0d6efd'; });
                 ua.addEventListener('dragleave', function () { ua.style.borderColor = '#ccc'; });
                 ua.addEventListener('drop', function (e) { e.preventDefault(); ua.style.borderColor = '#ccc'; handleFiles(e.dataTransfer.files); });
-                fi.addEventListener('change', function () { handleFiles(this.files); this.value = ''; });
+                fi.addEventListener('change', function () { handleFiles(this.files); });
             }
 
             // Initial UI state
