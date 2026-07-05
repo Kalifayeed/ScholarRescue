@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 using ScholarRescue.Models.Enums;
 
 namespace ScholarRescue.ViewModels.Order
@@ -86,5 +87,10 @@ namespace ScholarRescue.ViewModels.Order
 
         /// <summary>Whether to save as draft or proceed to payment.</summary>
         public bool SaveAsDraft { get; set; }
+
+        /// <summary>
+        /// Actual file data uploaded by the client. Bound by MVC model binding from the file input.
+        /// </summary>
+        public List<IFormFile>? UploadedFileData { get; set; }
     }
 }

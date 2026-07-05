@@ -68,7 +68,7 @@
                             <i class="bi bi-cloud-upload fs-1 text-muted"></i>
                             <p class="mb-1 mt-2 fw-medium">Drag & drop files here or click to browse</p>
                             <small class="text-muted">PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, RAR, JPG, JPEG, PNG (Max 25MB each, up to 10 files)</small>
-                            <input type="file" id="fileInput" class="d-none" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.jpg,.jpeg,.png" />
+                            <input type="file" id="fileInput" name="UploadedFileData" class="d-none" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.jpg,.jpeg,.png" />
                         </div>
                         <div id="fileList" class="mt-2"></div>
                         <input type="hidden" asp-for="UploadedFiles" id="uploadedFilesInput" />

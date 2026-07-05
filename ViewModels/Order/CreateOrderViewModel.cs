@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 using ScholarRescue.Models.Enums;
 
 namespace ScholarRescue.ViewModels.Order
@@ -63,8 +64,13 @@ namespace ScholarRescue.ViewModels.Order
         [Display(Name = "Number of Sources")]
         public int NumberOfSources { get; set; }
 
-        /// <summary>Comma-separated list of uploaded file identifiers.</summary>
+        /// <summary>Comma-separated list of uploaded file names (for client-side display).</summary>
         public string? UploadedFiles { get; set; }
+
+        /// <summary>
+        /// Actual file data uploaded by the client. Bound by MVC model binding from the file input.
+        /// </summary>
+        public List<IFormFile>? UploadedFileData { get; set; }
     }
 
     /// <summary>

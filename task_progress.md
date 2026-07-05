@@ -1,22 +1,16 @@
-# Phase 1 Implementation Complete
+# Phase 1 Corrective Fix — Wire Up Real Attachment Persistence
 
-## Final Checklist
+## Checklist
 
-- [x] 1. Create `Models/Enums/RequestType.cs`
-- [x] 2. Create `Models/Enums/AttachmentPurpose.cs`
-- [x] 3. Update `Models/Order.cs` — add RequestType, make Pages/WordCount optional, add HasRequiredDraftAttachment()
-- [x] 4. Update `Models/OrderAttachment.cs` — add AttachmentPurpose
-- [x] 5. Update `ViewModels/Order/CreateOrderViewModel.cs` — add RequestType, make Pages optional
-- [x] 6. Update `ViewModels/Order/EditOrderViewModel.cs` — add RequestType (read-only when not Draft)
-- [x] 7. Update `ViewModels/Order/GuestOrderViewModel.cs` — add RequestType, make Pages optional
-- [x] 8. Update `Views/Orders/Create.cshtml` — add RequestType selector, conditional draft upload section
-- [x] 9. Update `Views/Orders/Edit.cshtml` — add RequestType display with lock logic
-- [x] 10. Update `Controllers/OrdersController.cs` — add server-side draft attachment validation
-- [x] 11. Update `Services/OrderAssignmentService.cs` — add service-layer guard with logging
-- [x] 12. Update `ViewModels/Order/OrderIndexViewModel.cs` — make Pages nullable
-- [x] 13. Update `ViewModels/Order/OrderDetailsViewModel.cs` — make Pages/WordCount nullable
-- [x] 14. Update `ViewModels/Order/OrderWorkspaceViewModel.cs` — make Pages/WordCount nullable
-- [x] 15. Fix nullable propagation in `DashboardController`, `WritersController`, `OrderMilestonesController`, `OrderMilestoneService`
-- [x] 16. Generate EF Core migration `AddRequestTypeAndAttachmentPurpose`
-- [x] 17. Update `AI_MEMORY/DATABASE_SCHEMA.md`
-- [x] 18. Build passes with 0 errors
+- [ ] 1. Create shared `OrderAttachmentValidation` constants
+- [ ] 2. Add `UploadedFileData` to `CreateOrderViewModel`
+- [ ] 3. Add `UploadedFileData` to `GuestOrderViewModel`
+- [ ] 4. Create `IOrderAttachmentService` / `OrderAttachmentService`
+- [ ] 5. Update `OrdersController.Create()` — persist real files, use real validation
+- [ ] 6. Update `OrdersController.GuestCreate()` — same treatment
+- [ ] 7. Update `Views/Orders/Create.cshtml` — fix file input name, add client-side guard
+- [ ] 8. Update `Views/Orders/GuestCreate.cshtml` — add file upload widget if needed
+- [ ] 9. Add grandfathering constant to `OrderAssignmentService`
+- [ ] 10. Register service in `Program.cs`
+- [ ] 11. Build and verify
+- [ ] 12. Commit and push

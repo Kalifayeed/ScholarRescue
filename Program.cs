@@ -156,6 +156,7 @@ builder.Services.AddScoped<IFinancialService, FinancialService>();
 builder.Services.AddSingleton<IPayoutWindowService, PayoutWindowService>();
 builder.Services.AddScoped<IWriterApplicationService, WriterApplicationService>();
 builder.Services.AddScoped<IOrderAssignmentService, OrderAssignmentService>();
+builder.Services.AddScoped<IOrderAttachmentService, OrderAttachmentService>();
 builder.Services.AddScoped<IWorkDeliveryService, WorkDeliveryService>();
 builder.Services.AddScoped<IWriterResourceService, WriterResourceService>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();

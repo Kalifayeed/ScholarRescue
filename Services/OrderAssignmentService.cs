@@ -74,6 +74,15 @@ namespace ScholarRescue.Services
     /// </summary>
     public class OrderAssignmentService : IOrderAssignmentService
     {
+        /// <summary>
+        /// Cutoff UTC timestamp for enforcing the StudentDraft attachment requirement.
+        /// Orders created before this timestamp are grandfathered — they can be assigned
+        /// without a StudentDraft attachment.
+        /// Set to 2026-07-05T07:00:00Z (deployment time of this enforcement fix).
+        /// </summary>
+        public static readonly DateTime AttachmentEnforcementCutoffUtc =
+            new DateTime(2026, 7, 5, 7, 0, 0, DateTimeKind.Utc);
+
         private readonly ScholarRescueDbContext _context;
         private readonly INotificationService _notificationService;
         private readonly ILogger<OrderAssignmentService> _logger;
@@ -270,13 +279,20 @@ namespace ScholarRescue.Services
             }
 
             // Guard: enforce required draft attachment for applicable request types
-            if (!order.HasRequiredDraftAttachment())
+            // Grandfathering: orders created before the cutoff are exempt.
+            if (order.CreatedAt >= AttachmentEnforcementCutoffUtc && !order.HasRequiredDraftAttachment())
             {
-                _logger.LogWarning("Attempted to assign order {OrderNumber} of type {RequestType} without required StudentDraft attachment.",
-                    order.OrderNumber, order.RequestType);
+                _logger.LogWarning("Attempted to assign order {OrderNumber} (created {CreatedAt}) of type {RequestType} without required StudentDraft attachment.",
+                    order.OrderNumber, order.CreatedAt, order.RequestType);
                 throw new InvalidOperationException(
                     "This order requires the client to upload their own work before a writer can be assigned. " +
                     "Please ensure the client has uploaded a draft.");
+            }
+
+            if (order.CreatedAt < AttachmentEnforcementCutoffUtc)
+            {
+                _logger.LogInformation("Order {OrderNumber} (created {CreatedAt}) is before attachment enforcement cutoff; grandfathering assignment.",
+                    order.OrderNumber, order.CreatedAt);
             }
 
             // Make sure the writer is approved

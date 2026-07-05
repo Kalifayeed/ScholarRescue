@@ -29,6 +29,7 @@ namespace ScholarRescue.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IWorkDeliveryService _workDeliveryService;
         private readonly INotificationService _notificationService;
+        private readonly IOrderAttachmentService _orderAttachmentService;
 
         public OrdersController(
             ScholarRescueDbContext context,
@@ -40,7 +41,8 @@ namespace ScholarRescue.Controllers
             IConfigurationService configurationService,
             SignInManager<ApplicationUser> signInManager,
             IWorkDeliveryService workDeliveryService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IOrderAttachmentService orderAttachmentService)
         {
             _context = context;
             _userManager = userManager;
@@ -52,6 +54,7 @@ namespace ScholarRescue.Controllers
             _signInManager = signInManager;
             _workDeliveryService = workDeliveryService;
             _notificationService = notificationService;
+            _orderAttachmentService = orderAttachmentService;
         }
 
         [HttpGet]
@@ -290,6 +293,18 @@ namespace ScholarRescue.Controllers
                 });
 
                 await _context.SaveChangesAsync();
+
+                // Save uploaded attachments (if any)
+                if (viewModel.UploadedFileData != null && viewModel.UploadedFileData.Count > 0)
+                {
+                    var purpose = (viewModel.RequestType == RequestType.DraftFeedback ||
+                                   viewModel.RequestType == RequestType.ProofreadingOwnWork)
+                        ? AttachmentPurpose.StudentDraft
+                        : AttachmentPurpose.SupportingMaterial;
+
+                    await _orderAttachmentService.SaveAttachmentsAsync(
+                        order.Id, viewModel.UploadedFileData, purpose, currentUser.Id);
+                }
 
                 _logger.LogInformation("Order {OrderNumber} created, redirecting to payment.", orderNumber);
 
