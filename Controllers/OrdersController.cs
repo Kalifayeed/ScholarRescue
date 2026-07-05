@@ -207,10 +207,25 @@ namespace ScholarRescue.Controllers
         if (viewModel.RequestType == RequestType.DraftFeedback ||
             viewModel.RequestType == RequestType.ProofreadingOwnWork)
         {
-            if (string.IsNullOrWhiteSpace(viewModel.UploadedFiles))
+            if (viewModel.UploadedFileData == null || viewModel.UploadedFileData.Count == 0)
             {
-                ModelState.AddModelError(nameof(viewModel.UploadedFiles),
+                ModelState.AddModelError(nameof(viewModel.UploadedFileData),
                     "Please upload the work you'd like feedback on before submitting this request.");
+                return View(viewModel);
+            }
+        }
+
+        // Validate actual files before any database writes
+        if (viewModel.UploadedFileData != null && viewModel.UploadedFileData.Count > 0)
+        {
+            try
+            {
+                _orderAttachmentService.ValidateFiles(viewModel.UploadedFileData);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                _logger.LogWarning("File validation failed for order creation: {Message}", ex.Message);
                 return View(viewModel);
             }
         }
@@ -541,6 +556,35 @@ namespace ScholarRescue.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+            // Pre-flight: enforce draft upload for non-draft orders that require it.
+            // Draft orders (SaveAsDraft) are allowed to be incomplete.
+            if (!model.SaveAsDraft &&
+                (model.RequestType == RequestType.DraftFeedback ||
+                 model.RequestType == RequestType.ProofreadingOwnWork))
+            {
+                if (model.UploadedFileData == null || model.UploadedFileData.Count == 0)
+                {
+                    ModelState.AddModelError(nameof(model.UploadedFileData),
+                        "Please upload the work you'd like feedback on before submitting this request.");
+                    return View(model);
+                }
+            }
+
+            // Validate actual files before any database writes (account / order)
+            if (model.UploadedFileData != null && model.UploadedFileData.Count > 0)
+            {
+                try
+                {
+                    _orderAttachmentService.ValidateFiles(model.UploadedFileData);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                    _logger.LogWarning("Guest file validation failed: {Message}", ex.Message);
+                    return View(model);
+                }
+            }
+
             try
             {
                 // Check for duplicate email
@@ -641,6 +685,18 @@ namespace ScholarRescue.Controllers
                 });
 
                 await _context.SaveChangesAsync();
+
+                // Save uploaded attachments (if any)
+                if (model.UploadedFileData != null && model.UploadedFileData.Count > 0)
+                {
+                    var purpose = (model.RequestType == RequestType.DraftFeedback ||
+                                   model.RequestType == RequestType.ProofreadingOwnWork)
+                        ? AttachmentPurpose.StudentDraft
+                        : AttachmentPurpose.SupportingMaterial;
+
+                    await _orderAttachmentService.SaveAttachmentsAsync(
+                        order.Id, model.UploadedFileData, purpose, user.Id);
+                }
 
                 // 3. Log the user in automatically
                 await _signInManager.SignInAsync(user, isPersistent: true);

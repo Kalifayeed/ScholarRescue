@@ -90,8 +90,10 @@ namespace ScholarRescue.Services
         /// Throws <see cref="InvalidOperationException"/> on first failure,
         /// identifying which file failed and why.
         /// </summary>
-        private static void ValidateFiles(List<IFormFile> files)
+        public void ValidateFiles(List<IFormFile> files)
         {
+            if (files == null) throw new InvalidOperationException("No files were provided.");
+
             if (files.Count > OrderAttachmentValidation.MaxFilesPerOrder)
             {
                 throw new InvalidOperationException(

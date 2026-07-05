@@ -10,9 +10,17 @@ namespace ScholarRescue.Services
     public interface IOrderAttachmentService
     {
         /// <summary>
-        /// Validates, saves to disk, and creates <see cref="OrderAttachment"/> rows.
-        /// Validates all files upfront before writing any — no partial saves.
-        /// Returns the list of created attachments. Throws on validation failure.
+        /// Validates a list of uploaded files against extension, size, and count rules.
+        /// Throws <see cref="InvalidOperationException"/> on the first failure.
+        /// Use this before creating any database records to avoid partial persistence.
+        /// </summary>
+        /// <param name="files">The uploaded file data from the form.</param>
+        void ValidateFiles(List<IFormFile> files);
+
+        /// <summary>
+        /// Assumes <see cref="ValidateFiles"/> has already passed (or no files provided).
+        /// Saves to disk and creates <see cref="OrderAttachment"/> rows.
+        /// Returns the list of created attachments.
         /// </summary>
         /// <param name="orderId">The order to attach files to.</param>
         /// <param name="files">The uploaded file data from the form.</param>

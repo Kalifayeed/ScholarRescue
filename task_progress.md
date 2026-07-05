@@ -1,16 +1,11 @@
-# Phase 1 Corrective Fix — Wire Up Real Attachment Persistence
+# Phase 1 Corrective Fix — Round 2
 
 ## Checklist
 
-- [ ] 1. Create shared `OrderAttachmentValidation` constants
-- [ ] 2. Add `UploadedFileData` to `CreateOrderViewModel`
-- [ ] 3. Add `UploadedFileData` to `GuestOrderViewModel`
-- [ ] 4. Create `IOrderAttachmentService` / `OrderAttachmentService`
-- [ ] 5. Update `OrdersController.Create()` — persist real files, use real validation
-- [ ] 6. Update `OrdersController.GuestCreate()` — same treatment
-- [ ] 7. Update `Views/Orders/Create.cshtml` — fix file input name, add client-side guard
-- [ ] 8. Update `Views/Orders/GuestCreate.cshtml` — add file upload widget if needed
-- [ ] 9. Add grandfathering constant to `OrderAssignmentService`
-- [ ] 10. Register service in `Program.cs`
-- [ ] 11. Build and verify
-- [ ] 12. Commit and push
+- [ ] 1. Add `ValidateFiles` to `IOrderAttachmentService` interface
+- [ ] 2. Extract `ValidateFiles` as public method in `OrderAttachmentService`
+- [ ] 3. Fix `Create()`: check `UploadedFileData`, validate before DB writes
+- [ ] 4. Wire `GuestCreate()`: pre-flight check, validate before account creation, save attachments
+- [ ] 5. Add file upload widget + conditional JS to `GuestCreate.cshtml`
+- [ ] 6. Build and verify
+- [ ] 7. Commit and push
