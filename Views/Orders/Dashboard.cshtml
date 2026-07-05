@@ -237,7 +237,7 @@
             </h1>
             <p class="mb-0 opacity-90">Welcome back! Here's your order overview and quick actions.</p>
         </div>
-        <a asp-action="Create" class="btn btn-new-order btn-lg">
+        <a asp-controller="Orders" asp-action="Create" class="btn btn-new-order btn-lg">
             <i class="bi bi-plus-circle"></i> New Order
         </a>
     </div>
@@ -326,7 +326,7 @@
         <h3 class="section-title"><i class="bi bi-lightning"></i> Quick Actions</h3>
         <div class="row g-3">
             <div class="col-12 col-sm-6 col-lg-3">
-                <a asp-action="Create" class="quick-action-btn text-decoration-none text-dark d-flex flex-column align-items-center">
+                <a asp-controller="Orders" asp-action="Create" class="quick-action-btn text-decoration-none text-dark d-flex flex-column align-items-center">
                     <i class="bi bi-plus-circle-fill action-icon" style="color: #1B365D;"></i>
                     <strong class="d-block mb-1">New Order</strong>
                     <small class="text-muted">Create a new assignment</small>
@@ -377,7 +377,7 @@
                             </div>
                             <h6 class="text-muted">No orders yet</h6>
                             <p class="text-muted small mb-3">Get started by creating your first order</p>
-                            <a asp-action="Create" class="btn btn-primary">Create Your First Order</a>
+                            <a asp-controller="Orders" asp-action="Create" class="btn btn-primary">Create Your First Order</a>
                         </div>
                     }
                     else
