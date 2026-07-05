@@ -256,6 +256,14 @@ namespace ScholarRescue.Models
         [Display(Name = "Escrow Funded Date")]
         public DateTime? EscrowFundedDate { get; set; }
 
+        /// <summary>
+        /// Whether the client chose "Pay Later" at creation.
+        /// When true, the order is posted to the marketplace immediately without payment,
+        /// with an unfunded EscrowAccount in PendingFunding status.
+        /// Payment must be completed before work can be accepted.
+        /// </summary>
+        public bool PaymentDeferred { get; set; }
+
         // ---- Draft & Registration Fields ----
         /// <summary>Whether this order is a draft (not yet submitted for payment).</summary>
         public bool IsDraft { get; set; }

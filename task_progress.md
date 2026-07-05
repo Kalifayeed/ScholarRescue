@@ -1,12 +1,22 @@
-# Phase 2 Implementation Checklist
+# Implementation Progress: Pay Later + Order Editability + Funded→Open Fix
 
-- [x] Read all relevant source files
-- [ ] 1. Add `ReviewedAttachmentId` to `Models/OrderSubmission.cs`
-- [ ] 2. Update `Services/IWorkDeliveryService.cs` - add `reviewedAttachmentId` parameter
-- [ ] 3. Update `Services/WorkDeliveryService.cs` - validation logic for DraftFeedback/ProofreadingOwnWork
-- [ ] 4. Update `ViewModels/Order/OrderWorkspaceViewModel.cs` - add `RequestType`
-- [ ] 5. Update `Controllers/OrdersController.cs` - pass new param + populate RequestType in VM
-- [ ] 6. Update `Views/Orders/Workspace.cshtml` - conditional UI for attachment selector + comments
-- [ ] 7. Create EF Core migration
-- [ ] 8. Update `AI_MEMORY/DATABASE_SCHEMA.md`
-- [ ] 9. Build and verify
+## ✅ Completed
+1. **Models/Order.cs** - Added `PaymentDeferred` property
+2. **Migrations** - Created `AddPaymentDeferred` migration file (applies cleanly to production)
+3. **ViewModels/Order/CreateOrderViewModel.cs** - Added `PayLater` field
+4. **ViewModels/Order/GuestOrderViewModel.cs** - Added `PayLater` field
+5. **Services/Payments/PaystackPaymentService.cs** - Fixed Funded→Open in webhook handler (line 240: `OrderStatus.Funded` → `OrderStatus.Open`), set `PaymentDeferred = false`
+6. **Controllers/PaymentsController.cs** - Fixed Funded→Open in callback handler (line 180), added `IEscrowService` DI, updated `Checkout` to accept deferred orders (can pay when `Status == Open && PaymentDeferred`)
+7. **Services/WorkDeliveryService.cs** - Added funded escrow check in `AcceptWorkAsync` for deferred orders
+
+## ❌ Remaining
+8. **Controllers/OrdersController.cs** - Need to:
+   - Inject `IEscrowService`
+   - Pay Later branch in `Create` POST: set `PaymentDeferred = true`, `Status = Open`, `IsMarketplaceOpen = true`, create escrow in `PendingFunding`, redirect to Details
+   - Pay Later branch in `GuestCreate` POST (same logic)
+   - Fix `Edit` GET: populate `viewModel.RequestType = order.RequestType`, `viewModel.IsRequestTypeLocked = order.Status != OrderStatus.Draft`
+   - Fix `Edit` POST: re-read `Pages`/`Deadline` from DB when not Draft
+9. **ViewModels/Order/OrderDetailsViewModel.cs** - Add `PaymentDeferred` and `HasPendingEscrow` properties
+10. **ViewModels/Order/EditOrderViewModel.cs** - Add `IsPagesLocked`/`IsDeadlineLocked`
+11. **Views** - Create.cshtml, GuestCreate.cshtml, Details.cshtml, Edit.cshtml updates
+12. **Build, verify, commit**

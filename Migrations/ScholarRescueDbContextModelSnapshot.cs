@@ -1605,6 +1605,9 @@ namespace ScholarRescue.Migrations
                     b.Property<DateTime?>("PaymentDate")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<bool>("PaymentDeferred")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("integer");
 

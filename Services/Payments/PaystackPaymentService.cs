@@ -237,7 +237,8 @@ namespace ScholarRescue.Services.Payments
 
                 // Mark payment as paid
                 order.PaymentStatus = OrderPaymentStatus.Paid;
-                order.Status = OrderStatus.Funded;
+                order.PaymentDeferred = false;
+                order.Status = OrderStatus.Open;
                 order.PaymentDate = DateTime.UtcNow;
                 order.EscrowFundedDate = DateTime.UtcNow;
                 order.IsMarketplaceOpen = true;

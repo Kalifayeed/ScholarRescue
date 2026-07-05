@@ -268,6 +268,20 @@ namespace ScholarRescue.Services
                 order.Status != OrderStatus.FinalSubmitted)
                 throw new InvalidOperationException($"Cannot accept work when order status is {order.Status}.");
 
+            // Payment deferral check: if the order was created with Pay Later, escrow must be funded
+            if (order.PaymentDeferred)
+            {
+                var escrow = await _context.Set<EscrowAccount>()
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(e => e.OrderId == orderId);
+
+                if (escrow == null || escrow.Status != EscrowStatus.Funded)
+                {
+                    _logger.LogWarning("Blocked work acceptance on unfunded deferred order {OrderId}", orderId);
+                    throw new InvalidOperationException("Please complete payment before accepting this work.");
+                }
+            }
+
             order.Status = OrderStatus.Completed;
             order.UpdatedAt = DateTime.UtcNow;
             order.CompletedAt = DateTime.UtcNow;

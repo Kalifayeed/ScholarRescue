@@ -23,6 +23,7 @@ namespace ScholarRescue.Controllers
         private readonly ScholarRescueDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IPaystackPaymentService _paystackService;
+        private readonly IEscrowService _escrowService;
         private readonly IConfigurationService _configurationService;
         private readonly INotificationService _notificationService;
         private readonly ILogger<PaymentsController> _logger;
@@ -31,6 +32,7 @@ namespace ScholarRescue.Controllers
             ScholarRescueDbContext context,
             UserManager<ApplicationUser> userManager,
             IPaystackPaymentService paystackService,
+            IEscrowService escrowService,
             IConfigurationService configurationService,
             INotificationService notificationService,
             ILogger<PaymentsController> logger)
@@ -38,6 +40,7 @@ namespace ScholarRescue.Controllers
             _context = context;
             _userManager = userManager;
             _paystackService = paystackService;
+            _escrowService = escrowService;
             _configurationService = configurationService;
             _notificationService = notificationService;
             _logger = logger;
@@ -61,9 +64,13 @@ namespace ScholarRescue.Controllers
 
                 if (order == null) return NotFound();
 
-                if (order.Status != OrderStatus.PendingPayment)
+                // Accept orders that are PendingPayment (Pay Now) or Open with PaymentDeferred (Pay Later)
+                bool canPay = (order.Status == OrderStatus.PendingPayment) ||
+                             (order.Status == OrderStatus.Open && order.PaymentDeferred);
+
+                if (!canPay)
                 {
-                    TempData["ErrorMessage"] = "This order has already been processed.";
+                    TempData["ErrorMessage"] = "This order cannot be processed for payment at this time.";
                     return RedirectToAction("Index", "Orders");
                 }
 
@@ -177,7 +184,8 @@ namespace ScholarRescue.Controllers
 
                 // Mark payment as paid
                 order.PaymentStatus = OrderPaymentStatus.Paid;
-                order.Status = OrderStatus.Funded;
+                order.PaymentDeferred = false;
+                order.Status = OrderStatus.Open;
                 order.PaymentDate = DateTime.UtcNow;
                 order.EscrowFundedDate = DateTime.UtcNow;
                 order.IsMarketplaceOpen = true;

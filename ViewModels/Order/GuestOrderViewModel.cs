@@ -92,5 +92,12 @@ namespace ScholarRescue.ViewModels.Order
         /// Actual file data uploaded by the client. Bound by MVC model binding from the file input.
         /// </summary>
         public List<IFormFile>? UploadedFileData { get; set; }
+
+        /// <summary>
+        /// Whether payment is deferred. When true, the order is posted immediately 
+        /// to the marketplace without payment. Default false (Pay Now).
+        /// </summary>
+        [Display(Name = "Payment Timing")]
+        public bool PayLater { get; set; }
     }
 }
