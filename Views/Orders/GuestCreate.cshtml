@@ -1,4 +1,5 @@
 @model ScholarRescue.ViewModels.Order.GuestOrderViewModel
+@using ScholarRescue.Models.Enums
 @{
     ViewData["Title"] = "Place Your Order";
     Layout = "_Layout.Public";
@@ -12,6 +13,8 @@
 
             <form asp-action="GuestCreate" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                 <!-- Step 1: Account Details -->
                 <div class="card shadow-sm mb-4">
@@ -60,7 +63,30 @@
                 <!-- Step 2: Order Details -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">2. Order Details</h5>
+                        <h5 class="mb-0">2. What type of support do you need?</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="RequestType" class="form-label fw-semibold"></label>
+                                <select asp-for="RequestType" class="form-select" id="requestTypeSelect"
+                                        asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.RequestType>()">
+                                    <option value="">-- Select Request Type --</option>
+                                </select>
+                                <span asp-validation-for="RequestType" class="text-danger small"></span>
+                                <div id="requestTypeHelp" class="form-text mt-1">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span id="requestTypeHelpText">Select the type of support you need. For draft feedback or proofreading, you'll need to upload your work.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Assignment Details -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">3. Assignment Details</h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -74,6 +100,20 @@
                                 <textarea asp-for="Description" class="form-control" rows="5" placeholder="Provide detailed instructions for your order..."></textarea>
                                 <span asp-validation-for="Description" class="text-danger small"></span>
                             </div>
+
+                            <!-- File Upload -->
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Upload Your Work <span id="uploadRequiredIndicator" class="text-danger d-none">(required)</span></label>
+                                <div class="upload-area border rounded-3 p-3 text-center" id="uploadArea" style="border:2px dashed #ccc;cursor:pointer;">
+                                    <i class="bi bi-cloud-upload fs-1 text-muted"></i>
+                                    <p class="mb-1 mt-2 fw-medium">Drag & drop files here or click to browse</p>
+                                    <small class="text-muted">PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, RAR, JPG, JPEG, PNG (Max 25MB each, up to 10 files)</small>
+                                    <input type="file" id="fileInput" name="UploadedFileData" class="d-none" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.jpg,.jpeg,.png" />
+                                </div>
+                                <div id="fileList" class="mt-2"></div>
+                                <small id="uploadHelpText" class="text-muted">Upload your assignment instructions, rubric, or any reference materials</small>
+                            </div>
+
                             <div class="col-md-6">
                                 <label asp-for="Subject" class="form-label"></label>
                                 <input asp-for="Subject" class="form-control" placeholder="e.g., Nursing, History, Engineering" />
@@ -91,10 +131,11 @@
                                         asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.CitationFormat>()">
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3" id="pagesFieldGroup">
                                 <label asp-for="Pages" class="form-label"></label>
-                                <input asp-for="Pages" class="form-control" type="number" min="1" />
+                                <input asp-for="Pages" class="form-control" id="pages" type="number" min="1" />
                                 <span asp-validation-for="Pages" class="text-danger small"></span>
+                                <small class="text-muted">Pages in your existing draft</small>
                             </div>
                             <div class="col-md-3">
                                 <label asp-for="NumberOfSources" class="form-label"></label>
@@ -113,8 +154,8 @@
                 <!-- Submit -->
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="form-check">
-                        <input asp-for="SaveAsDraft" class="form-check-input" />
-                        <label asp-for="SaveAsDraft" class="form-check-label">Save as draft (pay later)</label>
+                        <input asp-for="SaveAsDraft" class="form-check-input" id="saveAsDraftCheckbox" />
+                        <label asp-for="SaveAsDraft" class="form-check-label">Save as draft (pay later) — file upload not required</label>
                     </div>
                     <button type="submit" class="btn btn-primary btn-lg px-5">
                         <i class="bi bi-send-fill"></i> Submit Order
@@ -134,4 +175,135 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // ============================================================
+        // GUEST ORDER CREATION – FILE UPLOAD & REQUEST TYPE UI
+        // Mirrors Create.cshtml's behavior for consistency.
+        // ============================================================
+
+        var REQUEST_TYPE_NAMES = {
+            'DraftFeedback': 'Draft Feedback',
+            'ConceptExplanation': 'Concept Explanation',
+            'ProofreadingOwnWork': 'Proofreading (Own Work)',
+            'LiveTutoringSession': 'Live Tutoring Session'
+        };
+
+        var uploadedFiles = [];
+
+        // ---- Check if request type requires a draft upload ----
+        function requiresDraftAttachment() {
+            var rt = document.getElementById('requestTypeSelect').value;
+            return rt === 'DraftFeedback' || rt === 'ProofreadingOwnWork';
+        }
+
+        // ---- Check if request type is concept/tutoring (no draft needed) ----
+        function isNoDraftType() {
+            var rt = document.getElementById('requestTypeSelect').value;
+            return rt === 'ConceptExplanation' || rt === 'LiveTutoringSession';
+        }
+
+        // ---- Check if SaveAsDraft is checked (exempts upload requirement) ----
+        function isSaveAsDraft() {
+            var cb = document.getElementById('saveAsDraftCheckbox');
+            return cb && cb.checked;
+        }
+
+        // ---- Update form visibility based on RequestType and SaveAsDraft ----
+        function updateRequestTypeUI() {
+            var rt = document.getElementById('requestTypeSelect').value;
+            var needsDraft = requiresDraftAttachment();
+            var noDraftNeeded = isNoDraftType();
+            var savingAsDraft = isSaveAsDraft();
+
+            // Update help text
+            var helpTexts = {
+                'DraftFeedback': 'You will upload a draft you have written and receive expert feedback on it.',
+                'ConceptExplanation': 'Get a clear explanation of a concept or topic. No draft required.',
+                'ProofreadingOwnWork': 'You will upload a completed piece you wrote for proofreading and polishing.',
+                'LiveTutoringSession': 'Schedule a live session with a tutor. No files needed.'
+            };
+            document.getElementById('requestTypeHelpText').textContent = helpTexts[rt] || 'Select the type of support you need. For draft feedback or proofreading, you will need to upload your work.';
+
+            // Show/hide the draft upload required indicator
+            var uploadIndicator = document.getElementById('uploadRequiredIndicator');
+            if (needsDraft && !savingAsDraft) {
+                uploadIndicator.classList.remove('d-none');
+                document.getElementById('uploadHelpText').textContent = 'Upload your draft or work (required for this request type)';
+            } else {
+                uploadIndicator.classList.add('d-none');
+                if (noDraftNeeded) {
+                    document.getElementById('uploadHelpText').textContent = 'Upload any reference materials (optional)';
+                } else if (savingAsDraft) {
+                    document.getElementById('uploadHelpText').textContent = 'Upload your draft or work (not required when saving as draft)';
+                } else {
+                    document.getElementById('uploadHelpText').textContent = 'Upload your assignment instructions, rubric, or any reference materials';
+                }
+            }
+
+            // Show/hide pages field
+            var pagesGroup = document.getElementById('pagesFieldGroup');
+            if (noDraftNeeded) {
+                pagesGroup.style.display = 'none';
+            } else {
+                pagesGroup.style.display = 'block';
+            }
+        }
+
+        // ---- FILE UPLOAD (mirrors Create.cshtml) ----
+        function handleFiles(files) {
+            var maxSize = 25 * 1024 * 1024;
+            var allowed = ['.pdf','.doc','.docx','.ppt','.pptx','.xls','.xlsx','.txt','.zip','.rar','.jpg','.jpeg','.png'];
+            for (var i = 0; i < files.length; i++) {
+                var f = files[i];
+                var ext = '.' + f.name.split('.').pop().toLowerCase();
+                if (allowed.indexOf(ext) === -1) { alert('File type ' + ext + ' not supported.'); continue; }
+                if (f.size > maxSize) { alert('File "' + f.name + '" exceeds 25MB.'); continue; }
+                if (uploadedFiles.length >= 10) { alert('Max 10 files.'); break; }
+                uploadedFiles.push({ name: f.name, size: f.size });
+            }
+            renderFileList();
+        }
+        function removeFile(i) { uploadedFiles.splice(i,1); renderFileList(); }
+        function renderFileList() {
+            var c = document.getElementById('fileList');
+            if (!uploadedFiles.length) { c.innerHTML = ''; return; }
+            var html = '<div class="list-group">';
+            for (var i = 0; i < uploadedFiles.length; i++) {
+                var f = uploadedFiles[i];
+                var s = f.size > 1048576 ? (f.size/1048576).toFixed(1)+' MB' : (f.size/1024).toFixed(0)+' KB';
+                html += '<div class="list-group-item d-flex justify-content-between align-items-center py-2"><span><i class="bi bi-file-earmark me-2"></i>' + f.name + ' <small class="text-muted">(' + s + ')</small></span><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile(' + i + ')"><i class="bi bi-trash"></i></button></div>';
+            }
+            html += '</div>';
+            c.innerHTML = html;
+        }
+
+        // ---- INIT ----
+        document.addEventListener('DOMContentLoaded', function () {
+            // Request Type change
+            var rt = document.getElementById('requestTypeSelect');
+            if (rt) {
+                rt.addEventListener('change', updateRequestTypeUI);
+            }
+
+            // SaveAsDraft change — re-evaluate upload requirement
+            var saveCheckbox = document.getElementById('saveAsDraftCheckbox');
+            if (saveCheckbox) {
+                saveCheckbox.addEventListener('change', updateRequestTypeUI);
+            }
+
+            // File upload
+            var ua = document.getElementById('uploadArea');
+            var fi = document.getElementById('fileInput');
+            if (ua && fi) {
+                ua.addEventListener('click', function () { fi.click(); });
+                ua.addEventListener('dragover', function (e) { e.preventDefault(); ua.style.borderColor = '#0d6efd'; });
+                ua.addEventListener('dragleave', function () { ua.style.borderColor = '#ccc'; });
+                ua.addEventListener('drop', function (e) { e.preventDefault(); ua.style.borderColor = '#ccc'; handleFiles(e.dataTransfer.files); });
+                fi.addEventListener('change', function () { handleFiles(this.files); this.value = ''; });
+            }
+
+            // Initial UI state
+            updateRequestTypeUI();
+        });
+    </script>
 }
