@@ -2180,6 +2180,9 @@ namespace ScholarRescue.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ReviewedAttachmentId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("SubmissionType")
                         .HasColumnType("integer");
 
@@ -2196,6 +2199,8 @@ namespace ScholarRescue.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("ReviewedAttachmentId");
 
                     b.HasIndex("WriterId");
 
@@ -4438,6 +4443,10 @@ namespace ScholarRescue.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ScholarRescue.Models.OrderAttachment", "ReviewedAttachment")
+                        .WithMany()
+                        .HasForeignKey("ReviewedAttachmentId");
+
                     b.HasOne("ScholarRescue.Models.ApplicationUser", "Writer")
                         .WithMany()
                         .HasForeignKey("WriterId")
@@ -4445,6 +4454,8 @@ namespace ScholarRescue.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
+
+                    b.Navigation("ReviewedAttachment");
 
                     b.Navigation("Writer");
                 });
