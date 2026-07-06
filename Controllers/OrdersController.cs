@@ -30,6 +30,7 @@ namespace ScholarRescue.Controllers
         private readonly IWorkDeliveryService _workDeliveryService;
         private readonly INotificationService _notificationService;
         private readonly IOrderAttachmentService _orderAttachmentService;
+        private readonly IEscrowService _escrowService;
 
         public OrdersController(
             ScholarRescueDbContext context,
@@ -42,7 +43,8 @@ namespace ScholarRescue.Controllers
             SignInManager<ApplicationUser> signInManager,
             IWorkDeliveryService workDeliveryService,
             INotificationService notificationService,
-            IOrderAttachmentService orderAttachmentService)
+            IOrderAttachmentService orderAttachmentService,
+            IEscrowService escrowService)
         {
             _context = context;
             _userManager = userManager;
@@ -55,6 +57,7 @@ namespace ScholarRescue.Controllers
             _workDeliveryService = workDeliveryService;
             _notificationService = notificationService;
             _orderAttachmentService = orderAttachmentService;
+            _escrowService = escrowService;
         }
 
         [HttpGet]
@@ -321,6 +324,39 @@ namespace ScholarRescue.Controllers
                         order.Id, viewModel.UploadedFileData, purpose, currentUser.Id);
                 }
 
+                if (viewModel.PayLater)
+                {
+                    // Pay Later: post immediately to marketplace with unfunded escrow
+                    order.PaymentDeferred = true;
+                    order.Status = OrderStatus.Open;
+                    order.IsMarketplaceOpen = true;
+                    await _escrowService.CreateEscrowAsync(order.Id, currentUser.Id);
+
+                    // Update history/audit for deferred payment
+                    _context.OrderHistories.Add(new OrderHistory
+                    {
+                        OrderId = order.Id,
+                        OldStatus = OrderStatus.PendingPayment,
+                        NewStatus = OrderStatus.Open,
+                        ChangedById = currentUser.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        Notes = "Order created with deferred payment. Escrow pending funding."
+                    });
+                    _context.AuditLogs.Add(new AuditLog
+                    {
+                        Action = "Order Created (Pay Later)",
+                        PerformedById = currentUser.Id,
+                        TargetUserId = currentUser.Id,
+                        Description = $"Order {orderNumber} created with deferred payment, posted to marketplace.",
+                        CreatedDate = DateTime.UtcNow
+                    });
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation("Order {OrderNumber} created with Pay Later.", orderNumber);
+                    TempData["SuccessMessage"] = "Order created successfully! Writers can now view and apply to your order. Remember to complete payment before work is finalized.";
+                    return RedirectToAction(nameof(Details), new { id = order.Id });
+                }
+
                 _logger.LogInformation("Order {OrderNumber} created, redirecting to payment.", orderNumber);
 
                 return RedirectToAction("Checkout", "Payments", new { orderId = order.Id });
@@ -354,6 +390,8 @@ namespace ScholarRescue.Controllers
                 {
                     Id = order.Id,
                     OrderNumber = order.OrderNumber,
+                    RequestType = order.RequestType,
+                    IsRequestTypeLocked = order.Status != OrderStatus.Draft,
                     Title = order.Title,
                     Description = order.Description,
                     Subject = order.Subject,
@@ -403,15 +441,21 @@ namespace ScholarRescue.Controllers
                 order.Subject = viewModel.Subject;
                 order.AcademicLevel = viewModel.AcademicLevel;
                 order.CitationFormat = viewModel.CitationFormat;
-                order.Deadline = viewModel.Deadline;
-                order.Pages = viewModel.Pages;
                 order.NumberOfSources = viewModel.NumberOfSources;
-                int editPages = viewModel.Pages ?? 1;
-                order.WordCount = _pricingService.CalculateWordCount(editPages);
-                order.Budget = _pricingService.CalculatePrice(viewModel.AcademicLevel, editPages, viewModel.Deadline);
-                var commissionRateForEdit = await _configurationService.GetCommissionRateAsync();
-                order.CommissionAmount = Math.Round(order.Budget * commissionRateForEdit, 2);
-                order.WriterEarnings = order.Budget - order.CommissionAmount;
+
+                // Lock Pages/Deadline once order leaves Draft — re-read DB values, don't trust form
+                if (order.Status == OrderStatus.Draft)
+                {
+                    order.Pages = viewModel.Pages;
+                    order.Deadline = viewModel.Deadline;
+                    int editPages = viewModel.Pages ?? 1;
+                    order.WordCount = _pricingService.CalculateWordCount(editPages);
+                    order.Budget = _pricingService.CalculatePrice(viewModel.AcademicLevel, editPages, viewModel.Deadline);
+                    var commissionRateForEdit = await _configurationService.GetCommissionRateAsync();
+                    order.CommissionAmount = Math.Round(order.Budget * commissionRateForEdit, 2);
+                    order.WriterEarnings = order.Budget - order.CommissionAmount;
+                }
+
                 order.UpdatedAt = DateTime.UtcNow;
 
                 if (User.IsInRole(RoleNames.Administrator))
