@@ -20,6 +20,18 @@ BACKUP_BASE="/var/backups/scholarrescue"
 SERVICE="scholarrescue"
 HEALTH_URL="http://localhost:5000/health"
 
+# ═══════════════════════════════════════════════════════════════
+# DATABASE CREDENTIALS (LIVE WEBSITE)
+# ═══════════════════════════════════════════════════════════════
+# The live website database uses:
+#   Database=scholarrescue
+#   Username=scholarrescue_user
+#
+# The 'postgres' user is the default PostgreSQL superuser and
+# does NOT point to the live website. NEVER use postgres user
+# for production operations.
+# ═══════════════════════════════════════════════════════════════
+
 # Allow the connection string to be overridden via environment or passed inline
 MIGRATION_CONNECTION="${ConnectionStrings__DefaultConnection:-}"
 
@@ -43,7 +55,29 @@ fi
 if [ -z "$MIGRATION_CONNECTION" ]; then
     echo "FATAL: ConnectionStrings__DefaultConnection is not set."
     echo "       Export it before running this script, e.g.:"
-    echo "       export ConnectionStrings__DefaultConnection='Host=...;Database=...;Username=...;Password=...'"
+    echo "       export ConnectionStrings__DefaultConnection='Host=localhost;Port=5432;Database=scholarrescue;Username=scholarrescue_user;Password=...'"
+    echo ""
+    echo "       WARNING: Use scholarrescue_user, NOT postgres!"
+    exit 1
+fi
+
+# ═══════════════════════════════════════════════════════════════
+# Validate database user — reject 'postgres' in production
+# ═══════════════════════════════════════════════════════════════
+if echo "$MIGRATION_CONNECTION" | grep -qi "Username=postgres" || echo "$MIGRATION_CONNECTION" | grep -qi "User Id=postgres"; then
+    echo ""
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "FATAL: Connection string uses Username=postgres!"
+    echo ""
+    echo "The 'postgres' user is the default PostgreSQL superuser account."
+    echo "It does NOT point to the live website database."
+    echo ""
+    echo "The correct database credentials are:"
+    echo "  Database=scholarrescue"
+    echo "  Username=scholarrescue_user"
+    echo ""
+    echo "Set ConnectionStrings__DefaultConnection to the correct value before deploying."
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     exit 1
 fi
 

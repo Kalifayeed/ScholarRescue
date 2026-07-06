@@ -5,6 +5,16 @@
 ### Migration Pending for Phase 5B
 `OrderSubmissions` and `RevisionRequests` tables are registered in DbContext but no EF Core migration has been created yet. Need to run `dotnet ef migrations add AddWorkDeliveryTables` when the database is available.
 
+## CRITICAL: Database Connection Credentials
+- **Status**: RESOLVED (guards added to prevent recurrence)
+- **Problem**: The `ConnectionStrings__DefaultConnection` environment variable was set with `Username=postgres` instead of `Username=scholarrescue_user`. The `postgres` user is the default PostgreSQL superuser and does NOT point to the live website database. The correct credentials are: `Database=scholarrescue; Username=scholarrescue_user`.
+- **Fix Applied**:
+  1. **Program.cs**: Added startup validation that rejects non-`scholarrescue_user` usernames in Production/Staging environments. The app will fail-fast with a clear error message if the wrong user is used.
+  2. **Deployment/deploy-remote.sh**: Added pre-deploy check that rejects connection strings containing `Username=postgres` or `User Id=postgres`.
+  3. **Deployment/fix-db-connection.sh**: Updated with clear documentation about which credentials are correct.
+- **Future implementations**: Always use `scholarrescue_user` for the live database. Never use `postgres` for production operations.
+- **To verify**: Run `echo $ConnectionStrings__DefaultConnection` and check that `Username` is `scholarrescue_user` (not `postgres`).
+
 ## Non-Critical
 
 ### WriterApplicationDetails View Uses Legacy Fields

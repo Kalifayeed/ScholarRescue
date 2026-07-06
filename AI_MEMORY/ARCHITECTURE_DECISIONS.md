@@ -1,5 +1,22 @@
 # ARCHITECTURE_DECISIONS
 
+## Database Connection Architecture
+
+### Decision: Environment Variable-Only Connection Strings
+- **Context**: Connection strings are never stored in `appsettings.json` or any file committed to the repository.
+- **Decision**: The `ConnectionStrings__DefaultConnection` environment variable is the single source of truth for the database connection in production and staging.
+- **Rationale**: Keeps credentials out of source control, enables different databases per environment, and simplifies rotation of passwords.
+- **Configuration loading order** (Program.cs):
+  1. `appsettings.json` (base, no secrets)
+  2. `appsettings.{Environment}.json` (environment-specific, no secrets)
+  3. Environment variables (the ONLY place for secrets)
+
+### Decision: Database Credentials Validation
+- **Context**: Three major recent implementations were applied to the wrong database because the environment variable was set with `Username=postgres` instead of `Username=scholarrescue_user`.
+- **Decision**: Added startup validation in `Program.cs` that rejects non-`scholarrescue_user` usernames in non-Development environments. This ensures the application will fail-fast with a clear error message if configured against the wrong database.
+- **Correct credentials**: `Host=localhost;Port=5432;Database=scholarrescue;Username=scholarrescue_user;Password=...`
+- **See also**: `Deployment/fix-db-connection.sh` for the systemd override file.
+
 ## Key Design Decisions
 
 ### Service Layer Pattern
