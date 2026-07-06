@@ -16,6 +16,7 @@ namespace ScholarRescue.Controllers
     /// Writer dashboard stays at /Writers/Dashboard.
     /// Admin dashboard stays at /Admin/Dashboard.
     /// </summary>
+    [Route("Dashboard")]
     public class DashboardController : Controller
     {
         private readonly ScholarRescueDbContext _context;
@@ -37,6 +38,7 @@ namespace ScholarRescue.Controllers
         /// Route: GET /Dashboard
         /// </summary>
         [HttpGet]
+        [HttpGet("Index")]
         [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Index()
         {
@@ -96,7 +98,7 @@ namespace ScholarRescue.Controllers
         /// Compatibility redirect for dashboard links that resolve to /Dashboard/Create.
         /// The order form is owned by OrdersController.
         /// </summary>
-        [HttpGet]
+        [HttpGet("Create")]
         [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
         public IActionResult Create()
         {

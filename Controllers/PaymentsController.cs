@@ -104,7 +104,11 @@ namespace ScholarRescue.Controllers
 
                 if (order == null) return NotFound();
 
-                if (order.PaymentStatus != OrderPaymentStatus.PendingPayment)
+                // Allow payment for PendingPayment orders (Pay Now) or Open+PaymentDeferred orders (Pay Later)
+                bool canPay = (order.PaymentStatus == OrderPaymentStatus.PendingPayment) ||
+                             (order.Status == OrderStatus.Open && order.PaymentDeferred);
+
+                if (!canPay)
                 {
                     TempData["ErrorMessage"] = "This order has already been processed.";
                     return RedirectToAction("Index", "Orders");

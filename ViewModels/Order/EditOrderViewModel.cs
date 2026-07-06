@@ -86,5 +86,11 @@ namespace ScholarRescue.ViewModels.Order
 
         /// <summary>Whether the request type is locked (order has left Draft status).</summary>
         public bool IsRequestTypeLocked { get; set; }
+
+        /// <summary>
+        /// Whether Pages and Deadline are locked (order has left Draft status).
+        /// These fields drive automatic repricing; they cannot be changed after posting.
+        /// </summary>
+        public bool IsPagesLocked { get; set; }
     }
 }
