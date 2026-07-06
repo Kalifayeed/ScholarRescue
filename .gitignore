@@ -26,5 +26,3 @@ Desktop.ini
 # NuGet
 packages/
 
-# Entity Framework
-Migrations/*.Designer.cs
