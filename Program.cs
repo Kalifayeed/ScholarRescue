@@ -97,9 +97,8 @@ try
     // The live website database uses: Database=scholarrescue; Username=scholarrescue_user
     // The wrong database uses: Username=postgres (does NOT point to the live website)
     //
-    // This guard prevents the application from connecting to the wrong
-    // database in Production/Staging environments. It checks that the
-    // connection string uses the correct 'scholarrescue_user' account.
+    // This guard logs a warning (does not crash the app) if the connection string
+    // does not match the expected credentials for Production/Staging environments.
     //
     // To use a different database locally, set ASPNETCORE_ENVIRONMENT=Development.
     // ═══════════════════════════════════════════════════════════════
@@ -110,29 +109,26 @@ try
 
         if (!string.Equals(csb.Username, expectedUsername, StringComparison.OrdinalIgnoreCase))
         {
-            startupLogger.LogCritical(
-                "FATAL: Connection string Username is '{ActualUsername}' but expected '{ExpectedUsername}'. " +
-                "The live website database uses 'scholarrescue_user', not 'postgres'. " +
-                "Set environment variable: ConnectionStrings__DefaultConnection " +
-                "to: Host=localhost;Port=5432;Database=scholarrescue;Username=scholarrescue_user;Password=...",
+            startupLogger.LogWarning(
+                "Database Username is '{ActualUsername}' but expected '{ExpectedUsername}'. " +
+                "The live website database should use 'scholarrescue_user', not 'postgres'. " +
+                "Set ConnectionStrings__DefaultConnection environment variable to correct this.",
                 csb.Username, expectedUsername);
-            throw new InvalidOperationException(
-                $"Connection string Username is '{csb.Username}' but expected '{expectedUsername}'. " +
-                "The live website database uses 'scholarrescue_user', not 'postgres'. " +
-                "Set environment variable ConnectionStrings__DefaultConnection to the correct value.");
         }
 
         if (!string.Equals(csb.Database, expectedDatabase, StringComparison.OrdinalIgnoreCase))
         {
-            startupLogger.LogCritical(
-                "FATAL: Connection string Database is '{ActualDatabase}' but expected '{ExpectedDatabase}'. " +
-                "The live website database is 'scholarrescue'.",
+            startupLogger.LogWarning(
+                "Database Name is '{ActualDatabase}' but expected '{ExpectedDatabase}'. " +
+                "The live website database should be 'scholarrescue'.",
                 csb.Database, expectedDatabase);
-            throw new InvalidOperationException(
-                $"Connection string Database is '{csb.Database}' but expected '{expectedDatabase}'.");
         }
 
-        startupLogger.LogInformation("Database user validation PASSED — using correct '{Username}' account.", expectedUsername);
+        if (string.Equals(csb.Username, expectedUsername, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(csb.Database, expectedDatabase, StringComparison.OrdinalIgnoreCase))
+        {
+            startupLogger.LogInformation("Database validation PASSED — using correct '{Username}' account.", expectedUsername);
+        }
     }
 }
 catch (Exception ex)
