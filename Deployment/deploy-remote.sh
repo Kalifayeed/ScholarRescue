@@ -15,7 +15,7 @@ set -e
 # ============================================================
 
 DEPLOY_DIR="/var/www/ScholarRescue-v2"
-PUBLISH_DIR="/var/www/ScholarRescue/publish"
+PUBLISH_DIR="/var/www/scholarrescue"
 BACKUP_BASE="/var/backups/scholarrescue"
 SERVICE="scholarrescue"
 HEALTH_URL="http://localhost:5000/health"
