@@ -17,7 +17,6 @@ namespace ScholarRescue.Controllers
     /// Pricing is automatic; clients never enter budgets.
     /// </summary>
     [Authorize]
-    [Route("Orders")]
     public class OrdersController : Controller
     {
         private readonly ScholarRescueDbContext _context;
@@ -31,6 +30,7 @@ namespace ScholarRescue.Controllers
         private readonly IWorkDeliveryService _workDeliveryService;
         private readonly INotificationService _notificationService;
         private readonly IOrderAttachmentService _orderAttachmentService;
+        private readonly IEscrowService _escrowService;
 
         public OrdersController(
             ScholarRescueDbContext context,
@@ -43,7 +43,8 @@ namespace ScholarRescue.Controllers
             SignInManager<ApplicationUser> signInManager,
             IWorkDeliveryService workDeliveryService,
             INotificationService notificationService,
-            IOrderAttachmentService orderAttachmentService)
+            IOrderAttachmentService orderAttachmentService,
+            IEscrowService escrowService)
         {
             _context = context;
             _userManager = userManager;
@@ -56,10 +57,10 @@ namespace ScholarRescue.Controllers
             _workDeliveryService = workDeliveryService;
             _notificationService = notificationService;
             _orderAttachmentService = orderAttachmentService;
+            _escrowService = escrowService;
         }
 
         [HttpGet]
-        [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
             try
@@ -175,7 +176,8 @@ namespace ScholarRescue.Controllers
                     WriterEmail = order.AssignedWriter?.Email,
                     CreatedAt = order.CreatedAt,
                     UpdatedAt = order.UpdatedAt,
-                    CompletedAt = order.CompletedAt
+                    CompletedAt = order.CompletedAt,
+                    PaymentDeferred = order.PaymentDeferred
                 };
 
                 return View(viewModel);
@@ -188,7 +190,7 @@ namespace ScholarRescue.Controllers
             }
         }
 
-    [HttpGet("Create")]
+    [HttpGet]
     [Authorize(Roles = RoleNames.Client + "," + RoleNames.Administrator)]
     public IActionResult Create()
     {
@@ -281,14 +283,66 @@ namespace ScholarRescue.Controllers
                 Status = OrderStatus.PendingPayment,
                 ClientId = currentUser.Id,
                 IsMarketplaceOpen = false,
+                PaymentDeferred = viewModel.PayLater,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
 
-                _context.Orders.Add(order);
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            if (viewModel.PayLater)
+            {
+                // Pay Later: create escrow record, open order to marketplace immediately
+                await _escrowService.CreateEscrowAsync(order.Id, currentUser.Id);
+
+                order.Status = OrderStatus.Open;
+                order.IsMarketplaceOpen = true;
+                order.PaymentDeferred = true;
+                order.UpdatedAt = DateTime.UtcNow;
+
                 await _context.SaveChangesAsync();
 
-                // Order history
+                _context.OrderHistories.Add(new OrderHistory
+                {
+                    OrderId = order.Id,
+                    OldStatus = OrderStatus.PendingPayment,
+                    NewStatus = OrderStatus.Open,
+                    ChangedById = currentUser.Id,
+                    CreatedAt = DateTime.UtcNow,
+                    Notes = "Order created with Pay Later — posted to marketplace immediately"
+                });
+
+                _context.AuditLogs.Add(new AuditLog
+                {
+                    Action = "Order Created (Pay Later)",
+                    PerformedById = currentUser.Id,
+                    TargetUserId = currentUser.Id,
+                    Description = $"Order {orderNumber} created with Pay Later, escrow created, posted to marketplace",
+                    CreatedDate = DateTime.UtcNow
+                });
+
+                await _context.SaveChangesAsync();
+
+                // Save uploaded attachments (if any)
+                if (viewModel.UploadedFileData != null && viewModel.UploadedFileData.Count > 0)
+                {
+                    var purpose = (viewModel.RequestType == RequestType.DraftFeedback ||
+                                   viewModel.RequestType == RequestType.ProofreadingOwnWork)
+                        ? AttachmentPurpose.StudentDraft
+                        : AttachmentPurpose.SupportingMaterial;
+
+                    await _orderAttachmentService.SaveAttachmentsAsync(
+                        order.Id, viewModel.UploadedFileData, purpose, currentUser.Id);
+                }
+
+                _logger.LogInformation("Order {OrderNumber} created with Pay Later, redirecting to details.", orderNumber);
+
+                return RedirectToAction(nameof(Details), new { id = order.Id });
+            }
+            else
+            {
+                // Pay Now (current behavior unchanged)
                 _context.OrderHistories.Add(new OrderHistory
                 {
                     OrderId = order.Id,
@@ -299,7 +353,6 @@ namespace ScholarRescue.Controllers
                     Notes = "Order created, pending payment"
                 });
 
-                // Audit log
                 _context.AuditLogs.Add(new AuditLog
                 {
                     Action = "Order Created (Pending Payment)",
@@ -326,6 +379,7 @@ namespace ScholarRescue.Controllers
                 _logger.LogInformation("Order {OrderNumber} created, redirecting to payment.", orderNumber);
 
                 return RedirectToAction("Checkout", "Payments", new { orderId = order.Id });
+            }
             }
             catch (Exception ex)
             {
@@ -668,6 +722,7 @@ namespace ScholarRescue.Controllers
                     IsMarketplaceOpen = false,
                     IsDraft = model.SaveAsDraft,
                     DraftSavedAt = model.SaveAsDraft ? DateTime.UtcNow : null,
+                    PaymentDeferred = model.PayLater,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -675,26 +730,58 @@ namespace ScholarRescue.Controllers
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
-                // Order history
-                _context.OrderHistories.Add(new OrderHistory
+                if (model.PayLater && !model.SaveAsDraft)
                 {
-                    OrderId = order.Id,
-                    OldStatus = order.Status,
-                    NewStatus = order.Status,
-                    ChangedById = user.Id,
-                    CreatedAt = DateTime.UtcNow,
-                    Notes = model.SaveAsDraft ? "Draft order created" : "Order created via guest flow"
-                });
+                    // Pay Later (not draft): create escrow, open to marketplace
+                    await _escrowService.CreateEscrowAsync(order.Id, user.Id);
 
-                // Audit log
-                _context.AuditLogs.Add(new AuditLog
+                    order.Status = OrderStatus.Open;
+                    order.IsMarketplaceOpen = true;
+                    order.PaymentDeferred = true;
+                    order.UpdatedAt = DateTime.UtcNow;
+
+                    await _context.SaveChangesAsync();
+
+                    _context.OrderHistories.Add(new OrderHistory
+                    {
+                        OrderId = order.Id,
+                        OldStatus = OrderStatus.PendingPayment,
+                        NewStatus = OrderStatus.Open,
+                        ChangedById = user.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        Notes = "Order created via guest flow with Pay Later — posted to marketplace immediately"
+                    });
+
+                    _context.AuditLogs.Add(new AuditLog
+                    {
+                        Action = "Order Created (Guest Pay Later)",
+                        PerformedById = user.Id,
+                        TargetUserId = user.Id,
+                        Description = $"Client registered through order flow. Order {orderNumber} created with Pay Later.",
+                        CreatedDate = DateTime.UtcNow
+                    });
+                }
+                else
                 {
-                    Action = model.SaveAsDraft ? "Draft Created" : "Order Created",
-                    PerformedById = user.Id,
-                    TargetUserId = user.Id,
-                    Description = $"Client registered through order flow. Order {orderNumber} created.",
-                    CreatedDate = DateTime.UtcNow
-                });
+                    _context.OrderHistories.Add(new OrderHistory
+                    {
+                        OrderId = order.Id,
+                        OldStatus = order.Status,
+                        NewStatus = order.Status,
+                        ChangedById = user.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        Notes = model.SaveAsDraft ? "Draft order created" : "Order created via guest flow"
+                    });
+
+                    _context.AuditLogs.Add(new AuditLog
+                    {
+                        Action = model.SaveAsDraft ? "Draft Created" : "Order Created",
+                        PerformedById = user.Id,
+                        TargetUserId = user.Id,
+                        Description = $"Client registered through order flow. Order {orderNumber} created.",
+                        CreatedDate = DateTime.UtcNow
+                    });
+                }
 
                 await _context.SaveChangesAsync();
 
@@ -718,13 +805,19 @@ namespace ScholarRescue.Controllers
 
                 _logger.LogInformation("Guest user {Email} created account and order {OrderNumber}", model.Email, orderNumber);
 
-                TempData["SuccessMessage"] = model.SaveAsDraft
-                    ? "Your draft has been saved. You can resume it anytime from your dashboard."
-                    : "Account created and order placed! Proceed to payment.";
-
                 if (model.SaveAsDraft)
+                {
+                    TempData["SuccessMessage"] = "Your draft has been saved. You can resume it anytime from your dashboard.";
                     return RedirectToAction(nameof(Dashboard));
+                }
 
+                if (model.PayLater)
+                {
+                    TempData["SuccessMessage"] = "Account created and order posted to marketplace! Writers can now view and apply.";
+                    return RedirectToAction(nameof(Details), new { id = order.Id });
+                }
+
+                TempData["SuccessMessage"] = "Account created and order placed! Proceed to payment.";
                 return RedirectToAction("Checkout", "Payments", new { orderId = order.Id });
             }
             catch (Exception ex)

@@ -58,5 +58,10 @@ namespace ScholarRescue.ViewModels.Order
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
+
+        /// <summary>
+        /// Whether payment was deferred (Pay Later). Used to show Pay Now button on Details page.
+        /// </summary>
+        public bool PaymentDeferred { get; set; }
     }
 }
