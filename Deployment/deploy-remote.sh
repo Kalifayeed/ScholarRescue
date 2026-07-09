@@ -10,7 +10,7 @@ set -e
 # Prerequisites (server):
 #   - /var/www/ScholarRescue-v2  — git clone of the repository
 #   - /var/www/ScholarRescue/publish  — current publish output
-#   - dotnet SDK 10, EF Core tools installed
+#   - dotnet SDK 10
 #   - ConnectionStrings__DefaultConnection set as env var or passed below
 # ============================================================
 
@@ -43,7 +43,7 @@ echo "========================================"
 # Step 0: Validate prerequisites
 # --------------------------------------------------
 echo ""
-echo "[0/6] Validating prerequisites..."
+echo "[0/5] Validating prerequisites..."
 
 if [ ! -d "$DEPLOY_DIR" ]; then
     echo "FATAL: Source directory $DEPLOY_DIR does not exist."
@@ -91,7 +91,7 @@ echo "       OK"
 # Step 1: Backup current publish output
 # --------------------------------------------------
 echo ""
-echo "[1/6] Backing up current publish output..."
+echo "[1/5] Backing up current publish output..."
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="${BACKUP_BASE}/rollback_${TIMESTAMP}"
@@ -109,7 +109,7 @@ fi
 # Step 2: Pull latest code from git
 # --------------------------------------------------
 echo ""
-echo "[2/6] Pulling latest code..."
+echo "[2/5] Pulling latest code..."
 
 cd "$DEPLOY_DIR"
 git fetch origin
@@ -122,7 +122,7 @@ echo "       Deployed commit: $DEPLOYED_COMMIT"
 # Step 3: Build and publish
 # --------------------------------------------------
 echo ""
-echo "[3/6] Building and publishing..."
+echo "[3/5] Building and publishing..."
 
 dotnet publish -c Release -r linux-x64 --self-contained false -o "$PUBLISH_DIR"
 BUILD_EXIT=$?
@@ -141,44 +141,20 @@ fi
 echo "       Build succeeded. Output: $PUBLISH_DIR"
 
 # --------------------------------------------------
-# Step 4: Apply pending database migrations
+# Step 4: Restart the service
 # --------------------------------------------------
 echo ""
-echo "[4/6] Applying database migrations..."
-
-cd "$DEPLOY_DIR"
-dotnet ef database update --project . --connection "$MIGRATION_CONNECTION"
-MIGRATE_EXIT=$?
-
-if [ $MIGRATE_EXIT -ne 0 ]; then
-    echo ""
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "DATABASE MIGRATION FAILED (exit code $MIGRATE_EXIT)"
-    echo "The service has NOT been restarted."
-    echo "The new binaries are published but the database"
-    echo "is out of sync. Do NOT restart manually until the"
-    echo "migration issue is resolved."
-    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    exit $MIGRATE_EXIT
-fi
-
-echo "       Migrations applied successfully."
-
-# --------------------------------------------------
-# Step 5: Restart the service
-# --------------------------------------------------
-echo ""
-echo "[5/6] Restarting $SERVICE service..."
+echo "[4/5] Restarting $SERVICE service..."
 
 systemctl restart "$SERVICE"
 echo "       Waiting for service to come up..."
 sleep 5
 
 # --------------------------------------------------
-# Step 6: Smoke test via health endpoint
+# Step 5: Smoke test via health endpoint
 # --------------------------------------------------
 echo ""
-echo "[6/6] Running smoke test (${HEALTH_URL})..."
+echo "[5/5] Running smoke test (${HEALTH_URL})..."
 
 HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 15 "$HEALTH_URL" 2>/dev/null || echo "000")
 
@@ -201,6 +177,7 @@ fi
 
 echo " Deployed commit:    $DEPLOYED_COMMIT"
 echo " Service status:     $(systemctl is-active "$SERVICE")"
+echo " DB migrations:      Applied automatically at app startup"
 echo ""
 echo " For deeper investigation:"
 echo "   journalctl -u $SERVICE -n 200 --no-pager"
