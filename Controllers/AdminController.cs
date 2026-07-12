@@ -1916,6 +1916,21 @@ namespace ScholarRescue.Controllers
                     escrow.UpdatedAt = DateTime.UtcNow;
                 }
 
+                // Create financial transaction record for accounting completeness
+                _context.FinancialTransactions.Add(new FinancialTransaction
+                {
+                    TransactionNumber = $"TXN-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid():N}"[..30],
+                    TransactionType = TransactionType.OrderFunded,
+                    ReferenceId = order.Id,
+                    ReferenceType = "Order",
+                    UserId = order.ClientId,
+                    Description = $"Order {order.OrderNumber} funded (admin marked as paid)",
+                    DebitAmount = 0,
+                    CreditAmount = order.Budget,
+                    BalanceAfter = order.Budget,
+                    CreatedDate = DateTime.UtcNow
+                });
+
                 // Audit log
                 _context.AuditLogs.Add(new AuditLog
                 {
