@@ -271,12 +271,41 @@
                                                 }
                                             </td>
                                             <td><small>@sub.SubmittedAt.ToString("MMM dd, h:mm tt")</small></td>
-                                            <td>
-                                                <a asp-action="DownloadSubmission" asp-route-submissionId="@sub.Id"
-                                                   class="btn btn-sm btn-outline-primary" title="Download">
-                                                    <i class="bi bi-download"></i>
-                                                </a>
-                                            </td>
+                                             <td>
+                                                 @{
+                                                     var isPaid = Model.PaymentStatus == OrderPaymentStatus.Paid;
+                                                     var ext = System.IO.Path.GetExtension(sub.FileName)?.ToLowerInvariant();
+                                                     var isTxt = ext == ".txt";
+                                                 }
+                                                 @if (isAdmin || isWriter || isPaid)
+                                                 {
+                                                     <a asp-action="DownloadSubmission" asp-route-submissionId="@sub.Id"
+                                                        class="btn btn-sm btn-outline-primary" title="Download">
+                                                         <i class="bi bi-download"></i>
+                                                     </a>
+                                                 }
+                                                 else if (isTxt)
+                                                 {
+                                                     <a asp-action="DownloadSubmission" asp-route-submissionId="@sub.Id"
+                                                        class="btn btn-sm btn-outline-warning" title="Download Preview (25%)" aria-label="Download Preview (25%)">
+                                                         <i class="bi bi-file-earmark-text"></i> Preview (25%)
+                                                     </a>
+                                                 }
+                                                 else
+                                                 {
+                                                     <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" title="Full download available after payment">
+                                                         <button class="btn btn-sm btn-outline-secondary" disabled aria-disabled="true">
+                                                             <i class="bi bi-lock-fill"></i>
+                                                         </button>
+                                                     </span>
+                                                     @if (Model.PaymentDeferred)
+                                                     {
+                                                         <a asp-controller="Payments" asp-action="Checkout" asp-route-orderId="@Model.Id" class="btn btn-sm btn-outline-success ms-1">
+                                                             <i class="bi bi-credit-card"></i> Pay Now
+                                                         </a>
+                                                     }
+                                                 }
+                                             </td>
                                         </tr>
                                         @if (!string.IsNullOrWhiteSpace(sub.Comments))
                                         {

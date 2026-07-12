@@ -277,6 +277,13 @@ namespace ScholarRescue.Models
         // ═══════════════════════════════════════════
 
         /// <summary>
+        /// Returns true if the client is allowed to download the full submission file.
+        /// Only paid orders grant full file access to the client.
+        /// Admins and assigned writers bypass this check (enforced separately in controller logic).
+        /// </summary>
+        public bool CanClientAccessFullSubmission => PaymentStatus == OrderPaymentStatus.Paid;
+
+        /// <summary>
         /// Determines whether this order has at least one attachment tagged as StudentDraft,
         /// which is required for DraftFeedback and ProofreadingOwnWork request types.
         /// Returns true if the request type does not require a draft, or if a qualifying attachment exists.

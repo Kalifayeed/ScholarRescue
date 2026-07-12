@@ -159,6 +159,18 @@
                                            class="btn btn-outline-info" title="View Details">
                                             <i class="bi bi-eye"></i>
                                         </a>
+                                        @if (order.PaymentStatus != OrderPaymentStatus.Paid)
+                                        {
+                                            <form asp-action="MarkOrderAsPaid" method="post" style="display:inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="orderId" value="@order.Id" />
+                                                <button type="submit" class="btn btn-outline-success"
+                                                        onclick="return confirm('Mark order @order.OrderNumber as paid? This will also fund the escrow account. This action should only be used when payment has been confirmed outside the platform.');"
+                                                        title="Mark as Paid">
+                                                    <i class="bi bi-currency-dollar"></i>
+                                                </button>
+                                            </form>
+                                        }
                                     </div>
                                 </td>
                             </tr>

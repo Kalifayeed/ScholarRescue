@@ -985,22 +985,8 @@ namespace ScholarRescue.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp with time zone");
 
-            migrationBuilder.AlterColumn<DateTime>(
-                name: "SubmittedAt",
-                table: "ContactMessages",
-                type: "timestamp without time zone",
-                nullable: false,
-                oldClrType: typeof(DateTime),
-                oldType: "timestamp with time zone");
-
-            migrationBuilder.AlterColumn<DateTime>(
-                name: "RespondedAt",
-                table: "ContactMessages",
-                type: "timestamp without time zone",
-                nullable: true,
-                oldClrType: typeof(DateTime),
-                oldType: "timestamp with time zone",
-                oldNullable: true);
+            // ContactMessages table was already created with timestamp without time zone
+            // (migration FixContactMessagesTableMissing), so no ALTER COLUMN needed here.
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LastUpdated",
@@ -2123,23 +2109,7 @@ namespace ScholarRescue.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "timestamp without time zone");
 
-            migrationBuilder.AlterColumn<DateTime>(
-                name: "SubmittedAt",
-                table: "ContactMessages",
-                type: "timestamp with time zone",
-                nullable: false,
-                oldClrType: typeof(DateTime),
-                oldType: "timestamp without time zone");
-
-            migrationBuilder.AlterColumn<DateTime>(
-                name: "RespondedAt",
-                table: "ContactMessages",
-                type: "timestamp with time zone",
-                nullable: true,
-                oldClrType: typeof(DateTime),
-                oldType: "timestamp without time zone",
-                oldNullable: true);
-
+            // No Down() for ContactMessages — they were never altered by Up()
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LastUpdated",
                 table: "ClientRiskProfiles",

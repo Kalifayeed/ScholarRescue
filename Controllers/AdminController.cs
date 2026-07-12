@@ -32,6 +32,7 @@ namespace ScholarRescue.Controllers
         private readonly IWriterCapacityService _writerCapacityService;
         private readonly IWriterMatchingService _writerMatchingService;
         private readonly IAdminDashboardService _adminDashboardService;
+        private readonly IEscrowService _escrowService;
         private readonly ILogger<AdminController> _logger;
 
         public AdminController(
@@ -47,9 +48,11 @@ namespace ScholarRescue.Controllers
             IWriterCapacityService writerCapacityService,
             IWriterMatchingService writerMatchingService,
             IAdminDashboardService adminDashboardService,
+            IEscrowService escrowService,
             ILogger<AdminController> logger)
         {
             _context = context;
+            _escrowService = escrowService;
             _userManager = userManager;
             _roleManager = roleManager;
             _orderAssignmentService = orderAssignmentService;
@@ -1868,6 +1871,73 @@ namespace ScholarRescue.Controllers
 
             TempData["SuccessMessage"] = $"Auto-assignment mode set to {mode}.";
             return RedirectToAction(nameof(Dashboard));
+        }
+
+        /// <summary>
+        /// Admin marks an unpaid order as paid. Updates PaymentStatus and EscrowAccount.
+        /// Restricted to Administrator role by class-level [Authorize].
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkOrderAsPaid(int orderId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            try
+            {
+                var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
+                if (order == null) return NotFound();
+
+                if (order.PaymentStatus == OrderPaymentStatus.Paid)
+                {
+                    TempData["InfoMessage"] = $"Order {order.OrderNumber} is already marked as paid.";
+                    return RedirectToAction(nameof(OrderManagement));
+                }
+
+                order.PaymentStatus = OrderPaymentStatus.Paid;
+                order.PaymentDate = DateTime.UtcNow;
+                order.UpdatedAt = DateTime.UtcNow;
+
+                // Ensure corresponding escrow record exists and is funded
+                var escrow = await _context.Set<EscrowAccount>()
+                    .FirstOrDefaultAsync(e => e.OrderId == order.Id);
+
+                if (escrow == null)
+                {
+                    // No escrow record exists (e.g. Pay Later flow wasn't used) — create one
+                    escrow = await _escrowService.CreateEscrowAsync(order.Id, order.ClientId);
+                }
+
+                if (escrow.Status != EscrowStatus.Funded)
+                {
+                    escrow.Status = EscrowStatus.Funded;
+                    escrow.FundedAmount = escrow.TotalAmount;
+                    escrow.UpdatedAt = DateTime.UtcNow;
+                }
+
+                // Audit log
+                _context.AuditLogs.Add(new AuditLog
+                {
+                    Action = "Order Marked Paid",
+                    PerformedById = currentUser.Id,
+                    TargetUserId = order.ClientId,
+                    Description = $"Admin {currentUser.Email} marked order {order.OrderNumber} as paid. PaymentStatus→Paid, Escrow→Funded.",
+                    CreatedDate = DateTime.UtcNow
+                });
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Admin {AdminId} marked order {OrderId} ({OrderNumber}) as paid.", currentUser.Id, order.Id, order.OrderNumber);
+                TempData["SuccessMessage"] = $"Order {order.OrderNumber} has been marked as paid and escrow funded.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error marking order {OrderId} as paid.", orderId);
+                TempData["ErrorMessage"] = "An error occurred while marking the order as paid.";
+            }
+
+            return RedirectToAction(nameof(OrderManagement));
         }
     }
 }

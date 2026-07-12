@@ -7,6 +7,7 @@ using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
 using ScholarRescue.Models.Security;
 using ScholarRescue.Services;
+using System.Text;
 using ScholarRescue.ViewModels.Order;
 
 namespace ScholarRescue.Controllers
@@ -1047,7 +1048,9 @@ namespace ScholarRescue.Controllers
                     RevisionRequests = revisions,
                     CanSubmitWork = canSubmitWork,
                     CanRequestRevision = canRequestRevision,
-                    CanAcceptWork = canAcceptWork
+                    CanAcceptWork = canAcceptWork,
+                    PaymentStatus = order.PaymentStatus,
+                    PaymentDeferred = order.PaymentDeferred
                 };
 
                 return View(viewModel);
@@ -1217,6 +1220,44 @@ namespace ScholarRescue.Controllers
 
                 if (!isAdmin && !isClient && !isAssignedWriter)
                     return Forbid();
+
+                // Payment gate: client can only download full file if order is paid.
+                // Admins and assigned writers bypass this restriction.
+                if (isClient && !isAdmin && !order.CanClientAccessFullSubmission)
+                {
+                    _logger.LogInformation("Client {UserId} requested download of unpaid submission {SubmissionId} for order {OrderId}. Serving preview/blocked.", currentUser.Id, submissionId, order.Id);
+
+                    var ext = Path.GetExtension(submission.FileName).ToLowerInvariant();
+                    if (ext == ".txt")
+                    {
+                        // Serve a truncated preview (first 25% of lines) with marker
+                        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", submission.FilePath.TrimStart('/'));
+                        string previewContent;
+                        try
+                        {
+                            var allLines = await System.IO.File.ReadAllLinesAsync(fullPath);
+                            var totalLines = allLines.Length;
+                            var previewLineCount = Math.Max(1, (int)Math.Ceiling(totalLines * 0.25));
+                            var previewLines = allLines.Take(previewLineCount).ToArray();
+                            previewContent = string.Join(Environment.NewLine, previewLines)
+                                + Environment.NewLine + Environment.NewLine
+                                + "[... Preview truncated. Complete payment to view the full document ...]";
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Could not read .txt file for preview generation: {FilePath}", fullPath);
+                            TempData["ErrorMessage"] = "Payment is required before this file can be downloaded. Preview is not available for this file type.";
+                            return RedirectToAction(nameof(Workspace), new { id = order.Id });
+                        }
+
+                        var previewBytes = Encoding.UTF8.GetBytes(previewContent);
+                        return File(previewBytes, "text/plain", $"preview_{submission.FileName}");
+                    }
+
+                    // Non-.txt files: redirect with "payment required" message
+                    TempData["ErrorMessage"] = "Payment is required before this file can be downloaded. Preview is not available for this file type.";
+                    return RedirectToAction(nameof(Workspace), new { id = order.Id });
+                }
 
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", submission.FilePath.TrimStart('/'));
                 if (!System.IO.File.Exists(filePath))

@@ -57,5 +57,11 @@ namespace ScholarRescue.ViewModels.Order
 
         /// <summary>Whether the current user can accept work (client with submitted work).</summary>
         public bool CanAcceptWork { get; set; }
+
+        /// <summary>Payment status of the order.</summary>
+        public OrderPaymentStatus PaymentStatus { get; set; }
+
+        /// <summary>Whether the client chose Pay Later.</summary>
+        public bool PaymentDeferred { get; set; }
     }
 }
