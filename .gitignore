@@ -26,3 +26,7 @@ Desktop.ini
 # NuGet
 packages/
 
+# Build output directories
+publish-linux/
+publish/
+
