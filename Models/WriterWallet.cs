@@ -12,7 +12,7 @@ namespace ScholarRescue.Models
         public int Id { get; set; }
 
         [Required]
-        [Display(Name = "Writer")]
+        [Display(Name = "Tutor")]
         public string WriterId { get; set; } = string.Empty;
 
         [ForeignKey(nameof(WriterId))]
@@ -38,7 +38,7 @@ namespace ScholarRescue.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal LifetimeCommissionPaid { get; set; }
 
-        /// <summary>Total amount paid out to this writer over lifetime.</summary>
+        /// <summary>Total amount paid out to this tutor over lifetime.</summary>
         [Display(Name = "Lifetime Payouts")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal LifetimePayouts { get; set; }

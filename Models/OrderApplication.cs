@@ -20,7 +20,7 @@ namespace ScholarRescue.Models
         public virtual TutoringRequest Order { get; set; } = null!;
 
         [Required]
-        [Display(Name = "Writer")]
+        [Display(Name = "Tutor")]
         public string WriterId { get; set; } = string.Empty;
 
         [ForeignKey(nameof(WriterId))]

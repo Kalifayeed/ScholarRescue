@@ -13,7 +13,7 @@ namespace ScholarRescue.Models
         public int Id { get; set; }
 
         [Required]
-        [Display(Name = "Writer")]
+        [Display(Name = "Tutor")]
         public string WriterId { get; set; } = string.Empty;
 
         [ForeignKey(nameof(WriterId))]
