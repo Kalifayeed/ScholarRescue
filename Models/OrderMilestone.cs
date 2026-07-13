@@ -16,7 +16,7 @@ namespace ScholarRescue.Models
         public int OrderId { get; set; }
 
         [ForeignKey(nameof(OrderId))]
-        public virtual Order? Order { get; set; }
+        public virtual TutoringRequest? Order { get; set; }
 
         /// <summary>
         /// Display title, e.g. "Chapter 1-2 Draft" or "Research Section".

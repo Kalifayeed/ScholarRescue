@@ -95,7 +95,7 @@ namespace ScholarRescue.Models
         public string? RegistrationIPAddress { get; set; }
 
         // ---- Navigation Properties ----
-        public virtual ICollection<Order> OrdersAsClient { get; set; } = new List<Order>();
-        public virtual ICollection<Order> OrdersAsWriter { get; set; } = new List<Order>();
+        public virtual ICollection<TutoringRequest> OrdersAsClient { get; set; } = new List<TutoringRequest>();
+        public virtual ICollection<TutoringRequest> OrdersAsWriter { get; set; } = new List<TutoringRequest>();
     }
 }

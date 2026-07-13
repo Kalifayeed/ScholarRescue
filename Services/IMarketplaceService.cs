@@ -29,7 +29,7 @@ namespace ScholarRescue.Services
 
     public class OrderMatch
     {
-        public Order Order { get; set; } = null!;
+        public TutoringRequest Order { get; set; } = null!;
         public int MatchScore { get; set; }
         public bool SubjectMatch { get; set; }
         public bool AcademicLevelMatch { get; set; }

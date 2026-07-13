@@ -2,7 +2,7 @@
 @using ScholarRescue.Models
 @using ScholarRescue.Models.Enums
 @{
-    var order = ViewBag.Order as Order;
+    var order = ViewBag.Order as TutoringRequest;
     string pageRule = ViewBag.PageRule as string ?? "";
     bool isAdmin = ViewBag.IsAdmin as bool? ?? false;
     bool isClient = ViewBag.IsClient as bool? ?? false;

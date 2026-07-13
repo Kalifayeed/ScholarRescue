@@ -19,7 +19,7 @@ namespace ScholarRescue.Models
         public int OrderId { get; set; }
 
         [ForeignKey(nameof(OrderId))]
-        public virtual Order Order { get; set; } = null!;
+        public virtual TutoringRequest Order { get; set; } = null!;
 
         /// <summary>Original file name as uploaded by the user.</summary>
         [Required]

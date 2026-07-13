@@ -15,12 +15,12 @@ namespace ScholarRescue.Services
         /// Lists all orders currently visible in the Available Orders marketplace.
         /// Excludes already-assigned, cancelled, and completed orders.
         /// </summary>
-        Task<List<Order>> GetAvailableOrdersAsync();
+        Task<List<TutoringRequest>> GetAvailableOrdersAsync();
 
         /// <summary>
         /// Lists available orders with filtering and sorting for the marketplace.
         /// </summary>
-        Task<List<Order>> GetAvailableOrdersFilteredAsync(
+        Task<List<TutoringRequest>> GetAvailableOrdersFilteredAsync(
             string? discipline = null,
             AcademicLevel? academicLevel = null,
             int? minPages = null,
@@ -97,7 +97,7 @@ namespace ScholarRescue.Services
             _logger = logger;
         }
 
-        public async Task<List<Order>> GetAvailableOrdersAsync()
+        public async Task<List<TutoringRequest>> GetAvailableOrdersAsync()
         {
             return await _context.Orders
                 .Include(o => o.Client)
@@ -110,7 +110,7 @@ namespace ScholarRescue.Services
                 .ToListAsync();
         }
 
-        public async Task<List<Order>> GetAvailableOrdersFilteredAsync(
+        public async Task<List<TutoringRequest>> GetAvailableOrdersFilteredAsync(
             string? discipline = null,
             AcademicLevel? academicLevel = null,
             int? minPages = null,

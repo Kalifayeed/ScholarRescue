@@ -11,7 +11,7 @@ namespace ScholarRescue.Data
     {
         public ScholarRescueDbContext(DbContextOptions<ScholarRescueDbContext> options) : base(options) { }
 
-        public DbSet<Order> Orders { get; set; }
+        public DbSet<TutoringRequest> Orders { get; set; }
         public DbSet<OrderDocument> OrderDocuments { get; set; }
         public DbSet<OrderNote> OrderNotes { get; set; }
         public DbSet<OrderHistory> OrderHistories { get; set; }
@@ -84,7 +84,7 @@ public DbSet<OrderBid> OrderBids { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<Order>(e => { e.HasIndex(o => o.OrderNumber).IsUnique(); e.HasOne(o => o.Client).WithMany(u => u.OrdersAsClient).HasForeignKey(o => o.ClientId).OnDelete(DeleteBehavior.Restrict); e.HasOne(o => o.AssignedWriter).WithMany(u => u.OrdersAsWriter).HasForeignKey(o => o.AssignedWriterId).OnDelete(DeleteBehavior.SetNull); e.HasOne(o => o.AssignedByAdmin).WithMany().HasForeignKey(o => o.AssignedByAdminId).OnDelete(DeleteBehavior.SetNull); e.HasIndex(o => o.CreatedAt); e.HasIndex(o => o.AssignedWriterId); e.HasIndex(o => o.IsMarketplaceOpen); });
+            builder.Entity<TutoringRequest>(e => { e.ToTable("Orders"); e.HasIndex(o => o.OrderNumber).IsUnique(); e.HasOne(o => o.Client).WithMany(u => u.OrdersAsClient).HasForeignKey(o => o.ClientId).OnDelete(DeleteBehavior.Restrict); e.HasOne(o => o.AssignedWriter).WithMany(u => u.OrdersAsWriter).HasForeignKey(o => o.AssignedWriterId).OnDelete(DeleteBehavior.SetNull); e.HasOne(o => o.AssignedByAdmin).WithMany().HasForeignKey(o => o.AssignedByAdminId).OnDelete(DeleteBehavior.SetNull); e.HasIndex(o => o.CreatedAt); e.HasIndex(o => o.AssignedWriterId); e.HasIndex(o => o.IsMarketplaceOpen); });
             builder.Entity<OrderDocument>(e => { e.HasOne(d => d.Order).WithMany(o => o.Documents).HasForeignKey(d => d.OrderId).OnDelete(DeleteBehavior.Cascade); e.HasOne(d => d.UploadedBy).WithMany().HasForeignKey(d => d.UploadedById).OnDelete(DeleteBehavior.Restrict); });
             builder.Entity<OrderNote>(e => { e.HasOne(n => n.Order).WithMany(o => o.Notes).HasForeignKey(n => n.OrderId).OnDelete(DeleteBehavior.Cascade); e.HasOne(n => n.CreatedBy).WithMany().HasForeignKey(n => n.CreatedById).OnDelete(DeleteBehavior.Restrict); });
             builder.Entity<WriterApplication>(e => { e.HasOne(a => a.User).WithMany().HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Restrict); e.HasOne(a => a.ReviewedBy).WithMany().HasForeignKey(a => a.ReviewedByAdminId).OnDelete(DeleteBehavior.SetNull); e.HasIndex(a => a.Status); e.HasIndex(a => a.SubmittedAt); });
@@ -133,7 +133,7 @@ public DbSet<OrderBid> OrderBids { get; set; }
             builder.Entity<FeatureFlag>(e => { e.HasIndex(f => f.FeatureName).IsUnique(); });
 
             // Performance indexes for frequently queried columns
-            builder.Entity<Order>(e =>
+            builder.Entity<TutoringRequest>(e =>
             {
                 e.HasIndex(o => new { o.Status, o.CreatedAt }).HasDatabaseName("IX_Orders_Status_CreatedAt");
                 e.HasIndex(o => new { o.AssignedWriterId, o.Status }).HasDatabaseName("IX_Orders_AssignedWriterId_Status");

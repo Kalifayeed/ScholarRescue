@@ -821,7 +821,7 @@ namespace ScholarRescue.Controllers
         {
             try
             {
-                IQueryable<Order> query = _context.Orders
+                IQueryable<TutoringRequest> query = _context.Orders
                     .Include(o => o.Client)
                     .Include(o => o.AssignedWriter)
                     .Include(o => o.Applications)
@@ -829,7 +829,7 @@ namespace ScholarRescue.Controllers
 
                 if (!string.IsNullOrEmpty(statusFilter) && Enum.TryParse<OrderStatus>(statusFilter, out var status))
                 {
-                    query = query.Where(o => o.Status == status).Cast<Order>();
+                    query = query.Where(o => o.Status == status).Cast<TutoringRequest>();
                 }
 
                 var orders = await query.ToListAsync();

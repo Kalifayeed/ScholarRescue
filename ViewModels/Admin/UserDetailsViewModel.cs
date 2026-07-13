@@ -1,6 +1,6 @@
 using ScholarRescue.Models;
 using ScholarRescue.Models.Enums;
-using OrderEntity = ScholarRescue.Models.Order;
+using OrderEntity = ScholarRescue.Models.TutoringRequest;
 
 namespace ScholarRescue.ViewModels.Admin
 {

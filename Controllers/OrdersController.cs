@@ -69,7 +69,7 @@ namespace ScholarRescue.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null) return Challenge();
 
-                IQueryable<Order> ordersQuery = _context.Orders
+                IQueryable<TutoringRequest> ordersQuery = _context.Orders
                     .Include(o => o.Client)
                     .Include(o => o.AssignedWriter)
                     .AsNoTracking();
@@ -264,30 +264,30 @@ namespace ScholarRescue.Controllers
             var commission = Math.Round(budget * commissionRate, 2);
             var writerEarnings = budget - commission;
 
-            var order = new Order
-            {
-                OrderNumber = orderNumber,
-                RequestType = viewModel.RequestType,
-                Title = viewModel.Title,
-                Description = viewModel.Description,
-                Subject = subject,
-                AcademicLevel = viewModel.AcademicLevel,
-                CitationFormat = viewModel.CitationFormat,
-                Deadline = viewModel.Deadline,
-                Pages = viewModel.Pages,
-                WordCount = viewModel.Pages.HasValue ? wordCount : null,
-                Budget = budget,
-                CommissionAmount = commission,
-                WriterEarnings = writerEarnings,
-                NumberOfSources = viewModel.NumberOfSources,
-                Priority = PriorityLevel.Normal,
-                Status = OrderStatus.PendingPayment,
-                ClientId = currentUser.Id,
-                IsMarketplaceOpen = false,
-                PaymentDeferred = viewModel.PayLater,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+                var order = new TutoringRequest
+                {
+                    OrderNumber = orderNumber,
+                    RequestType = viewModel.RequestType,
+                    Title = viewModel.Title,
+                    Description = viewModel.Description,
+                    Subject = subject,
+                    AcademicLevel = viewModel.AcademicLevel,
+                    CitationFormat = viewModel.CitationFormat,
+                    Deadline = viewModel.Deadline,
+                    Pages = viewModel.Pages,
+                    WordCount = viewModel.Pages.HasValue ? wordCount : null,
+                    Budget = budget,
+                    CommissionAmount = commission,
+                    WriterEarnings = writerEarnings,
+                    NumberOfSources = viewModel.NumberOfSources,
+                    Priority = PriorityLevel.Normal,
+                    Status = OrderStatus.PendingPayment,
+                    ClientId = currentUser.Id,
+                    IsMarketplaceOpen = false,
+                    PaymentDeferred = viewModel.PayLater,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
@@ -701,7 +701,7 @@ namespace ScholarRescue.Controllers
                 var commission = Math.Round(budget * commissionRate, 2);
                 var writerEarnings = budget - commission;
 
-                var order = new Order
+                var order = new TutoringRequest
                 {
                     OrderNumber = orderNumber,
                     RequestType = model.RequestType,

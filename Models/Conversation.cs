@@ -26,7 +26,7 @@ namespace ScholarRescue.Models
         /// Navigation property for the associated order.
         /// </summary>
         [ForeignKey(nameof(OrderId))]
-        public virtual Order Order { get; set; } = null!;
+        public virtual TutoringRequest Order { get; set; } = null!;
 
         /// <summary>
         /// Timestamp when the conversation was created.

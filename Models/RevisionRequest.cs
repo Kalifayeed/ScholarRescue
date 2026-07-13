@@ -16,7 +16,7 @@ namespace ScholarRescue.Models
         public int OrderId { get; set; }
 
         [ForeignKey(nameof(OrderId))]
-        public virtual Order Order { get; set; } = null!;
+        public virtual TutoringRequest Order { get; set; } = null!;
 
         [Required]
         [Display(Name = "Client")]

@@ -53,7 +53,7 @@ namespace ScholarRescue.Models
         public int? OrderId { get; set; }
 
         [ForeignKey(nameof(OrderId))]
-        public virtual Order? Order { get; set; }
+        public virtual TutoringRequest? Order { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

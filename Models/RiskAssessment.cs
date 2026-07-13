@@ -72,6 +72,6 @@ namespace ScholarRescue.Models
         public virtual Message? Message { get; set; }
 
         [ForeignKey(nameof(OrderId))]
-        public virtual Order? Order { get; set; }
+        public virtual TutoringRequest? Order { get; set; }
     }
 }

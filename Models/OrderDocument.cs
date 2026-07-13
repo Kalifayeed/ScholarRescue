@@ -22,10 +22,10 @@ namespace ScholarRescue.Models
         public int OrderId { get; set; }
 
         /// <summary>
-        /// Navigation property for the parent order.
+        /// Navigation property for the parent tutoring request.
         /// </summary>
         [ForeignKey(nameof(OrderId))]
-        public virtual Order Order { get; set; } = null!;
+        public virtual TutoringRequest Order { get; set; } = null!;
 
         /// <summary>
         /// The original file name as uploaded by the user.

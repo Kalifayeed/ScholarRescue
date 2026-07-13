@@ -25,7 +25,7 @@ namespace ScholarRescue.Models
         /// Navigation property for the parent order.
         /// </summary>
         [ForeignKey(nameof(OrderId))]
-        public virtual Order Order { get; set; } = null!;
+        public virtual TutoringRequest Order { get; set; } = null!;
 
         /// <summary>
         /// The content of the note.

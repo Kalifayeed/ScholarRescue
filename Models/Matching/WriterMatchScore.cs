@@ -16,7 +16,7 @@ namespace ScholarRescue.Models.Matching
         [Required]
         public int OrderId { get; set; }
         [ForeignKey(nameof(OrderId))]
-        public virtual Order Order { get; set; } = null!;
+        public virtual TutoringRequest Order { get; set; } = null!;
 
         [Required, MaxLength(450)]
         public string WriterId { get; set; } = string.Empty;

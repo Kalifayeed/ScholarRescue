@@ -100,7 +100,7 @@ namespace ScholarRescue.Services.Matching
             return scores.OrderByDescending(s => s.MatchPercentage).ToList();
         }
 
-        private async Task<WriterMatchScore?> CalculateSingleMatchScoreAsync(Order order, ApplicationUser writer)
+        private async Task<WriterMatchScore?> CalculateSingleMatchScoreAsync(TutoringRequest order, ApplicationUser writer)
         {
             // Check basic eligibility
             if (!await _capacityService.CanAcceptOrderAsync(writer.Id))

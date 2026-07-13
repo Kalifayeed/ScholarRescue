@@ -5,22 +5,24 @@ using ScholarRescue.Models.Enums;
 namespace ScholarRescue.Models
 {
     /// <summary>
-    /// Represents an academic support order placed by a client and fulfilled by a tutor/writer.
+    /// Represents an academic support tutoring request (formerly "Order") placed by a client 
+    /// and fulfilled by a tutor/writer.
     /// </summary>
-    public class Order
+    public class TutoringRequest
     {
         /// <summary>
-        /// Primary key for the order.
+        /// Primary key for the tutoring request.
         /// </summary>
         [Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// Unique human-readable identifier for the order (e.g., "SR-2026-000001").
+        /// Unique human-readable identifier for the request (e.g., "SR-2026-000001").
         /// </summary>
         [Required]
         [MaxLength(20)]
-        [Display(Name = "Order Number")]
+        [Display(Name = "Request Number")]
+        [Column("OrderNumber")]
         public string OrderNumber { get; set; } = string.Empty;
 
         /// <summary>
@@ -38,13 +40,13 @@ namespace ScholarRescue.Models
         public string Title { get; set; } = string.Empty;
 
         /// <summary>
-        /// Detailed description of the order requirements.
+        /// Detailed description of the request requirements.
         /// </summary>
         [Required]
         public string Description { get; set; } = string.Empty;
 
         /// <summary>
-        /// Academic subject or topic of the order.
+        /// Academic subject or topic of the request.
         /// </summary>
         [Required]
         [MaxLength(200)]
@@ -58,14 +60,14 @@ namespace ScholarRescue.Models
         public AcademicLevel AcademicLevel { get; set; }
 
         /// <summary>
-        /// Required citation/reference format for the order.
+        /// Required citation/reference format for the request.
         /// </summary>
         [Required]
         [Display(Name = "Citation Format")]
         public CitationFormat CitationFormat { get; set; } = CitationFormat.APA_7th;
 
         /// <summary>
-        /// The deadline by which the order must be completed.
+        /// The deadline by which the request must be completed.
         /// </summary>
         [Required]
         [Display(Name = "Deadline")]
@@ -87,7 +89,7 @@ namespace ScholarRescue.Models
         public int? WordCount { get; set; }
 
         /// <summary>
-        /// The total budget/price for the order.
+        /// The total budget/price for the request.
         /// </summary>
         [Required]
         [Range(0.01, double.MaxValue)]
@@ -120,45 +122,45 @@ namespace ScholarRescue.Models
         public decimal WriterEarnings { get; set; }
 
         /// <summary>
-        /// Priority level of the order.
+        /// Priority level of the request.
         /// </summary>
         [Required]
         public PriorityLevel Priority { get; set; } = PriorityLevel.Normal;
 
         /// <summary>
-        /// Current status of the order in its lifecycle.
+        /// Current status of the request in its lifecycle.
         /// </summary>
         [Required]
         public OrderStatus Status { get; set; } = OrderStatus.Draft;
 
         /// <summary>
-        /// Foreign key referencing the client (ApplicationUser) who created the order.
+        /// Foreign key referencing the client (ApplicationUser) who created the request.
         /// </summary>
         [Required]
         [Display(Name = "Client")]
         public string ClientId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Navigation property for the client who owns the order.
+        /// Navigation property for the client who owns the request.
         /// </summary>
         [ForeignKey(nameof(ClientId))]
         public virtual ApplicationUser Client { get; set; } = null!;
 
         /// <summary>
-        /// Foreign key referencing the writer (ApplicationUser) assigned to the order.
-        /// Nullable since an order may not yet be assigned to a writer.
+        /// Foreign key referencing the writer (ApplicationUser) assigned to the request.
+        /// Nullable since a request may not yet be assigned to a writer.
         /// </summary>
         [Display(Name = "Assigned Writer")]
         public string? AssignedWriterId { get; set; }
 
         /// <summary>
-        /// Navigation property for the writer assigned to fulfill the order.
+        /// Navigation property for the writer assigned to fulfill the request.
         /// </summary>
         [ForeignKey(nameof(AssignedWriterId))]
         public virtual ApplicationUser? AssignedWriter { get; set; }
 
         /// <summary>
-        /// Timestamp when the order was assigned to a writer.
+        /// Timestamp when the request was assigned to a writer.
         /// </summary>
         [Display(Name = "Assigned At")]
         public DateTime? AssignedAt { get; set; }
@@ -173,33 +175,33 @@ namespace ScholarRescue.Models
         public virtual ApplicationUser? AssignedByAdmin { get; set; }
 
         /// <summary>
-        /// Whether the order is currently visible on the Available Orders marketplace.
+        /// Whether the request is currently visible on the Available Orders marketplace.
         /// </summary>
         [Display(Name = "Is Open In Marketplace")]
         public bool IsMarketplaceOpen { get; set; }
 
         /// <summary>
-        /// Timestamp when the order was created.
+        /// Timestamp when the request was created.
         /// </summary>
         [Required]
         [Display(Name = "Created At")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
-        /// Timestamp when the order was last updated.
+        /// Timestamp when the request was last updated.
         /// </summary>
         [Required]
         [Display(Name = "Updated At")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
-        /// Timestamp when the order was completed.
+        /// Timestamp when the request was completed.
         /// </summary>
         [Display(Name = "Completed At")]
         public DateTime? CompletedAt { get; set; }
 
         /// <summary>
-        /// Client rating (1-5) submitted after order completion. Used for writer ranking.
+        /// Client rating (1-5) submitted after request completion. Used for writer ranking.
         /// </summary>
         [Range(1, 5)]
         public int? Rating { get; set; }
@@ -207,27 +209,27 @@ namespace ScholarRescue.Models
         public DateTime? RatedAt { get; set; }
 
         /// <summary>
-        /// Whether this order was flagged as a dispute. Used for writer ranking.
+        /// Whether this request was flagged as a dispute. Used for writer ranking.
         /// </summary>
         public bool IsDisputed { get; set; }
 
         /// <summary>
-        /// Navigation property for documents attached to this order.
+        /// Navigation property for documents attached to this request.
         /// </summary>
         public virtual ICollection<OrderDocument> Documents { get; set; } = new List<OrderDocument>();
 
         /// <summary>
-        /// Navigation property for notes attached to this order.
+        /// Navigation property for notes attached to this request.
         /// </summary>
         public virtual ICollection<OrderNote> Notes { get; set; } = new List<OrderNote>();
 
         /// <summary>
-        /// Navigation property for status history of this order.
+        /// Navigation property for status history of this request.
         /// </summary>
         public virtual ICollection<OrderHistory> History { get; set; } = new List<OrderHistory>();
 
         /// <summary>
-        /// Navigation property for writer applications on this order.
+        /// Navigation property for writer applications on this request.
         /// </summary>
         public virtual ICollection<OrderApplication> Applications { get; set; } = new List<OrderApplication>();
 
@@ -258,14 +260,14 @@ namespace ScholarRescue.Models
 
         /// <summary>
         /// Whether the client chose "Pay Later" at creation.
-        /// When true, the order is posted to the marketplace immediately without payment,
+        /// When true, the request is posted to the marketplace immediately without payment,
         /// with an unfunded EscrowAccount in PendingFunding status.
         /// Payment must be completed before work can be accepted.
         /// </summary>
         public bool PaymentDeferred { get; set; }
 
         // ---- Draft & Registration Fields ----
-        /// <summary>Whether this order is a draft (not yet submitted for payment).</summary>
+        /// <summary>Whether this request is a draft (not yet submitted for payment).</summary>
         public bool IsDraft { get; set; }
 
         /// <summary>When the draft was last saved.</summary>
@@ -278,13 +280,13 @@ namespace ScholarRescue.Models
 
         /// <summary>
         /// Returns true if the client is allowed to download the full submission file.
-        /// Only paid orders grant full file access to the client.
+        /// Only paid requests grant full file access to the client.
         /// Admins and assigned writers bypass this check (enforced separately in controller logic).
         /// </summary>
         public bool CanClientAccessFullSubmission => PaymentStatus == OrderPaymentStatus.Paid;
 
         /// <summary>
-        /// Determines whether this order has at least one attachment tagged as StudentDraft,
+        /// Determines whether this request has at least one attachment tagged as StudentDraft,
         /// which is required for DraftFeedback and ProofreadingOwnWork request types.
         /// Returns true if the request type does not require a draft, or if a qualifying attachment exists.
         /// </summary>

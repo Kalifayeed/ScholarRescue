@@ -1,7 +1,7 @@
 @model ScholarRescue.Models.QaReview
 @using ScholarRescue.Models
 @using ScholarRescue.Models.Enums
-@{ var order = ViewBag.Order as Order; ViewData["Title"] = $"QA Review - {order?.OrderNumber}"; }
+@{ var order = ViewBag.Order as TutoringRequest; ViewData["Title"] = $"QA Review - {order?.OrderNumber}"; }
 
 <div class="mb-4">
     <nav aria-label="breadcrumb"><ol class="breadcrumb small">

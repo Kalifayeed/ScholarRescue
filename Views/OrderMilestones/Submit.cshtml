@@ -2,7 +2,7 @@
 @using ScholarRescue.Models.Enums
 @{
     var milestone = ViewBag.Milestone as OrderMilestone;
-    var order = ViewBag.Order as Order;
+    var order = ViewBag.Order as TutoringRequest;
     var files = ViewBag.Files as List<OrderMilestoneFile> ?? new List<OrderMilestoneFile>();
     ViewData["Title"] = $"Submit Milestone: {milestone?.Title}";
 }
