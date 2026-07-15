@@ -601,11 +601,31 @@ namespace ScholarRescue.Controllers
 
         /// <summary>
         /// Guest users can create an order with automatic account registration.
+        /// This page is intended ONLY for anonymous visitors.
+        /// - Anonymous visitors: allowed.
+        /// - Authenticated Clients: redirected to Orders/Create.
+        /// - Authenticated Writers/Tutors: redirected to their dashboard with an info message.
+        /// - Authenticated Administrators: redirected to Orders/Create.
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
         public IActionResult GuestCreate()
         {
+            // Any authenticated user (Client, Writer, Administrator) must be redirected
+            // away from the guest flow. The guest endpoint is strictly for anonymous visitors.
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                if (User.IsInRole(RoleNames.Writer))
+                {
+                    TempData["OrderNowMessage"] = "Tutors cannot submit support requests.";
+                    TempData["OrderNowIsError"] = "true";
+                    return RedirectToAction("Dashboard", "Writers");
+                }
+
+                // Clients and Administrators → the authenticated create-request form.
+                return RedirectToAction("Create", "Orders");
+            }
+
             return View(new GuestOrderViewModel
             {
                 Deadline = DateTime.UtcNow.AddDays(7)
@@ -613,21 +633,51 @@ namespace ScholarRescue.Controllers
         }
 
         /// <summary>
-        /// Handle guest order submission: create account, create order, log user in.
+        /// Handle guest order submission: create the client account, create the request,
+        /// persist any uploaded files, then sign the new client in.
+        /// This POST endpoint strictly rejects all authenticated users.
+        ///
+        /// TRANSACTION STRATEGY
+        /// ─────────────────────
+        /// ScholarRescueDbContext extends IdentityDbContext, so UserManager and the
+        /// controller's _context share the SAME scoped DbContext instance (registered
+        /// via AddDbContext + AddIdentity → AddEntityFrameworkStores in Program.cs).
+        /// The explicit transaction opened on _context.Database covers Identity writes
+        /// (user creation, role assignment) and business writes (order, history, audit,
+        /// escrow) atomically — they all go through the same connection and transaction.
+        ///
+        /// File operations (attachment persistence to disk + DB records) happen after
+        /// the transaction commits. If they fail, compensating cleanup removes the
+        /// request and user so no orphaned data is left behind.
+        ///
+        /// The user is NOT signed in until EVERYTHING — account, request, AND files —
+        /// has been persisted successfully.
         /// </summary>
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GuestCreate(GuestOrderViewModel model)
         {
+            // ── Direct endpoint guard: reject ALL authenticated users ──
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                if (User.IsInRole(RoleNames.Writer))
+                {
+                    TempData["OrderNowMessage"] = "Tutors cannot submit support requests.";
+                    TempData["OrderNowIsError"] = "true";
+                    return RedirectToAction("Dashboard", "Writers");
+                }
+
+                // Clients and Administrators → the authenticated create-request form.
+                return RedirectToAction("Create", "Orders");
+            }
+
             if (!ModelState.IsValid)
                 return View(model);
 
-            // Pre-flight: enforce draft upload for non-draft orders that require it.
-            // Draft orders (SaveAsDraft) are allowed to be incomplete.
-            if (!model.SaveAsDraft &&
-                (model.RequestType == RequestType.DraftFeedback ||
-                 model.RequestType == RequestType.ProofreadingOwnWork))
+            // Enforce draft upload for request types that require it.
+            if (model.RequestType == RequestType.DraftFeedback ||
+                model.RequestType == RequestType.ProofreadingOwnWork)
             {
                 if (model.UploadedFileData == null || model.UploadedFileData.Count == 0)
                 {
@@ -637,7 +687,7 @@ namespace ScholarRescue.Controllers
                 }
             }
 
-            // Validate actual files before any database writes (account / order)
+            // Validate actual files before any database writes (account / order).
             if (model.UploadedFileData != null && model.UploadedFileData.Count > 0)
             {
                 try
@@ -652,24 +702,33 @@ namespace ScholarRescue.Controllers
                 }
             }
 
+            // Check for duplicate email BEFORE writing anything. Do not reveal the
+            // existing account's role (client / tutor / administrator).
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError(nameof(model.Email),
+                    "An account already exists for this email. Please sign in to continue.");
+                return View(model);
+            }
+
+            // ── Single transaction: UserManager + role + request + history + audit ──
+            // Both UserManager and _context share the same scoped ScholarRescueDbContext
+            // (IdentityDbContext<ApplicationUser>), so the connection-level transaction
+            // created by BeginTransactionAsync covers ALL writes — Identity and business.
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            ApplicationUser? createdUser = null;
+            TutoringRequest? createdOrder = null;
+
             try
             {
-                // Check for duplicate email
-                var existingUser = await _userManager.FindByEmailAsync(model.Email);
-                if (existingUser != null)
-                {
-                    ModelState.AddModelError(nameof(model.Email), "An account with this email already exists. Please log in.");
-                    return View(model);
-                }
-
-                // 1. Create client account
+                // 1. Create the client account via the existing Identity/UserManager flow.
                 var user = new ApplicationUser
                 {
                     UserName = model.Email,
                     Email = model.Email,
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    PhoneNumber = model.PhoneNumber,
                     UserType = RoleNames.Client,
                     IsActive = true,
                     RegistrationCompleted = true,
@@ -680,15 +739,26 @@ namespace ScholarRescue.Controllers
                 var createResult = await _userManager.CreateAsync(user, model.Password);
                 if (!createResult.Succeeded)
                 {
+                    await transaction.RollbackAsync();
                     foreach (var err in createResult.Errors)
                         ModelState.AddModelError(string.Empty, err.Description);
                     return View(model);
                 }
 
-                // Assign Client role
-                await _userManager.AddToRoleAsync(user, RoleNames.Client);
+                createdUser = user;
 
-                // 2. Create the order
+                // Assign the existing Client role using the project role constant.
+                var roleResult = await _userManager.AddToRoleAsync(user, RoleNames.Client);
+                if (!roleResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError("Role assignment failed for guest user {Email}: {Errors}",
+                        model.Email, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+                    ModelState.AddModelError(string.Empty, "An error occurred while setting up your account. Please try again.");
+                    return View(model);
+                }
+
+                // 2. Create the request linked to the newly created client.
                 var lastOrder = await _context.Orders
                     .OrderByDescending(o => o.Id)
                     .FirstOrDefaultAsync();
@@ -718,11 +788,9 @@ namespace ScholarRescue.Controllers
                     WriterEarnings = writerEarnings,
                     NumberOfSources = model.NumberOfSources,
                     Priority = PriorityLevel.Normal,
-                    Status = model.SaveAsDraft ? OrderStatus.Draft : OrderStatus.PendingPayment,
+                    Status = OrderStatus.PendingPayment,
                     ClientId = user.Id,
                     IsMarketplaceOpen = false,
-                    IsDraft = model.SaveAsDraft,
-                    DraftSavedAt = model.SaveAsDraft ? DateTime.UtcNow : null,
                     PaymentDeferred = model.PayLater,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -730,17 +798,17 @@ namespace ScholarRescue.Controllers
 
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
+                createdOrder = order;
 
-                if (model.PayLater && !model.SaveAsDraft)
+                // Pay Later: create escrow and open the request to the marketplace immediately.
+                if (model.PayLater)
                 {
-                    // Pay Later (not draft): create escrow, open to marketplace
                     await _escrowService.CreateEscrowAsync(order.Id, user.Id);
 
                     order.Status = OrderStatus.Open;
                     order.IsMarketplaceOpen = true;
                     order.PaymentDeferred = true;
                     order.UpdatedAt = DateTime.UtcNow;
-
                     await _context.SaveChangesAsync();
 
                     _context.OrderHistories.Add(new OrderHistory
@@ -767,16 +835,16 @@ namespace ScholarRescue.Controllers
                     _context.OrderHistories.Add(new OrderHistory
                     {
                         OrderId = order.Id,
-                        OldStatus = order.Status,
-                        NewStatus = order.Status,
+                        OldStatus = OrderStatus.PendingPayment,
+                        NewStatus = OrderStatus.PendingPayment,
                         ChangedById = user.Id,
                         CreatedAt = DateTime.UtcNow,
-                        Notes = model.SaveAsDraft ? "Draft order created" : "Order created via guest flow"
+                        Notes = "Order created via guest flow"
                     });
 
                     _context.AuditLogs.Add(new AuditLog
                     {
-                        Action = model.SaveAsDraft ? "Draft Created" : "Order Created",
+                        Action = "Order Created",
                         PerformedById = user.Id,
                         TargetUserId = user.Id,
                         Description = $"Client registered through order flow. Order {orderNumber} created.",
@@ -786,8 +854,25 @@ namespace ScholarRescue.Controllers
 
                 await _context.SaveChangesAsync();
 
-                // Save uploaded attachments (if any)
-                if (model.UploadedFileData != null && model.UploadedFileData.Count > 0)
+                // Commit user + role + request + history + audit atomically.
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error during guest account/order transaction for {Email}. Rolled back.", model.Email);
+
+                // If UserManager succeeded (user was created) but something later failed,
+                // the rollback undoes all changes including the Identity user record since
+                // they share the same context+connection+transaction.
+                ModelState.AddModelError(string.Empty, "An error occurred while creating your account and request. Please try again.");
+                return View(model);
+            }
+
+            // ── Post-commit: persist uploaded files (outside the transaction) ──
+            if (model.UploadedFileData != null && model.UploadedFileData.Count > 0 && createdOrder != null)
+            {
+                try
                 {
                     var purpose = (model.RequestType == RequestType.DraftFeedback ||
                                    model.RequestType == RequestType.ProofreadingOwnWork)
@@ -795,37 +880,114 @@ namespace ScholarRescue.Controllers
                         : AttachmentPurpose.SupportingMaterial;
 
                     await _orderAttachmentService.SaveAttachmentsAsync(
-                        order.Id, model.UploadedFileData, purpose, user.Id);
+                        createdOrder.Id, model.UploadedFileData, purpose, createdUser!.Id);
                 }
+                catch (Exception ex)
+                {
+                    // Compensating cleanup: remove the request and the account we just created,
+                    // and delete any files that were written, so we never leave an orphaned
+                    // client account or request behind.
+                    _logger.LogError(ex, "File upload failed for guest order {OrderNumber}. Compensating cleanup.", createdOrder.OrderNumber);
+                    await CompensateGuestCreationAsync(createdOrder, createdUser!);
+                    ModelState.AddModelError(string.Empty, "An error occurred while saving your files. Your account and request have been removed. Please try again.");
+                    return View(model);
+                }
+            }
 
-                // 3. Log the user in automatically
-                await _signInManager.SignInAsync(user, isPersistent: true);
+            // ── Everything succeeded: sign the new client in and redirect ──
+            await _signInManager.SignInAsync(createdUser!, isPersistent: true);
 
-                // 4. Send welcome email (email confirmation optional for clients)
+            // Send the client welcome email (non-blocking — never fails the request).
+            try
+            {
                 await _verificationService.SendClientWelcomeEmailAsync(model.Email, $"{model.FirstName} {model.LastName}");
-
-                _logger.LogInformation("Guest user {Email} created account and order {OrderNumber}", model.Email, orderNumber);
-
-                if (model.SaveAsDraft)
-                {
-                    TempData["SuccessMessage"] = "Your draft has been saved. You can resume it anytime from your dashboard.";
-                    return RedirectToAction(nameof(Dashboard));
-                }
-
-                if (model.PayLater)
-                {
-                    TempData["SuccessMessage"] = "Account created and order posted to marketplace! Writers can now view and apply.";
-                    return RedirectToAction(nameof(Details), new { id = order.Id });
-                }
-
-                TempData["SuccessMessage"] = "Account created and order placed! Proceed to payment.";
-                return RedirectToAction("Checkout", "Payments", new { orderId = order.Id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing guest order creation.");
-                ModelState.AddModelError(string.Empty, "An error occurred. Please try again.");
-                return View(model);
+                _logger.LogWarning(ex, "Failed to send welcome email to guest client {Email}.", model.Email);
+            }
+
+            _logger.LogInformation("Guest user {Email} created account and order {OrderNumber}", model.Email, createdOrder!.OrderNumber);
+
+            if (model.PayLater)
+            {
+                TempData["SuccessMessage"] = "Account created and order posted to marketplace! Writers can now view and apply.";
+                return RedirectToAction(nameof(Details), new { id = createdOrder.Id });
+            }
+
+            TempData["SuccessMessage"] = "Account created and order placed! Proceed to payment.";
+            return RedirectToAction("Checkout", "Payments", new { orderId = createdOrder.Id });
+        }
+
+        /// <summary>
+        /// Compensating cleanup for a failed guest creation workflow.
+        /// Removes any files uploaded to disk, then deletes the request and user
+        /// that were created during this guest submission. Only affects accounts
+        /// and requests created in the current failed guest flow — never touches
+        /// pre-existing data.
+        ///
+        /// Each step is individually wrapped in try/catch so that a failure to clean
+        /// up one resource does not prevent cleanup of the remaining resources.
+        /// </summary>
+        private async Task CompensateGuestCreationAsync(TutoringRequest order, ApplicationUser user)
+        {
+            // 1. Remove any files already written to disk for this order.
+            try
+            {
+                var uploadDir = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot", "uploads", "orders", order.Id.ToString(), "attachments");
+                if (Directory.Exists(uploadDir))
+                {
+                    Directory.Delete(uploadDir, recursive: true);
+                    _logger.LogInformation("Deleted upload directory for failed guest order {OrderId}.", order.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to delete upload directory during guest compensation for order {OrderId}.", order.Id);
+            }
+
+            // 2. Remove the request (cascade removes attachments, history, audit rows).
+            try
+            {
+                var trackedOrder = await _context.Orders.FindAsync(order.Id);
+                if (trackedOrder != null)
+                {
+                    _context.Orders.Remove(trackedOrder);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("Removed guest order {OrderId} during compensation.", order.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to remove guest order {OrderId} during compensation.", order.Id);
+            }
+
+            // 3. Remove the user account created for this guest.
+            //    Only deletes if the user was created during THIS submission —
+            //    never touches a pre-existing account.
+            try
+            {
+                var trackedUser = await _userManager.FindByIdAsync(user.Id);
+                if (trackedUser != null)
+                {
+                    // Guard: only delete users with RegistrationSource == "OrderFlow"
+                    // to never accidentally affect a pre-existing account.
+                    if (trackedUser.RegistrationSource == "OrderFlow")
+                    {
+                        await _userManager.DeleteAsync(trackedUser);
+                        _logger.LogInformation("Removed guest user {UserId} during compensation.", user.Id);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Skipped user deletion during compensation: user {UserId} was not an OrderFlow registration.", user.Id);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to delete guest user {UserId} during compensation.", user.Id);
             }
         }
 

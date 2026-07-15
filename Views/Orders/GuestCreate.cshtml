@@ -1,204 +1,366 @@
 @model ScholarRescue.ViewModels.Order.GuestOrderViewModel
 @using ScholarRescue.Models.Enums
+@using ScholarRescue.ViewModels.Order
 @{
-    ViewData["Title"] = "Place Your Order";
+    ViewData["Title"] = "Request Academic Support";
     Layout = "_Layout.Public";
+    var subjects = AcademicSubjects.Subjects;
 }
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <h1 class="mb-2">Place Your Order</h1>
-            <p class="text-muted mb-4">Create an account and place your order in one step.</p>
+            <h1 class="mb-2">Request Academic Support</h1>
+            <p class="text-muted mb-4">
+                Tell us what you need, then create your client account at the end of this form.
+                Your account is created automatically when you submit.
+            </p>
 
-            <form asp-action="GuestCreate" method="post" enctype="multipart/form-data">
+            <form asp-action="GuestCreate" method="post" id="guestOrderForm" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
-
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                <!-- Step 1: Account Details -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">1. Create Your Account</h5>
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <!-- Request Type Selection -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0"><i class="bi bi-question-circle text-primary me-2"></i>What type of support do you need?</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-0">
+                                    <label asp-for="RequestType" class="form-label fw-semibold"></label>
+                                    <select asp-for="RequestType" class="form-select" id="requestTypeSelect"
+                                            asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.RequestType>()">
+                                        <option value="">-- Select Request Type --</option>
+                                    </select>
+                                    <span asp-validation-for="RequestType" class="text-danger small"></span>
+                                    <div id="requestTypeHelp" class="form-text mt-2">
+                                        <i class="bi bi-info-circle"></i>
+                                        <span id="requestTypeHelpText">Select the type of support you need. For draft feedback or proofreading, you'll need to upload your work.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Assignment Information -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Assignment Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label asp-for="Title" class="form-label fw-semibold"></label>
+                                    <input asp-for="Title" class="form-control" placeholder="e.g., Research paper on climate change" />
+                                    <span asp-validation-for="Title" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="form-label fw-semibold"></label>
+                                    <textarea asp-for="Description" class="form-control" rows="6" placeholder="Provide detailed instructions, requirements, and any specific notes for your request"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label fw-semibold">Upload Your Work <span id="uploadRequiredIndicator" class="text-danger d-none">(required)</span></label>
+                                    <div class="upload-area border rounded-3 p-3 text-center" id="uploadArea" style="border:2px dashed #ccc;cursor:pointer;">
+                                        <i class="bi bi-cloud-upload fs-1 text-muted"></i>
+                                        <p class="mb-1 mt-2 fw-medium">Drag & drop files here or click to browse</p>
+                                        <small class="text-muted">PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, RAR, JPG, JPEG, PNG (Max 25MB each, up to 10 files)</small>
+                                        <input type="file" id="fileInput" name="UploadedFileData" class="d-none" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.jpg,.jpeg,.png" />
+                                    </div>
+                                    <div id="fileList" class="mt-2"></div>
+                                    <small id="uploadHelpText" class="text-muted">Upload your assignment instructions, rubric, or any reference materials</small>
+                                    <span asp-validation-for="UploadedFileData" class="text-danger small d-block"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Academic Requirements -->
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0"><i class="bi bi-mortarboard text-primary me-2"></i>Academic Requirements</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="Subject" class="form-label fw-semibold"></label>
+                                        <select asp-for="Subject" class="form-select" id="subjectSelect">
+                                            <option value="">-- Select Subject --</option>
+                                            @foreach (var s in subjects)
+                                            {
+                                                <option value="@s">@s</option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="Subject" class="text-danger small"></span>
+                                        <div id="otherSubjectGroup" class="mt-2" style="display:none;">
+                                            <label asp-for="OtherSubject" class="form-label small">Specify Subject</label>
+                                            <input asp-for="OtherSubject" class="form-control" placeholder="Enter your subject" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="AcademicLevel" class="form-label fw-semibold"></label>
+                                        <select asp-for="AcademicLevel" class="form-select" id="academicLevel">
+                                            <option value="">-- Select Academic Level --</option>
+                                            <option value="HighSchool">High School</option>
+                                            <option value="College">College</option>
+                                            <option value="Undergraduate">Undergraduate</option>
+                                            <option value="Masters">Master's</option>
+                                            <option value="PhD">PhD</option>
+                                        </select>
+                                        <span asp-validation-for="AcademicLevel" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="CitationFormat" class="form-label fw-semibold"></label>
+                                        <select asp-for="CitationFormat" class="form-select" id="citationFormat"
+                                                asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.CitationFormat>()">
+                                        </select>
+                                        <span asp-validation-for="CitationFormat" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="Deadline" class="form-label fw-semibold"></label>
+                                        <input asp-for="Deadline" class="form-control" id="deadlinePicker"
+                                               placeholder="DD/MM/YYYY HH:mm" />
+                                        <span asp-validation-for="Deadline" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-3" id="pagesFieldGroup">
+                                        <label asp-for="Pages" class="form-label fw-semibold"></label>
+                                        <input asp-for="Pages" class="form-control" id="pages" type="number" min="1" value="1" />
+                                        <span asp-validation-for="Pages" class="text-danger small"></span>
+                                        <small id="pagesHelpText" class="text-muted">Pages in your existing draft</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label asp-for="NumberOfSources" class="form-label fw-semibold"></label>
+                                        <input asp-for="NumberOfSources" class="form-control" id="sources" type="number" min="0" value="0" />
+                                        <span asp-validation-for="NumberOfSources" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm sticky-top" style="top:80px;">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Pricing Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Request Type</span>
+                                    <strong id="requestTypeDisplay" class="small text-end">--</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Academic Level</span>
+                                    <strong id="academicLevelDisplay" class="small text-end">--</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Pages</span>
+                                    <strong id="pagesDisplay" class="small">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Word Count</span>
+                                    <strong id="wordCountDisplay" class="small">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Sources</span>
+                                    <strong id="sourcesDisplay" class="small">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Citation Format</span>
+                                    <strong id="citationDisplay" class="small text-end">APA 7th</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Deadline</span>
+                                    <strong id="deadlineDisplay" class="small text-end">--</strong>
+                                </div>
+                                <hr class="my-2" />
+                                <div class="d-flex justify-content-between py-1">
+                                    <span class="text-muted small">Base Price</span>
+                                    <strong id="basePriceDisplay" class="small">$0.00</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-1">
+                                    <span class="text-muted small">Urgency Surcharge</span>
+                                    <strong id="surchargeDisplay" class="small">$0.00</strong>
+                                </div>
+                                <hr class="my-2" />
+                                <div class="d-flex justify-content-between py-2">
+                                    <span class="fw-bold">Total Price</span>
+                                    <strong id="totalPriceDisplay" class="text-primary fs-4">$0.00</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Timing -->
+                        <div class="card border-0 shadow-sm mt-4">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0"><i class="bi bi-credit-card text-primary me-2"></i>Payment Timing</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-2">
+                                    <input type="radio" class="form-check-input" id="payNowRadio" name="PayLater" value="false" checked />
+                                    <label class="form-check-label fw-semibold" for="payNowRadio">Pay Now</label>
+                                    <small class="d-block text-muted ms-3">Pay now via Paystack — proceed to checkout immediately after submitting.</small>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="payLaterRadio" name="PayLater" value="true" />
+                                    <label class="form-check-label fw-semibold" for="payLaterRadio">Pay Later</label>
+                                    <small class="d-block text-muted ms-3">Your order is posted to writers immediately — complete payment anytime before work is finalized.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review & Submit -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Cancel
+                    </a>
+                    <button type="button" class="btn btn-primary btn-lg" id="reviewOrderBtn">
+                        <i class="bi bi-eye me-1"></i>Review Request
+                    </button>
+                </div>
+
+                <!-- ═══════════════════════════════════════════ -->
+                <!-- CREATE YOUR CLIENT ACCOUNT (at the end)   -->
+                <!-- ═══════════════════════════════════════════ -->
+                <div class="card border-0 shadow-sm mt-5">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="bi bi-person-badge me-2"></i>Create Your Client Account</h4>
                     </div>
                     <div class="card-body">
-                        <div class="text-muted small mb-3">
-                            <i class="bi bi-info-circle"></i> Your account will be created automatically when you submit this order.
-                        </div>
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-info-circle"></i> Your account will be created automatically when you submit this request.
+                            Account type is fixed to <strong>Client</strong>.
+                        </p>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label asp-for="FirstName" class="form-label"></label>
-                                <input asp-for="FirstName" class="form-control" placeholder="John" />
+                                <label asp-for="FirstName" class="form-label fw-semibold"></label>
+                                <input asp-for="FirstName" class="form-control" placeholder="First name" />
                                 <span asp-validation-for="FirstName" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="LastName" class="form-label"></label>
-                                <input asp-for="LastName" class="form-control" placeholder="Doe" />
+                                <label asp-for="LastName" class="form-label fw-semibold"></label>
+                                <input asp-for="LastName" class="form-control" placeholder="Last name" />
                                 <span asp-validation-for="LastName" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="Email" class="form-label"></label>
+                                <label asp-for="Email" class="form-label fw-semibold"></label>
                                 <input asp-for="Email" class="form-control" type="email" placeholder="you@example.com" />
                                 <span asp-validation-for="Email" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="PhoneNumber" class="form-label"></label>
-                                <input asp-for="PhoneNumber" class="form-control" placeholder="+254 712 345 678" />
-                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="Password" class="form-label"></label>
+                                <label asp-for="Password" class="form-label fw-semibold"></label>
                                 <input asp-for="Password" class="form-control" />
                                 <span asp-validation-for="Password" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="ConfirmPassword" class="form-label"></label>
+                                <label asp-for="ConfirmPassword" class="form-label fw-semibold"></label>
                                 <input asp-for="ConfirmPassword" class="form-control" />
                                 <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Step 2: Order Details -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">2. What type of support do you need?</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label asp-for="RequestType" class="form-label fw-semibold"></label>
-                                <select asp-for="RequestType" class="form-select" id="requestTypeSelect"
-                                        asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.RequestType>()">
-                                    <option value="">-- Select Request Type --</option>
-                                </select>
-                                <span asp-validation-for="RequestType" class="text-danger small"></span>
-                                <div id="requestTypeHelp" class="form-text mt-1">
-                                    <i class="bi bi-info-circle"></i>
-                                    <span id="requestTypeHelpText">Select the type of support you need. For draft feedback or proofreading, you'll need to upload your work.</span>
-                                </div>
-                            </div>
+                        <div class="form-check mt-3">
+                            <input asp-for="AcceptTerms" class="form-check-input" id="acceptTerms" />
+                            <label class="form-check-label" for="acceptTerms">
+                                I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>.
+                            </label>
+                            <span asp-validation-for="AcceptTerms" class="text-danger small d-block"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+                            <p class="mb-0 text-muted small">
+                                Already have an account?
+                                <a asp-action="Login" asp-controller="Account" class="text-primary fw-bold text-decoration-none">Sign in instead</a>
+                            </p>
+                            <button type="submit" class="btn btn-success btn-lg px-5">
+                                <i class="bi bi-send-fill"></i> Submit Request & Create Account
+                            </button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Step 3: Assignment Details -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">3. Assignment Details</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label asp-for="Title" class="form-label"></label>
-                                <input asp-for="Title" class="form-control" placeholder="e.g., Research Paper on Climate Change" />
-                                <span asp-validation-for="Title" class="text-danger small"></span>
-                            </div>
-                            <div class="col-12">
-                                <label asp-for="Description" class="form-label"></label>
-                                <textarea asp-for="Description" class="form-control" rows="5" placeholder="Provide detailed instructions for your order..."></textarea>
-                                <span asp-validation-for="Description" class="text-danger small"></span>
-                            </div>
-
-                            <!-- File Upload -->
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Upload Your Work <span id="uploadRequiredIndicator" class="text-danger d-none">(required)</span></label>
-                                <div class="upload-area border rounded-3 p-3 text-center" id="uploadArea" style="border:2px dashed #ccc;cursor:pointer;">
-                                    <i class="bi bi-cloud-upload fs-1 text-muted"></i>
-                                    <p class="mb-1 mt-2 fw-medium">Drag & drop files here or click to browse</p>
-                                    <small class="text-muted">PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, RAR, JPG, JPEG, PNG (Max 25MB each, up to 10 files)</small>
-                                    <input type="file" id="fileInput" name="UploadedFileData" class="d-none" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.jpg,.jpeg,.png" />
-                                </div>
-                                <div id="fileList" class="mt-2"></div>
-                                <small id="uploadHelpText" class="text-muted">Upload your assignment instructions, rubric, or any reference materials</small>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label asp-for="Subject" class="form-label"></label>
-                                <input asp-for="Subject" class="form-control" placeholder="e.g., Nursing, History, Engineering" />
-                                <span asp-validation-for="Subject" class="text-danger small"></span>
-                            </div>
-                            <div class="col-md-3">
-                                <label asp-for="AcademicLevel" class="form-label"></label>
-                                <select asp-for="AcademicLevel" class="form-select"
-                                        asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.AcademicLevel>()">
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label asp-for="CitationFormat" class="form-label"></label>
-                                <select asp-for="CitationFormat" class="form-select"
-                                        asp-items="Html.GetEnumSelectList<ScholarRescue.Models.Enums.CitationFormat>()">
-                                </select>
-                            </div>
-                            <div class="col-md-3" id="pagesFieldGroup">
-                                <label asp-for="Pages" class="form-label"></label>
-                                <input asp-for="Pages" class="form-control" id="pages" type="number" min="1" />
-                                <span asp-validation-for="Pages" class="text-danger small"></span>
-                                <small class="text-muted">Pages in your existing draft</small>
-                            </div>
-                            <div class="col-md-3">
-                                <label asp-for="NumberOfSources" class="form-label"></label>
-                                <input asp-for="NumberOfSources" class="form-control" type="number" min="0" />
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="Deadline" class="form-label"></label>
-                                <input asp-for="Deadline" class="form-control" type="datetime-local"
-                                       value="@DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-ddTHH:mm")" />
-                                <span asp-validation-for="Deadline" class="text-danger small"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Payment Timing -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">4. Payment Timing</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-check mb-2">
-                            <input type="radio" class="form-check-input" id="payNowRadio" name="PayLater" value="false" checked />
-                            <label class="form-check-label fw-semibold" for="payNowRadio">Pay Now</label>
-                            <small class="d-block text-muted ms-3">Pay now via Paystack — proceed to checkout immediately after submitting.</small>
-                        </div>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" id="payLaterRadio" name="PayLater" value="true" />
-                            <label class="form-check-label fw-semibold" for="payLaterRadio">Pay Later</label>
-                            <small class="d-block text-muted ms-3">Your order is posted to writers immediately — complete payment anytime before work is finalized.</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit -->
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="form-check">
-                        <input asp-for="SaveAsDraft" class="form-check-input" id="saveAsDraftCheckbox" />
-                        <label asp-for="SaveAsDraft" class="form-check-label">Save as draft (pay later) — file upload not required</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-lg px-5">
-                        <i class="bi bi-send-fill"></i> Submit Order
-                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-@section Styles {
-    <style>
-        .card-header h5 { font-weight: 600; }
-        .form-label { font-weight: 500; }
-    </style>
-}
+<!-- Order Review Modal -->
+<div class="modal fade" id="orderReviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-file-text me-2"></i>Request Review Summary</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold border-bottom pb-2">Request Details</h6>
+                        <table class="table table-sm table-borderless">
+                            <tr><td class="text-muted">Type:</td><td id="reviewRequestType" class="fw-medium"></td></tr>
+                            <tr><td class="text-muted">Title:</td><td id="reviewTitle" class="fw-medium"></td></tr>
+                            <tr><td class="text-muted">Subject:</td><td id="reviewSubject"></td></tr>
+                            <tr><td class="text-muted">Academic Level:</td><td id="reviewAcademic"></td></tr>
+                            <tr><td class="text-muted">Citation:</td><td id="reviewCitation"></td></tr>
+                            <tr><td class="text-muted">Pages:</td><td id="reviewPages"></td></tr>
+                            <tr><td class="text-muted">Word Count:</td><td id="reviewWordCount"></td></tr>
+                            <tr><td class="text-muted">Sources:</td><td id="reviewSources"></td></tr>
+                            <tr><td class="text-muted">Deadline:</td><td id="reviewDeadline"></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold border-bottom pb-2">Price Breakdown</h6>
+                        <table class="table table-sm table-borderless">
+                            <tr><td class="text-muted">Base Rate:</td><td id="reviewBaseRate"></td></tr>
+                            <tr><td class="text-muted">Pages:</td><td id="reviewPages2"></td></tr>
+                            <tr><td class="text-muted">Base Price:</td><td id="reviewBasePrice"></td></tr>
+                            <tr><td class="text-muted">Urgency Surcharge:</td><td id="reviewSurcharge"></td></tr>
+                            <tr class="border-top"><td class="fw-bold">Total Price:</td><td id="reviewTotal" class="fw-bold text-primary fs-5"></td></tr>
+                        </table>
+                        <h6 class="fw-bold border-bottom pb-2 mt-3">Uploaded Files</h6>
+                        <ul id="reviewFiles" class="list-unstyled mb-0 small">
+                            <li class="text-muted">No files uploaded</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-pencil me-1"></i>Back & Edit
+                </button>
+                <button type="submit" class="btn btn-success btn-lg" id="proceedPaymentBtn" form="guestOrderForm">
+                    <i class="bi bi-send-fill me-1"></i>Submit Request & Create Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         // ============================================================
-        // GUEST ORDER CREATION – FILE UPLOAD & REQUEST TYPE UI
-        // Mirrors Create.cshtml's behavior for consistency.
+        // GUEST ORDER CREATION – CENTRAL PRICING ENGINE
+        // Mirrors Create.cshtml for consistency.
         // ============================================================
+
+        var ACADEMIC_RATES = {
+            HighSchool: 5,
+            College: 6,
+            Undergraduate: 7,
+            Masters: 8,
+            PhD: 9
+        };
+
+        var ACADEMIC_NAMES = {
+            HighSchool: 'High School',
+            College: 'College',
+            Undergraduate: 'Undergraduate',
+            Masters: "Master's",
+            PhD: 'PhD'
+        };
 
         var REQUEST_TYPE_NAMES = {
             'DraftFeedback': 'Draft Feedback',
@@ -207,34 +369,24 @@
             'LiveTutoringSession': 'Live Tutoring Session'
         };
 
+        var WORDS_PER_PAGE = 300;
         var uploadedFiles = []; // Stores real File objects
 
-        // ---- Check if request type requires a draft upload ----
         function requiresDraftAttachment() {
             var rt = document.getElementById('requestTypeSelect').value;
             return rt === 'DraftFeedback' || rt === 'ProofreadingOwnWork';
         }
 
-        // ---- Check if request type is concept/tutoring (no draft needed) ----
         function isNoDraftType() {
             var rt = document.getElementById('requestTypeSelect').value;
             return rt === 'ConceptExplanation' || rt === 'LiveTutoringSession';
         }
 
-        // ---- Check if SaveAsDraft is checked (exempts upload requirement) ----
-        function isSaveAsDraft() {
-            var cb = document.getElementById('saveAsDraftCheckbox');
-            return cb && cb.checked;
-        }
-
-        // ---- Update form visibility based on RequestType and SaveAsDraft ----
         function updateRequestTypeUI() {
             var rt = document.getElementById('requestTypeSelect').value;
             var needsDraft = requiresDraftAttachment();
             var noDraftNeeded = isNoDraftType();
-            var savingAsDraft = isSaveAsDraft();
 
-            // Update help text
             var helpTexts = {
                 'DraftFeedback': 'You will upload a draft you have written and receive expert feedback on it.',
                 'ConceptExplanation': 'Get a clear explanation of a concept or topic. No draft required.',
@@ -243,32 +395,153 @@
             };
             document.getElementById('requestTypeHelpText').textContent = helpTexts[rt] || 'Select the type of support you need. For draft feedback or proofreading, you will need to upload your work.';
 
-            // Show/hide the draft upload required indicator
             var uploadIndicator = document.getElementById('uploadRequiredIndicator');
-            if (needsDraft && !savingAsDraft) {
+            if (needsDraft) {
                 uploadIndicator.classList.remove('d-none');
                 document.getElementById('uploadHelpText').textContent = 'Upload your draft or work (required for this request type)';
             } else {
                 uploadIndicator.classList.add('d-none');
-                if (noDraftNeeded) {
-                    document.getElementById('uploadHelpText').textContent = 'Upload any reference materials (optional)';
-                } else if (savingAsDraft) {
-                    document.getElementById('uploadHelpText').textContent = 'Upload your draft or work (not required when saving as draft)';
-                } else {
-                    document.getElementById('uploadHelpText').textContent = 'Upload your assignment instructions, rubric, or any reference materials';
-                }
+                document.getElementById('uploadHelpText').textContent = noDraftNeeded ? 'Upload any reference materials (optional)' : 'Upload your assignment instructions, rubric, or any reference materials';
             }
 
-            // Show/hide pages field
             var pagesGroup = document.getElementById('pagesFieldGroup');
             if (noDraftNeeded) {
                 pagesGroup.style.display = 'none';
             } else {
                 pagesGroup.style.display = 'block';
             }
+
+            document.getElementById('requestTypeDisplay').textContent = REQUEST_TYPE_NAMES[rt] || '--';
         }
 
-        // ---- FILE UPLOAD (mirrors Create.cshtml) ----
+        function calculateOrderPrice() {
+            var level = document.getElementById('academicLevel').value;
+            var pagesInput = document.getElementById('pages').value;
+            var pages = parseInt(pagesInput) || 0;
+            var deadlineStr = document.getElementById('deadlinePicker').value;
+
+            var rate = ACADEMIC_RATES[level] || 0;
+            var basePrice = pages * rate;
+
+            var surchargePerPage = 0;
+            if (deadlineStr && deadlineStr.length > 0) {
+                var parts = deadlineStr.split(/[\s\/:]/);
+                if (parts.length >= 4) {
+                    var dt = new Date(
+                        parseInt(parts[2], 10),
+                        parseInt(parts[1], 10) - 1,
+                        parseInt(parts[0], 10),
+                        parseInt(parts[3], 10),
+                        parseInt(parts[4] || 0, 10)
+                    );
+                    if (!isNaN(dt.getTime())) {
+                        var hrs = (dt - new Date()) / (1000 * 60 * 60);
+                        if (hrs <= 12) surchargePerPage = 2;
+                        else if (hrs <= 24) surchargePerPage = 1;
+                    }
+                }
+            }
+
+            var surchargeTotal = pages * surchargePerPage;
+            var totalPrice = basePrice + surchargeTotal;
+
+            return {
+                level: level,
+                levelName: ACADEMIC_NAMES[level] || '--',
+                pages: pages,
+                wordCount: pages * WORDS_PER_PAGE,
+                rate: rate,
+                basePrice: basePrice,
+                surchargePerPage: surchargePerPage,
+                surchargeTotal: surchargeTotal,
+                totalPrice: totalPrice
+            };
+        }
+
+        function updatePricingSummary() {
+            var p = calculateOrderPrice();
+
+            document.getElementById('academicLevelDisplay').textContent = p.levelName;
+            document.getElementById('pagesDisplay').textContent = p.pages;
+            document.getElementById('wordCountDisplay').textContent = p.wordCount;
+            document.getElementById('basePriceDisplay').textContent = '$' + p.basePrice.toFixed(2);
+
+            if (p.surchargeTotal > 0) {
+                document.getElementById('surchargeDisplay').textContent = '$' + p.surchargeTotal.toFixed(2);
+            } else {
+                document.getElementById('surchargeDisplay').textContent = '$0.00';
+            }
+            document.getElementById('totalPriceDisplay').textContent = '$' + p.totalPrice.toFixed(2);
+        }
+
+        function updateReviewModal() {
+            var p = calculateOrderPrice();
+
+            var rt = document.getElementById('requestTypeSelect').value;
+            document.getElementById('reviewRequestType').textContent = REQUEST_TYPE_NAMES[rt] || '-';
+            document.getElementById('reviewTitle').textContent = document.getElementById('Title').value || '-';
+            var se = document.getElementById('subjectSelect');
+            var sv = se.value === 'Other'
+                ? (document.getElementById('OtherSubject').value || 'Other')
+                : (se.options[se.selectedIndex]?.text || '-');
+            document.getElementById('reviewSubject').textContent = sv;
+            document.getElementById('reviewAcademic').textContent = p.levelName;
+            document.getElementById('reviewCitation').textContent = document.getElementById('citationDisplay').textContent;
+            document.getElementById('reviewPages').textContent = p.pages;
+            document.getElementById('reviewWordCount').textContent = p.wordCount;
+            document.getElementById('reviewSources').textContent = document.getElementById('sources').value || 0;
+            document.getElementById('reviewBaseRate').textContent = '$' + p.rate.toFixed(2) + '/page';
+            document.getElementById('reviewPages2').textContent = p.pages;
+            document.getElementById('reviewBasePrice').textContent = '$' + p.basePrice.toFixed(2);
+            document.getElementById('reviewSurcharge').textContent = '$' + p.surchargeTotal.toFixed(2);
+            document.getElementById('reviewTotal').textContent = '$' + p.totalPrice.toFixed(2);
+
+            var deadline = document.getElementById('deadlinePicker').value;
+            if (deadline && deadline.length > 0) {
+                var parts = deadline.split(/[\s\/:]/);
+                if (parts.length >= 4) {
+                    var dt = new Date(parseInt(parts[2],10), parseInt(parts[1],10)-1, parseInt(parts[0],10), parseInt(parts[3],10), parseInt(parts[4]||0,10));
+                    if (!isNaN(dt.getTime())) {
+                        document.getElementById('reviewDeadline').textContent = dt.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+                    }
+                }
+            } else {
+                document.getElementById('reviewDeadline').textContent = '--';
+            }
+
+            var fh = uploadedFiles.length === 0 ? '<li class="text-muted">No files uploaded</li>' : '';
+            for (var i = 0; i < uploadedFiles.length; i++) {
+                fh += '<li><i class="bi bi-file-earmark me-1"></i>' + uploadedFiles[i].name + '</li>';
+            }
+            document.getElementById('reviewFiles').innerHTML = fh;
+        }
+
+        function refreshAllDisplays() {
+            document.getElementById('sourcesDisplay').textContent = document.getElementById('sources').value || 0;
+
+            var citationEl = document.getElementById('citationFormat');
+            if (citationEl && citationEl.selectedIndex >= 0) {
+                document.getElementById('citationDisplay').textContent = citationEl.options[citationEl.selectedIndex].text;
+            }
+
+            var deadline = document.getElementById('deadlinePicker').value;
+            if (deadline && deadline.length > 0) {
+                var parts = deadline.split(/[\s\/:]/);
+                if (parts.length >= 4) {
+                    var dt = new Date(parseInt(parts[2],10), parseInt(parts[1],10)-1, parseInt(parts[0],10), parseInt(parts[3],10), parseInt(parts[4]||0,10));
+                    if (!isNaN(dt.getTime())) {
+                        document.getElementById('deadlineDisplay').textContent = dt.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+                    }
+                }
+            } else {
+                document.getElementById('deadlineDisplay').textContent = '--';
+            }
+
+            updatePricingSummary();
+            updateRequestTypeUI();
+        }
+
+        // ---- FILE UPLOAD ----
         function handleFiles(files) {
             var maxSize = 25 * 1024 * 1024;
             var allowed = ['.pdf','.doc','.docx','.ppt','.pptx','.xls','.xlsx','.txt','.zip','.rar','.jpg','.jpeg','.png'];
@@ -278,7 +551,7 @@
                 if (allowed.indexOf(ext) === -1) { alert('File type ' + ext + ' not supported.'); continue; }
                 if (f.size > maxSize) { alert('File "' + f.name + '" exceeds 25MB.'); continue; }
                 if (uploadedFiles.length >= 10) { alert('Max 10 files.'); break; }
-                uploadedFiles.push(f); // Store the real File object
+                uploadedFiles.push(f);
             }
             syncFileInput();
             renderFileList();
@@ -306,21 +579,45 @@
             c.innerHTML = html;
         }
 
-        // ---- INIT ----
+        function showReview() {
+            updateReviewModal();
+            new bootstrap.Modal(document.getElementById('orderReviewModal')).show();
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
-            // Request Type change
+            try {
+                flatpickr('#deadlinePicker', {
+                    enableTime: true,
+                    dateFormat: 'd/m/Y H:i',
+                    time_24hr: true,
+                    minDate: new Date().fp_incr(1),
+                    minuteIncrement: 5,
+                    onChange: function () { refreshAllDisplays(); }
+                });
+            } catch (e) {}
+
+            var ss = document.getElementById('subjectSelect');
+            if (ss) {
+                ss.addEventListener('change', function () {
+                    document.getElementById('otherSubjectGroup').style.display = this.value === 'Other' ? 'block' : 'none';
+                });
+            }
+
             var rt = document.getElementById('requestTypeSelect');
-            if (rt) {
-                rt.addEventListener('change', updateRequestTypeUI);
-            }
+            if (rt) rt.addEventListener('change', refreshAllDisplays);
 
-            // SaveAsDraft change — re-evaluate upload requirement
-            var saveCheckbox = document.getElementById('saveAsDraftCheckbox');
-            if (saveCheckbox) {
-                saveCheckbox.addEventListener('change', updateRequestTypeUI);
-            }
+            var acad = document.getElementById('academicLevel');
+            if (acad) acad.addEventListener('change', refreshAllDisplays);
 
-            // File upload
+            var p = document.getElementById('pages');
+            if (p) { p.addEventListener('input', refreshAllDisplays); p.addEventListener('change', refreshAllDisplays); }
+
+            var cit = document.getElementById('citationFormat');
+            if (cit) cit.addEventListener('change', refreshAllDisplays);
+
+            var src = document.getElementById('sources');
+            if (src) src.addEventListener('input', function () { document.getElementById('sourcesDisplay').textContent = this.value || 0; });
+
             var ua = document.getElementById('uploadArea');
             var fi = document.getElementById('fileInput');
             if (ua && fi) {
@@ -331,8 +628,10 @@
                 fi.addEventListener('change', function () { handleFiles(this.files); });
             }
 
-            // Initial UI state
-            updateRequestTypeUI();
+            var rb = document.getElementById('reviewOrderBtn');
+            if (rb) rb.addEventListener('click', showReview);
+
+            refreshAllDisplays();
         });
     </script>
 }

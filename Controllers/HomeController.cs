@@ -139,38 +139,31 @@ namespace ScholarRescue.Controllers
         }
 
         /// <summary>
-        /// Public 'Order Now' entry point. Branches based on the visitor's authentication status and role.
-        /// - Guests: redirected to register with a message.
-        /// - Clients: redirected to the create-order form.
-        /// - Writers/Admins: shown a notice that only client accounts can submit requests.
+        /// Public 'Request Support' / 'Order Now' entry point. Branches based on the
+        /// visitor's authentication status and role:
+        /// - Anonymous visitor: redirected to the public guest request page (Orders/GuestCreate).
+        /// - Authenticated Client: redirected to the authenticated create-order form (Orders/Create).
+        /// - Authenticated Writer/Tutor: redirected to their tutor dashboard with an informational message
+        ///   (writers cannot create requests).
+        /// - Authenticated Administrator: redirected to the authorized create-request form (Orders/Create).
         /// </summary>
         [HttpGet]
         public IActionResult OrderNow()
         {
             if (User.Identity?.IsAuthenticated != true)
             {
-                TempData["OrderNowMessage"] = "Create an account to submit your academic support request.";
-                TempData["OrderNowShowLogin"] = "true";
-                return RedirectToAction("Register", "Account");
+                return RedirectToAction("GuestCreate", "Orders");
             }
 
-            if (User.IsInRole(RoleNames.Client))
+            if (User.IsInRole(RoleNames.Writer))
             {
-                return RedirectToAction("Create", "Orders");
-            }
-
-            if (User.IsInRole(RoleNames.Writer) || User.IsInRole(RoleNames.Administrator))
-            {
-                TempData["OrderNowMessage"] = "Only client accounts can submit requests.";
+                TempData["OrderNowMessage"] = "Tutors cannot submit support requests. You can browse and apply to available orders from your dashboard.";
                 TempData["OrderNowIsError"] = "true";
-            }
-            else
-            {
-                TempData["OrderNowMessage"] = "Only client accounts can submit requests.";
-                TempData["OrderNowIsError"] = "true";
+                return RedirectToAction("Dashboard", "Writers");
             }
 
-            return RedirectToAction("Index", "Home");
+            // Clients and Administrators both reach the authorized create-request form.
+            return RedirectToAction("Create", "Orders");
         }
 
         [HttpPost]
