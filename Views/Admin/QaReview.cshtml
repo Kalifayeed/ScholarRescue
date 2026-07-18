@@ -1,7 +1,11 @@
 @model ScholarRescue.Models.QaReview
 @using ScholarRescue.Models
 @using ScholarRescue.Models.Enums
-@{ var order = ViewBag.Order as TutoringRequest; ViewData["Title"] = $"QA Review - {order?.OrderNumber}"; }
+@{
+    var order = ViewBag.Order as TutoringRequest;
+    ViewData["Title"] = $"QA Review - {order?.OrderNumber}";
+    var submissions = ViewBag.Submissions as List<OrderSubmission> ?? new();
+}
 
 <div class="mb-4">
     <nav aria-label="breadcrumb"><ol class="breadcrumb small">
@@ -14,56 +18,82 @@
 
 <div class="row g-3">
     <div class="col-lg-7">
-        <form asp-action="QaReview" method="post" enctype="multipart/form-data">
+        <form asp-action="QaReview" method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" name="OrderId" value="@Model.OrderId" />
+            @if (ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="alert alert-danger">
+                    <div asp-validation-summary="All" class="mb-0"></div>
+                </div>
+            }
 
             <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-light"><h6 class="mb-0 fw-semibold"><i class="bi bi-list-check me-1"></i>Checklist</h6></div>
+                <div class="card-header bg-light"><h6 class="mb-0 fw-semibold"><i class="bi bi-list-check me-1"></i>Feedback Quality Checklist</h6></div>
                 <div class="card-body">
+<p class="text-muted small mb-3">
+    Evaluate the <strong>tutor feedback</strong> on the student draft &mdash; not the draft itself.
+    Check each criterion that the feedback satisfies.
+</p>
                     <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="formattingPassed" name="FormattingPassed" value="true" />
-                        <label class="form-check-label" for="formattingPassed">Formatting meets standards (font, margins, spacing, headings)</label>
+                        <input class="form-check-input" type="checkbox" id="feedbackIsSubstantive" name="FeedbackIsSubstantive" value="true" />
+                        <label class="form-check-label" for="feedbackIsSubstantive">
+                            <strong>Substantive feedback</strong> — engages with argument, structure, or content (not just surface corrections)
+                        </label>
                     </div>
                     <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="wordCountPassed" name="WordCountPassed" value="true" />
-                        <label class="form-check-label" for="wordCountPassed">Word count matches requirements</label>
+                        <input class="form-check-input" type="checkbox" id="feedbackIsActionable" name="FeedbackIsActionable" value="true" />
+                        <label class="form-check-label" for="feedbackIsActionable">
+                            <strong>Specific & actionable</strong> — student knows what to change and why
+                        </label>
                     </div>
                     <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="filesPassed" name="FilesPassed" value="true" />
-                        <label class="form-check-label" for="filesPassed">All required files are present and properly uploaded</label>
+                        <input class="form-check-input" type="checkbox" id="preservesStudentVoice" name="PreservesStudentVoice" value="true" />
+                        <label class="form-check-label" for="preservesStudentVoice">
+                            <strong>Preserves student voice</strong> — improves the draft, doesn't replace it
+                        </label>
                     </div>
                     <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="instructionsPassed" name="InstructionsPassed" value="true" />
-                        <label class="form-check-label" for="instructionsPassed">All client instructions were followed</label>
+                        <input class="form-check-input" type="checkbox" id="matchesRequestType" name="MatchesRequestType" value="true" />
+                        <label class="form-check-label" for="matchesRequestType">
+                            <strong>Matches request type</strong> — proofreading &rarr; grammar/flow; draft feedback &rarr; argument/structure
+                        </label>
                     </div>
-                    <input type="hidden" name="FormattingPassed" value="false" />
-                    <input type="hidden" name="WordCountPassed" value="false" />
-                    <input type="hidden" name="FilesPassed" value="false" />
-                    <input type="hidden" name="InstructionsPassed" value="false" />
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="feedbackNotesQualityPassed" name="FeedbackNotesQualityPassed" value="true" />
+                        <label class="form-check-label" for="feedbackNotesQualityPassed">
+                            <strong>Notes are clear & sufficiently detailed</strong> — at least a few sentences addressing key issues
+                        </label>
+                    </div>
+                    <!-- Hidden fields for unchecked checkboxes -->
+                    <input type="hidden" name="FeedbackIsSubstantive" value="false" />
+                    <input type="hidden" name="FeedbackIsActionable" value="false" />
+                    <input type="hidden" name="PreservesStudentVoice" value="false" />
+                    <input type="hidden" name="MatchesRequestType" value="false" />
+                    <input type="hidden" name="FeedbackNotesQualityPassed" value="false" />
                 </div>
             </div>
 
             <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-light"><h6 class="mb-0 fw-semibold"><i class="bi bi-file-earmark-text me-1"></i>Documents</h6></div>
+                <div class="card-header bg-light"><h6 class="mb-0 fw-semibold"><i class="bi bi-chat-dots me-1"></i>Admin Decision</h6></div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label fw-medium">Plagiarism Report</label>
-                        <input type="file" name="plagiarismReport" class="form-control" accept=".pdf,.jpg,.png" />
-                        <span class="text-muted small">Upload a PDF or screenshot of the plagiarism check result.</span>
+                        <label class="form-label fw-medium" for="adminNotes">Admin Notes <span class="text-danger" id="adminNotesRequired" style="display:none;">(required when rejecting)</span></label>
+                        <textarea name="AdminNotes" id="adminNotes" class="form-control" rows="4" placeholder="Provide specific guidance for the tutor on what needs to improve...">@Model.AdminNotes</textarea>
+                        <span class="text-muted small">Maximum 2000 characters.</span>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-medium">Notes (optional)</label>
-                        <textarea name="Notes" class="form-control" rows="3" placeholder="Any additional notes about this review..."></textarea>
+                        <label class="form-label fw-medium">Internal Notes (optional, not visible to tutor)</label>
+                        <textarea name="Notes" class="form-control" rows="2" placeholder="Any additional internal notes...">@Model.Notes</textarea>
                     </div>
                 </div>
             </div>
 
             <div class="d-flex gap-2">
-                <button type="submit" name="IsApproved" value="true" class="btn btn-success">
+                <button type="submit" name="IsApproved" value="true" class="btn btn-success" id="approveBtn">
                     <i class="bi bi-check-circle me-1"></i>Approve & Deliver to Client
                 </button>
-                <button type="submit" name="IsApproved" value="false" class="btn btn-outline-warning">
+                <button type="submit" name="IsApproved" value="false" class="btn btn-outline-warning" id="rejectBtn">
                     <i class="bi bi-x-circle me-1"></i>Mark as Needs Revision
                 </button>
                 <a asp-action="PendingQa" class="btn btn-outline-secondary">Cancel</a>
@@ -75,8 +105,11 @@
             <div class="card-header bg-light"><h6 class="mb-0 fw-semibold"><i class="bi bi-info-circle me-1"></i>Order Info</h6></div>
             <div class="card-body small">
                 <div><strong>Order:</strong> @order?.OrderNumber</div>
+                <div><strong>Request Type:</strong>
+                    <span class="badge bg-info text-dark">@order?.RequestType</span>
+                </div>
                 <div><strong>Client:</strong> @(order?.Client?.FirstName ?? "") @(order?.Client?.LastName ?? "")</div>
-                <div><strong>Writer:</strong> @(order?.AssignedWriter?.FirstName ?? "") @(order?.AssignedWriter?.LastName ?? "")</div>
+                <div><strong>Tutor:</strong> @(order?.AssignedWriter?.FirstName ?? "") @(order?.AssignedWriter?.LastName ?? "")</div>
                 <div><strong>Pages:</strong> @order?.Pages</div>
                 <div><strong>Budget:</strong> $@order?.Budget.ToString("F2")</div>
                 <div><strong>Deadline:</strong> @order?.Deadline.ToString("MMM dd, yyyy")</div>
@@ -85,13 +118,23 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-light"><h6 class="mb-0 fw-semibold"><i class="bi bi-cloud-download me-1"></i>Submitted Files</h6></div>
             <div class="card-body small">
-                @{ var submissions = ViewBag.Submissions as List<OrderSubmission> ?? new(); }
                 @if (!submissions.Any()) { <p class="text-muted mb-0">No submissions found.</p> }
                 else {
                     <ul class="list-unstyled mb-0">
                         @foreach (var s in submissions.OrderByDescending(s => s.VersionNumber))
                         {
-                            <li class="mb-1"><a href="@s.FilePath" target="_blank"><i class="bi bi-paperclip me-1"></i>v@s.VersionNumber: @s.FileName</a> <span class="text-muted">(@s.SubmissionType)</span></li>
+                            <li class="mb-1">
+                                <a href="@s.FilePath" target="_blank"><i class="bi bi-paperclip me-1"></i>v@s.VersionNumber: @s.FileName</a>
+                                <span class="text-muted">(@s.SubmissionType)</span>
+                                @if (s.ReviewedAttachment != null)
+                                {
+                                    <br />
+                                    <span class="ms-3 text-muted small">
+                                        <i class="bi bi-eye me-1"></i>Reviewed draft:
+                                        <a href="@s.ReviewedAttachment.FilePath" target="_blank">@s.ReviewedAttachment.FileName</a>
+                                    </span>
+                                }
+                            </li>
                         }
                     </ul>
                 }
@@ -99,3 +142,46 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        (function() {
+            var adminNotes = document.getElementById('adminNotes');
+            var adminNotesRequired = document.getElementById('adminNotesRequired');
+            var rejectBtn = document.getElementById('rejectBtn');
+            var approveBtn = document.getElementById('approveBtn');
+
+            function updateNotesRequired() {
+                // This runs when the reject button is clicked — we add 'required' to the notes field
+            }
+
+            rejectBtn.addEventListener('click', function(e) {
+                var notes = adminNotes.value.trim();
+                if (notes.length === 0) {
+                    e.preventDefault();
+                    adminNotes.classList.add('is-invalid');
+                    adminNotesRequired.style.display = 'inline';
+                    adminNotes.focus();
+                    // Show a validation message
+                    var feedback = adminNotes.parentElement.querySelector('.invalid-feedback');
+                    if (!feedback) {
+                        feedback = document.createElement('div');
+                        feedback.className = 'invalid-feedback';
+                        feedback.textContent = 'Admin notes are required when rejecting a submission — the tutor needs specific feedback on what to improve.';
+                        adminNotes.parentElement.appendChild(feedback);
+                    }
+                }
+            });
+
+            // Clear validation state when user starts typing
+            adminNotes.addEventListener('input', function() {
+                if (adminNotes.classList.contains('is-invalid')) {
+                    adminNotes.classList.remove('is-invalid');
+                    adminNotesRequired.style.display = 'none';
+                    var feedback = adminNotes.parentElement.querySelector('.invalid-feedback');
+                    if (feedback) feedback.remove();
+                }
+            });
+        })();
+    </script>
+}

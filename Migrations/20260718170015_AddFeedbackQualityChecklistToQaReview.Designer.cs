@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScholarRescue.Data;
@@ -11,9 +12,11 @@ using ScholarRescue.Data;
 namespace ScholarRescue.Migrations
 {
     [DbContext(typeof(ScholarRescueDbContext))]
-    partial class ScholarRescueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260718170015_AddFeedbackQualityChecklistToQaReview")]
+    partial class AddFeedbackQualityChecklistToQaReview
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

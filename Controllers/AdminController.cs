@@ -1317,7 +1317,7 @@ namespace ScholarRescue.Controllers
         /// <summary>Submits a QA review — approves/rejects and delivers to client.</summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> QaReview(QaReview model, IFormFile? plagiarismReport)
+        public async Task<IActionResult> QaReview(QaReview model)
         {
             var admin = await _userManager.GetUserAsync(User);
             if (admin == null) return Challenge();
@@ -1325,16 +1325,22 @@ namespace ScholarRescue.Controllers
             {
                 var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == model.OrderId);
                 if (order == null || order.Status != OrderStatus.PendingQA) throw new InvalidOperationException("Invalid order or not pending QA.");
+
+                // Server-side validation: AdminNotes required when rejecting
+                if (!model.IsApproved && string.IsNullOrWhiteSpace(model.AdminNotes))
+                {
+                    ModelState.AddModelError("AdminNotes", "Admin notes are required when rejecting a submission — the tutor needs specific feedback on what to improve.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    ViewBag.Order = order;
+                    ViewBag.Submissions = await _workDeliveryService.GetSubmissionsAsync(order.Id);
+                    return View(model);
+                }
+
                 model.ReviewerId = admin.Id;
                 model.CreatedAt = DateTime.UtcNow;
-                if (plagiarismReport != null && plagiarismReport.Length > 0)
-                {
-                    var dir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "qa-reports", model.OrderId.ToString());
-                    Directory.CreateDirectory(dir);
-                    var safe = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid():N}_{plagiarismReport.FileName}";
-                    using var s = new FileStream(Path.Combine(dir, safe), FileMode.Create); await plagiarismReport.CopyToAsync(s);
-                    model.PlagiarismReportPath = $"/uploads/qa-reports/{model.OrderId}/{safe}";
-                }
                 _context.QaReviews.Add(model);
                 if (model.IsApproved)
                 {
