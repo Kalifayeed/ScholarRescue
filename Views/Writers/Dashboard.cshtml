@@ -12,7 +12,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
             <h1 class="h3 mb-0"><i class="bi bi-pencil-square"></i> Writer Dashboard</h1>
-            <small class="text-muted">Your assigned orders and workload</small>
+            <small class="text-muted">Your assigned requests and workload</small>
         </div>
         <div class="d-flex gap-2 align-items-center">
             <partial name="_RankBadge" model="rank" />
@@ -27,7 +27,7 @@
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-body py-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div>
-                <small class="text-muted fw-medium"><i class="bi bi-toggle-on me-1"></i>Availability for new orders:</small>
+                <small class="text-muted fw-medium"><i class="bi bi-toggle-on me-1"></i>Availability for new requests:</small>
                 <partial name="_AvailabilityBadge" model="availability" />
             </div>
             <form asp-action="UpdateAvailability" method="post" class="d-flex gap-1 align-items-center">
@@ -49,7 +49,7 @@
             <div class="card-body py-3">
                 <div class="row text-center g-2">
                     <div class="col-6 col-md-3">
-                        <div class="text-muted small">Completed Orders</div>
+                        <div class="text-muted small">Completed Requests</div>
                         <div class="fw-semibold fs-5">@ranking.CompletedOrders</div>
                     </div>
                     <div class="col-6 col-md-3">
@@ -90,7 +90,7 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     <h2 class="fw-bold text-primary mb-0">@ViewBag.TotalAssigned</h2>
-                    <small class="text-muted">Assigned Orders</small>
+                    <small class="text-muted">Assigned Requests</small>
                 </div>
             </div>
         </div>
@@ -114,7 +114,7 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     <h2 class="fw-bold text-info mb-0">@ViewBag.PendingAssignment</h2>
-                    <small class="text-muted">Available Orders</small>
+                    <small class="text-muted">Available Requests</small>
                 </div>
             </div>
         </div>
@@ -123,9 +123,9 @@
     @* Assigned Orders *@
     <div class="card border-0 shadow-sm mt-4">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-file-text"></i> My Assigned Orders</h5>
+            <h5 class="mb-0"><i class="bi bi-file-text"></i> My Assigned Requests</h5>
             <a asp-controller="Orders" asp-action="Index" class="btn btn-light btn-sm">
-                <i class="bi bi-arrow-right"></i> All Orders
+                <i class="bi bi-arrow-right"></i> All Requests
             </a>
         </div>
         <div class="card-body">
@@ -133,8 +133,8 @@
             {
                 <div class="text-center py-4">
                     <i class="bi bi-inbox display-4 text-muted"></i>
-                    <h6 class="mt-2 text-muted">No assigned orders yet.</h6>
-                    <p class="small text-muted">Once an administrator assigns you an order, it will appear here.</p>
+                    <h6 class="mt-2 text-muted">No assigned requests yet.</h6>
+                    <p class="small text-muted">Once an administrator assigns you a request, it will appear here.</p>
                 </div>
             }
             else
@@ -143,7 +143,7 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Order #</th>
+                                <th>Request #</th>
                                 <th>Title</th>
                                 <th>Status</th>
                                 <th>Pages</th>
@@ -231,7 +231,7 @@
     @* Available Orders Section *@
     <div class="card border-0 shadow-sm mt-4">
         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-shop"></i> Available Orders</h5>
+            <h5 class="mb-0"><i class="bi bi-shop"></i> Available Requests</h5>
             <a asp-controller="Writers" asp-action="AvailableOrders" class="btn btn-light btn-sm">
                 <i class="bi bi-arrow-right"></i> View All
             </a>
@@ -244,7 +244,7 @@
             {
                 <div class="text-center py-4">
                     <i class="bi bi-inbox display-4 text-muted"></i>
-                    <h6 class="mt-2 text-muted">No available orders right now.</h6>
+                    <h6 class="mt-2 text-muted">No available requests right now.</h6>
                     <p class="small text-muted">Check back later for new opportunities.</p>
                 </div>
             }
@@ -297,9 +297,9 @@
                 <div class="text-center py-4">
                     <i class="bi bi-inbox display-4 text-muted"></i>
                     <h6 class="mt-2 text-muted">You have not placed any bids yet.</h6>
-                    <p class="small text-muted">Browse available orders and place a bid to get started.</p>
+                    <p class="small text-muted">Browse available requests and place a bid to get started.</p>
                     <a asp-controller="Writers" asp-action="AvailableOrders" class="btn btn-primary btn-sm">
-                        <i class="bi bi-shop"></i> Browse Orders
+                        <i class="bi bi-shop"></i> Browse Requests
                     </a>
                 </div>
             }
@@ -333,7 +333,7 @@
                     </table>
                 </div>
                 <a asp-controller="Writers" asp-action="AvailableOrders" class="btn btn-outline-primary btn-sm mt-2">
-                    <i class="bi bi-arrow-right"></i> Browse More Orders
+                    <i class="bi bi-arrow-right"></i> Browse More Requests
                 </a>
             }
         </div>

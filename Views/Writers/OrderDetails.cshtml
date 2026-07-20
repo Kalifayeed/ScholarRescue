@@ -1,7 +1,8 @@
+
 @model ScholarRescue.Models.TutoringRequest
 @using ScholarRescue.Models.Enums
 @{
-    ViewData["Title"] = $"Order {Model.OrderNumber}";
+    ViewData["Title"] = $"Request {Model.OrderNumber}";
     Layout = "~/Views/Shared/_Layout.App.cshtml";
     var myApplication = ViewBag.MyApplication as ScholarRescue.Models.OrderApplication;
     var isAssigned = (bool)(ViewBag.IsAssignedWriter ?? false);
@@ -11,11 +12,11 @@
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 mb-0"><i class="bi bi-file-earmark-text"></i> Order @Model.OrderNumber</h1>
+            <h1 class="h3 mb-0"><i class="bi bi-file-earmark-text"></i> Request @Model.OrderNumber</h1>
             <small class="text-muted">@Model.Title</small>
         </div>
         <a asp-action="AvailableOrders" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Orders
+            <i class="bi bi-arrow-left"></i> Back to Requests
         </a>
     </div>
 
@@ -36,7 +37,7 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0">Order Details</h5>
+                    <h5 class="mb-0">Request Details</h5>
                 </div>
                 <div class="card-body">
                     <h4 class="mb-3">@Model.Title</h4>
@@ -48,11 +49,28 @@
                         <dt class="col-sm-3">Academic Level:</dt>
                         <dd class="col-sm-9"><span class="badge bg-info text-dark">@Model.AcademicLevel</span></dd>
 
-                        <dt class="col-sm-3">Pages:</dt>
-                        <dd class="col-sm-9">@Model.Pages</dd>
-
-                        <dt class="col-sm-3">Sources Required:</dt>
-                        <dd class="col-sm-9">@Model.NumberOfSources</dd>
+                        <dt class="col-sm-3">Request Type:</dt>
+                        <dd class="col-sm-9">
+                            @{
+                                var rtBadge = Model.RequestType switch
+                                {
+                                    RequestType.DraftFeedback => "bg-primary",
+                                    RequestType.ProofreadingOwnWork => "bg-info text-dark",
+                                    RequestType.ConceptExplanation => "bg-success",
+                                    RequestType.LiveTutoringSession => "bg-warning text-dark",
+                                    _ => "bg-secondary"
+                                };
+                                var rtLabel = Model.RequestType switch
+                                {
+                                    RequestType.DraftFeedback => "Draft Feedback",
+                                    RequestType.ProofreadingOwnWork => "Proofreading",
+                                    RequestType.ConceptExplanation => "Concept Help",
+                                    RequestType.LiveTutoringSession => "Live Session",
+                                    _ => Model.RequestType.ToString()
+                                };
+                            }
+                            <span class="badge @rtBadge">@rtLabel</span>
+                        </dd>
 
                         <dt class="col-sm-3">Citation Format:</dt>
                         <dd class="col-sm-9">@Model.CitationFormat</dd>
@@ -114,11 +132,49 @@
                 </div>
             </div>
 
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Request Info</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1">
+                        <i class="bi bi-tag"></i>
+                        <strong>Request Type:</strong>
+                        <span class="badge @(Model.RequestType switch {
+                            RequestType.DraftFeedback => "bg-primary",
+                            RequestType.ProofreadingOwnWork => "bg-info text-dark",
+                            RequestType.ConceptExplanation => "bg-success",
+                            RequestType.LiveTutoringSession => "bg-warning text-dark",
+                            _ => "bg-secondary"
+                        })">@(Model.RequestType switch {
+                            RequestType.DraftFeedback => "Draft Feedback",
+                            RequestType.ProofreadingOwnWork => "Proofreading",
+                            RequestType.ConceptExplanation => "Concept Help",
+                            RequestType.LiveTutoringSession => "Live Session",
+                            _ => Model.RequestType.ToString()
+                        })</span>
+                    </p>
+                    <p class="mb-0">
+                        <i class="bi bi-file-earmark-check text-success"></i>
+                        <strong>Draft provided:</strong>
+                        @if (Model.HasRequiredDraftAttachment())
+                        {
+                            <i class="bi bi-check-circle-fill text-success" title="Draft attached"></i>
+                            <span class="text-success">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No</span>
+                        }
+                    </p>
+                </div>
+            </div>
+
             @if (!isAssigned && !isAdmin)
             {
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-light">
-                        <h5 class="mb-0">Apply for this Order</h5>
+                        <h5 class="mb-0">Apply for this Request</h5>
                     </div>
                     <div class="card-body">
                         @if (myApplication != null)
@@ -157,11 +213,11 @@
                                 <div class="mb-3">
                                     <label for="message" class="form-label small">Message to admin (optional)</label>
                                     <textarea name="message" class="form-control" rows="3"
-                                              placeholder="Why are you a good fit for this order?"></textarea>
+                                              placeholder="Why are you a good fit for this tutoring request?"></textarea>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100"
-                                        onclick="return confirm('Apply for this order?');">
-                                    <i class="bi bi-send"></i> Apply For Order
+                                        onclick="return confirm('Apply for this request?');">
+                                    <i class="bi bi-send"></i> Apply For Request
                                 </button>
                             </form>
                         }

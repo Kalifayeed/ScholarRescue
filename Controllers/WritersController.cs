@@ -256,6 +256,7 @@ namespace ScholarRescue.Controllers
             decimal? maxPrice = null,
             CitationFormat? citationStyle = null,
             PriorityLevel? urgency = null,
+            RequestType? requestType = null,
             string sortBy = "newest")
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -272,7 +273,7 @@ namespace ScholarRescue.Controllers
             var orders = await _orderAssignmentService.GetAvailableOrdersFilteredAsync(
                 discipline, academicLevel, minPages, maxPages,
                 deadlineFrom, deadlineTo, minPrice, maxPrice,
-                citationStyle, urgency, sortBy);
+                citationStyle, urgency, requestType, sortBy);
 
             var myApplications = await _orderAssignmentService.GetApplicationsByWriterAsync(currentUser.Id);
             var myAppliedOrderIds = myApplications
@@ -293,6 +294,7 @@ namespace ScholarRescue.Controllers
             ViewBag.MaxPrice = maxPrice;
             ViewBag.CitationStyle = citationStyle;
             ViewBag.Urgency = urgency;
+            ViewBag.RequestType = requestType;
 
             return View(orders);
         }

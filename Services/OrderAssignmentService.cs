@@ -31,6 +31,7 @@ namespace ScholarRescue.Services
             decimal? maxPrice = null,
             CitationFormat? citationStyle = null,
             PriorityLevel? urgency = null,
+            RequestType? requestType = null,
             string sortBy = "newest");
 
         /// <summary>
@@ -121,6 +122,7 @@ namespace ScholarRescue.Services
             decimal? maxPrice = null,
             CitationFormat? citationStyle = null,
             PriorityLevel? urgency = null,
+            RequestType? requestType = null,
             string sortBy = "newest")
         {
             var query = _context.Orders
@@ -161,6 +163,9 @@ namespace ScholarRescue.Services
 
             if (urgency.HasValue)
                 query = query.Where(o => o.Priority == urgency.Value);
+
+            if (requestType.HasValue)
+                query = query.Where(o => o.RequestType == requestType.Value);
 
             // Sorting
             query = sortBy?.ToLower() switch
